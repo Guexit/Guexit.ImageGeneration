@@ -1,7 +1,8 @@
-from typing import List
 from fastapi import FastAPI
+import logging
+import os
 
-logger = logging.getLogger("Neural Search Server")
+logger = logging.getLogger("Image Generation Server")
 logger.setLevel(os.getenv("LOGGER_LEVEL", logging.ERROR))
 
 app = FastAPI()

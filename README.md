@@ -29,6 +29,6 @@ AI Image Generation Service
     If you are in MacOS (CURRENTLY FAILING IN MACOS):
 
     ```shell
-    pip install torch torchvision
-    pip install -e .
+    pip3 install torch torchvision
+    GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
     ```
