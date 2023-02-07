@@ -6,13 +6,13 @@ AI Image Generation Service
 
 ### Setup
 
-1. Install Python (3.8 - 3.10)
+1. Install [Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html)
 
 2. Create and activate environment with:
 
     ```shell
-    python3 -m venv env && . env/bin/activate
-    pip install -U pip
+    conda create -n sd_guexit python=3.9 --no-default-packages -y
+    conda activate sd_guexit
     ```
 
 3. Install Poetry from [here](https://python-poetry.org/docs/#installation)
@@ -22,8 +22,8 @@ AI Image Generation Service
     If you are in Linux or Windows:
 
     ```shell
-    pip install torch==1.12.1 torchvision>=0.13.1
-    pip install -e .
+    pip3 install torch==1.12.1 torchvision>=0.13.1
+    pip3 install -e .
     ```
 
     If you are in MacOS (CURRENTLY FAILING IN MACOS):
