@@ -8,7 +8,6 @@ class LogConfig(BaseModel):
 
     LOGGER_NAME: str = "Image Generation"
     LOG_FORMAT: str = "%(levelprefix)s | %(asctime)s | %(message)s"
-    LOG_LEVEL: str = os.getenv("LOGGER_LEVEL", logging.ERROR)
 
     # Logging config
     version = 1
@@ -28,5 +27,5 @@ class LogConfig(BaseModel):
         },
     }
     loggers = {
-        LOGGER_NAME: {"handlers": ["default"], "level": LOG_LEVEL},
+        LOGGER_NAME: {"handlers": ["default"]},
     }

@@ -7,6 +7,7 @@ class TextToImage(BaseModel):
     guidance_scale: float
     height: int
     width: int
+    seed: int = -1
     num_inference_steps: int
     num_images_per_prompt: int
 
