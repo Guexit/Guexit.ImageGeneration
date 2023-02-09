@@ -47,8 +47,8 @@ if __name__ == "__main__":
         }
     )
     # Save images
-    # with open("output.png", "wb") as f:
-    #     f.write(response.content)
-    for idx, image in enumerate(response["images"]):
-        with open(f"{args.prompt}_{idx}.png", "wb") as f:
-            f.write(image)
+    with open("output.png", "wb") as f:
+        f.write(response.content)
+    # for idx, image in enumerate(response["images"]):
+    #     with open(f"{args.prompt}_{idx}.png", "wb") as f:
+    #         f.write(image)
