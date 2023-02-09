@@ -17,5 +17,5 @@ class TextToImageInput(TextToImage):
 
 
 class TextToImageOutput(BaseModel):
-    images: list = None
-    images_url_paths: list = None
+    images_zip_file: str = None
+    image_url_path: str = None

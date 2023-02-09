@@ -1,17 +1,18 @@
-import requests
+import grequests
 import json
 
 
 # Call Image Generation API
 def call_image_generation_api(request_object: dict):
     # Call Image Generation API
-    response = requests.post("http://127.0.0.1:5000/text_to_image", json=request_object)
+    async_req = grequests.post(
+        "http://127.0.0.1:5000/text_to_image", json=request_object
+    )
+    response = grequests.map([async_req])[0]
     # Check if the request was successful
     if response.status_code == 200:
-        # Get the response
-        response_object = json.loads(response.content)
         # Return the response
-        return response_object
+        return response
     else:
         raise Exception(f"Request failed with status code {response.status_code}")
 
@@ -28,11 +29,11 @@ if __name__ == "__main__":
     parser.add_argument("--guidance_scale", type=float, default=7.5)
     parser.add_argument("--height", type=int, default=512)
     parser.add_argument("--width", type=int, default=512)
-    parser.add_argument("--num_inference_steps", type=int, default=50)
-    parser.add_argument("--num_images_per_prompt", type=int, default=1)
+    parser.add_argument("--num_inference_steps", type=int, default=1)
+    parser.add_argument("--num_images_per_prompt", type=int, default=2)
     args = parser.parse_args()
     # Call Image Generation API
-    response_object = call_image_generation_api(
+    response = call_image_generation_api(
         {
             "model_path": args.model_path,
             "prompt": args.prompt,
@@ -46,6 +47,8 @@ if __name__ == "__main__":
         }
     )
     # Save images
-    for image in response_object["images"]:
-        with open(f"{args.prompt}.png", "wb") as f:
+    # with open("output.png", "wb") as f:
+    #     f.write(response.content)
+    for idx, image in enumerate(response["images"]):
+        with open(f"{args.prompt}_{idx}.png", "wb") as f:
             f.write(image)

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from typing import List
+from fastapi import FastAPI, Response
 from logging.config import dictConfig
 import logging
 from image_generation.logging import LogConfig
@@ -22,7 +23,7 @@ async def root():
 
 
 # text to image
-@app.post("/text_to_image", response_model=TextToImageOutput)
+@app.post("/text_to_image", response_model=None)
 async def text_to_image(text_to_image_input: TextToImageInput):
     logger.info(f"Text to image request: {text_to_image_input}")
     images = model.txt_to_img(text_to_image_input)
@@ -30,6 +31,4 @@ async def text_to_image(text_to_image_input: TextToImageInput):
         logger.warning("Uploading images to the Cloud is not available yet!")
     if text_to_image_input.return_images:
         images_bytes = [image_to_bytes(image) for image in images]
-        return TextToImageOutput(
-            images=images_bytes,
-        )
+        return Response(content=images_bytes[0], media_type="image/jpeg")
