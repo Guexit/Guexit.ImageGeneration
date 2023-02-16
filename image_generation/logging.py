@@ -1,31 +1,20 @@
 import logging
 import os
-from pydantic import BaseModel
+from rich.logging import RichHandler
+from rich.console import Console
+import sys
 
 
-class LogConfig(BaseModel):
-    """Logging configuration to be set for the server"""
+stderr = Console(file=sys.stderr)
+logging.basicConfig(
+    level=os.getenv("LOGGER_LEVEL", logging.WARNING),
+    format="%(message)s",
+    datefmt=".",
+    handlers=[RichHandler(console=stderr)],
+)
 
-    LOGGER_NAME: str = "Image Generation"
-    LOG_FORMAT: str = "%(levelprefix)s | %(asctime)s | %(message)s"
 
-    # Logging config
-    version = 1
-    disable_existing_loggers = False
-    formatters = {
-        "default": {
-            "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": LOG_FORMAT,
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    }
-    handlers = {
-        "default": {
-            "formatter": "default",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stderr",
-        },
-    }
-    loggers = {
-        LOGGER_NAME: {"handlers": ["default"]},
-    }
+def set_logger(name):
+    logger = logging.getLogger(name)
+    logger.setLevel(os.getenv("LOGGER_LEVEL", logging.WARNING))
+    return logger

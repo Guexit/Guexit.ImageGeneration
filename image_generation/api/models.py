@@ -1,20 +1,49 @@
 from pydantic import BaseModel
 
 
-class TextToImage(BaseModel):
-    model_path: str = "stabilityai/stable-diffusion-2-1-base"
-    prompt: str
+class Prompt(BaseModel):
+    positive: str
+    negative: str = ""
     guidance_scale: float
+
+
+class TextToImage(BaseModel):
+    model_path: str = "prompthero/openjourney-v2"
+    model_scheduler: str = None
+    prompt: Prompt
     height: int
     width: int
     seed: int = -1
     num_inference_steps: int
-    num_images_per_prompt: int
+    num_images: int
 
 
-class TextToImageInput(TextToImage):
+class TextToImageInput(BaseModel):
+    text_to_image: TextToImage
     return_images: bool = True
     upload_images: bool = False
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "text_to_image": {
+                    "model_path": "prompthero/openjourney-v2",
+                    "model_scheduler": "euler_a",
+                    "prompt": {
+                        "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
+                        "negative": "bad quality, malformed",
+                        "guidance_scale": 16.5,
+                    },
+                    "height": 688,
+                    "width": 512,
+                    "num_inference_steps": 50,
+                    "num_images": 2,
+                    "seed": 57857,
+                },
+                "return_images": True,
+                "upload_images": False,
+            }
+        }
 
 
 class TextToImageOutput(BaseModel):

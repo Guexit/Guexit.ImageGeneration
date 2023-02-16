@@ -1,16 +1,11 @@
-import os
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from logging.config import dictConfig
-import logging
-from image_generation.logging import LogConfig
+from image_generation.logging import set_logger
 from stable_diffusion import StableDiffusionHandler
 from image_generation.api.models import TextToImageInput
 from image_generation.api.utils import zip_images
 
-dictConfig(LogConfig().dict())
-logger = logging.getLogger("Image Generation API")
-logger.setLevel(os.getenv("LOGGER_LEVEL", logging.ERROR))
+logger = set_logger("Image Generation API")
 logger.info("--- Image Generation API ---")
 
 app = FastAPI()
@@ -28,7 +23,7 @@ async def root():
 @app.post("/text_to_image", response_model=None)
 async def text_to_image(text_to_image_input: TextToImageInput):
     logger.info(f"Text to image request: {text_to_image_input}")
-    images = model.txt_to_img(text_to_image_input)
+    images = model.txt_to_img(text_to_image_input.text_to_image)
 
     if text_to_image_input.upload_images:
         logger.warning("Uploading images to the Cloud is not available yet!")
