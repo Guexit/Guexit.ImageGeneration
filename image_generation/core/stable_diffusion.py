@@ -1,5 +1,5 @@
 import torch
-from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler
+from diffusers import StableDiffusionPipeline
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.logging import set_logger
@@ -8,7 +8,7 @@ logger = set_logger("Stable Diffusion Handler")
 
 
 class StableDiffusionHandler:
-    def __init__(self, model_path: str, device: torch.device = None):
+    def __init__(self, model_path: str, device: str = None):
         if device is None:
             if torch.backends.mps.is_available():
                 device = torch.device("mps")
@@ -16,6 +16,8 @@ class StableDiffusionHandler:
                 device = torch.device("cuda")
             else:
                 device = torch.device("cpu")
+        else:
+            device = torch.device(device)
         self.device = device
         self._init_model(model_path=model_path)
 
