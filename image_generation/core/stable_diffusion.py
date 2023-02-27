@@ -114,6 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_inference_steps", type=int, default=50)
     parser.add_argument("--num_images", type=int, default=2)
     parser.add_argument("--seed", type=int, default=57857)
+    parser.add_argument("--id", type=str, default=None)
     args = parser.parse_args()
 
     model = StableDiffusionHandler(args.model_path)
@@ -135,5 +136,6 @@ if __name__ == "__main__":
         )
     )
     # Save images
+    prefix_id = args.id + "_" if args.id is not None else ""
     for i, image in enumerate(images):
-        image.save(f"output_{i}.png")
+        image.save(f"output_{prefix_id}{i}.png")
