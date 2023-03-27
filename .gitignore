@@ -131,3 +131,5 @@ dmypy.json
 # Output images
 output*
 images/
+
+.DS_Store

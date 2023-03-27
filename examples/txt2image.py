@@ -1,10 +1,12 @@
 import grequests
 import zipfile, io
+from rich import print
 
 
 # Call Image Generation API
 def call_image_generation_api(request_object: dict):
     # Call Image Generation API
+    print(request_object)
     async_req = grequests.post(
         "http://127.0.0.1:5000/text_to_image", json=request_object
     )
@@ -62,10 +64,10 @@ if __name__ == "__main__":
                 "width": args.width,
                 "num_inference_steps": args.num_inference_steps,
                 "num_images": args.num_images,
-                "seed": args.seed,
-                "return_images": True,
-                "upload_images": False,
-            }
+                "seed": args.seed
+            },
+            "return_images": False,
+            "upload_images": True,
         }
     )
     # Save images
