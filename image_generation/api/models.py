@@ -17,31 +17,21 @@ class TextToImage(BaseModel):
     num_inference_steps: int
     num_images: int
 
-
-class TextToImageInput(BaseModel):
-    text_to_image: TextToImage
-    return_images: bool = True
-    upload_images: bool = False
-
     class Config:
         schema_extra = {
             "example": {
-                "text_to_image": {
-                    "model_path": "prompthero/openjourney-v2",
-                    "model_scheduler": "euler_a",
-                    "prompt": {
-                        "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
-                        "negative": "bad quality, malformed",
-                        "guidance_scale": 16.5,
-                    },
-                    "height": 688,
-                    "width": 512,
-                    "num_inference_steps": 50,
-                    "num_images": 2,
-                    "seed": 57857,
+                "model_path": "prompthero/openjourney-v2",
+                "model_scheduler": "euler_a",
+                "prompt": {
+                    "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
+                    "negative": "bad quality, malformed",
+                    "guidance_scale": 16.5,
                 },
-                "return_images": True,
-                "upload_images": False,
+                "height": 688,
+                "width": 512,
+                "num_inference_steps": 50,
+                "num_images": 2,
+                "seed": 57857,
             }
         }
 

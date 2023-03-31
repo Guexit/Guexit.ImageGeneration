@@ -5,7 +5,7 @@ from diffusers.schedulers import (
     DDIMScheduler,
     PNDMScheduler,
 )
-from image_generation.logging import set_logger
+from image_generation.custom_logging import set_logger
 
 logger = set_logger("SD Scheduler Handler")
 

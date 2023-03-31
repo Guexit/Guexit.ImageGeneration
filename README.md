@@ -47,23 +47,47 @@ AI Image Generation Service
 
     ```json
     {
-    "text_to_image": {
-        "model_path": "prompthero/openjourney-2",
-        "model_scheduler": "euler_a",
-        "prompt": {
-            "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
-            "negative": "bad quality, malformed",
-            "guidance_scale": 16.5
-        },
-        "height": 688,
-        "width": 512,
-        "num_inference_steps": 50,
-        "num_images": 2,
-        "seed": 57857
-    },
-    "return_images": true,
-    "upload_images": false
+        "text_to_image": {
+            "model_path": "prompthero/openjourney-2",
+            "model_scheduler": "euler_a",
+            "prompt": {
+                "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
+                "negative": "bad quality, malformed",
+                "guidance_scale": 16.5
+            },
+            "height": 688,
+            "width": 512,
+            "num_inference_steps": 50,
+            "num_images": 2,
+            "seed": 57857
+        }
     }
     ```
 
-3. You can also execute the scripts in the example folder to test the API.
+3. You can also execute the script in the example folder to test the API:
+
+```shell
+python3 examples/text2image.py --model_path prompthero/openjourney-2 /
+                               --model_scheduler euler_a /
+                               --positive_prompt "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4"
+                               --negative_prompt "bad quality, malformed"
+                               --guidance_scale 16.5
+                               --height 688
+                               --width 512
+                               --num_inference_steps 50
+                               --num_images 2
+                               --seed 57857
+```
+
+#### Upload images
+
+1. First you need to specify the following environment variables:
+
+    ```shell
+        # Azure Storage connection string
+        export AZURE_STORAGE_CONNECTION_STRING='<connection_string>'
+        # Azure Storage container name (e.g. test)
+        export AZURE_STORAGE_CONTAINER_NAME='<container_name>'
+    ```
+
+2. Then change "upload_images" to true and run the script again.
