@@ -79,15 +79,41 @@ python3 examples/text2image.py --model_path prompthero/openjourney-2 /
                                --seed 57857
 ```
 
-#### Upload images
+### Using ImageGenerationMessageHandler
 
-1. First you need to specify the following environment variables:
+The ImageGenerationMessageHandler in `scripts/image_generation_message_handler.py` is a script that processes incoming messages to generate images, uploads them to Azure Blob Storage, and sends a message with the generated image URLs to an Azure Service Bus topic.
 
-    ```shell
-        # Azure Storage connection string
-        export AZURE_STORAGE_CONNECTION_STRING='<connection_string>'
-        # Azure Storage container name (e.g. test)
-        export AZURE_STORAGE_CONTAINER_NAME='<container_name>'
-    ```
+To use the ImageGenerationMessageHandler, you need to have a few environment variables set up:
 
-2. Then change "upload_images" to true and run the script again.
+```shell
+AZURE_STORAGE_CONNECTION_STRING: The connection string for your Azure Storage account.
+AZURE_SERVICE_BUS_CONNECTION_STRING: The connection string for your Azure Service Bus instance.
+AZURE_STORAGE_CONTAINER_NAME: The name of the container in your Azure Storage account where the images will be uploaded.
+AZURE_SERVICE_BUS_QUEUE_NAME: The name of the queue in your Azure Service Bus instance where messages will be consumed.
+AZURE_SERVICE_BUS_TOPIC_NAME: The name of the topic in your Azure Service Bus instance where messages will be published.
+AZURE_SERVICE_BUS_MESSAGE_TYPE: The message type for the messages sent to the Azure Service Bus topic.
+You can set these environment variables in your terminal or in a .env file in the project directory. Here's an example of how to set them in your terminal:
+```
+
+```shell
+export AZURE_STORAGE_CONNECTION_STRING="<your_storage_connection_string>"
+export AZURE_SERVICE_BUS_CONNECTION_STRING="<your_service_bus_connection_string>"
+export AZURE_STORAGE_CONTAINER_NAME="<your_storage_container_name>"
+export AZURE_SERVICE_BUS_QUEUE_NAME="<your_service_bus_queue_name>"
+export AZURE_SERVICE_BUS_TOPIC_NAME="<your_service_bus_topic_name>"
+export AZURE_SERVICE_BUS_MESSAGE_TYPE="<your_service_bus_message_type>"
+```
+
+Once you have the environment variables set up, you first need to have the service running on one terminal:
+
+```shell
+sh start_server.sh
+```
+
+Then you can start consuming messages from Azure Service Bus with:
+
+```shell
+sh start_consuming.sh
+```
+
+This will start the ImageGenerationMessageHandler and begin processing messages from the specified Azure Service Bus queue. The generated images will be uploaded to the specified Azure Storage container, and the resulting image URLs will be sent as a message to the specified Azure Service Bus topic.
