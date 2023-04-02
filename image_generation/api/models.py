@@ -8,7 +8,7 @@ class Prompt(BaseModel):
 
 
 class TextToImage(BaseModel):
-    model_path: str = "prompthero/openjourney-v2"
+    model_path: str = "prompthero/openjourney-v4"
     model_scheduler: str = None
     prompt: Prompt
     height: int
@@ -20,7 +20,7 @@ class TextToImage(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "model_path": "prompthero/openjourney-v2",
+                "model_path": "prompthero/openjourney-v4",
                 "model_scheduler": "euler_a",
                 "prompt": {
                     "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",

@@ -10,7 +10,7 @@ logger = set_logger("Image Generation API")
 logger.info("--- Image Generation API ---")
 
 app = FastAPI()
-model = StableDiffusionHandler("stabilityai/stable-diffusion-2-1-base")
+model = StableDiffusionHandler("prompthero/openjourney-v4")
 
 
 # health check

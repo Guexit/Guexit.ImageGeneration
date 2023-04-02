@@ -22,18 +22,18 @@ class SchedulerHandler:
     def set_scheduler(cls, scheduler_name, current_scheduler):
         optimal_parameters = {}
         logger.info(f"Scheduler name: {scheduler_name}")
-        if scheduler_name == SchedulerEnum.EULER_A:
+        if scheduler_name == SchedulerEnum.EULER_A.value:
             scheduler_selected = EulerAncestralDiscreteScheduler
             optimal_parameters = {
                 "beta_start": 0.00085,
                 "beta_end": 0.012,
                 "beta_schedule": "scaled_linear",
             }
-        elif scheduler_name == SchedulerEnum.EULER:
+        elif scheduler_name == SchedulerEnum.EULER.value:
             scheduler_selected = EulerDiscreteScheduler
-        elif scheduler_name == SchedulerEnum.DDIMS:
+        elif scheduler_name == SchedulerEnum.DDIMS.value:
             scheduler_selected = DDIMScheduler
-        elif scheduler_name == SchedulerEnum.PNDM:
+        elif scheduler_name == SchedulerEnum.PNDM.value:
             scheduler_selected = PNDMScheduler
         elif scheduler_name is None:
             logger.info("No scheduler selected. Returning default scheduler.")

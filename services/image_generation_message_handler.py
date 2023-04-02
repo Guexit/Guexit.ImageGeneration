@@ -84,8 +84,10 @@ class ImageGenerationMessageHandler:
         message_json = json.loads(message)["message"]
         logger.info(f"Message content: {message_json}")
 
-        processed_message = self.process_incoming_message(message_json)
-        file_objects, temp_dir = self.upload_images_to_blob_storage(processed_message)
+        processed_message, message_json = self.process_incoming_message(message_json)
+        file_objects, temp_dir = self.upload_images_to_blob_storage(
+            processed_message, message_json
+        )
         message_to_send = create_message_to_send(file_objects)
 
         logger.info(f"Sending message ImageGenerated: {message_to_send}")
@@ -102,6 +104,7 @@ class ImageGenerationMessageHandler:
 
         Returns:
             Dict[str, Any]: The response from the image generation API.
+            message_json (Dict[str, Any]): The incoming message JSON.
         """
         if "text_to_image" in message_json:
             endpoint = "/text_to_image"
@@ -114,10 +117,10 @@ class ImageGenerationMessageHandler:
         )
         logger.info(f"Response: {response}")
 
-        return response
+        return response, message_json
 
     def upload_images_to_blob_storage(
-        self, response: Dict[str, Any]
+        self, response: Dict[str, Any], message_json: Dict[str, Any]
     ) -> Tuple[List[Dict[str, str]], TemporaryDirectory]:
         """
         Extract image files from the API response, store them temporarily,
@@ -126,6 +129,7 @@ class ImageGenerationMessageHandler:
 
         Args:
             response (Dict[str, Any]): The response from the image generation API.
+            message_json (Dict[str, Any]): The incoming message JSON.
 
         Returns:
             Tuple[List[Dict[str, str]], TemporaryDirectory]: A tuple containing
@@ -134,7 +138,7 @@ class ImageGenerationMessageHandler:
         file_paths, temp_dir = store_zip_images_temporarily(response)
         file_objects = [
             {
-                "name": get_file_name(response["prompt"], response["seed"], i),
+                "name": get_file_name(message_json["prompt"], message_json["seed"], i),
                 "path": str(Path(file_path)),
             }
             for i, file_path in enumerate(file_paths)

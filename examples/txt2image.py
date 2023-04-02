@@ -13,12 +13,12 @@ if __name__ == "__main__":
 
     # Text to image input args
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v2")
-    parser.add_argument("--model_scheduler", type=str, default=None)
+    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v4")
+    parser.add_argument("--model_scheduler", type=str, default="euler_a")
     parser.add_argument(
         "--positive_prompt",
         type=str,
-        default="portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
+        default="portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed",
     )
     parser.add_argument(
         "--negative_prompt",

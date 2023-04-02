@@ -48,10 +48,10 @@ AI Image Generation Service
     ```json
     {
         "text_to_image": {
-            "model_path": "prompthero/openjourney-2",
+            "model_path": "prompthero/openjourney-v4",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4",
+                "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed",
                 "negative": "bad quality, malformed",
                 "guidance_scale": 16.5
             },
@@ -67,9 +67,9 @@ AI Image Generation Service
 3. You can also execute the script in the example folder to test the API:
 
 ```shell
-python3 examples/text2image.py --model_path prompthero/openjourney-2 /
+python3 examples/txt2image.py --model_path "prompthero/openjourney-v4" /
                                --model_scheduler euler_a /
-                               --positive_prompt "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed --v 4"
+                               --positive_prompt "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed"
                                --negative_prompt "bad quality, malformed"
                                --guidance_scale 16.5
                                --height 688
@@ -92,8 +92,9 @@ AZURE_STORAGE_CONTAINER_NAME: The name of the container in your Azure Storage ac
 AZURE_SERVICE_BUS_QUEUE_NAME: The name of the queue in your Azure Service Bus instance where messages will be consumed.
 AZURE_SERVICE_BUS_TOPIC_NAME: The name of the topic in your Azure Service Bus instance where messages will be published.
 AZURE_SERVICE_BUS_MESSAGE_TYPE: The message type for the messages sent to the Azure Service Bus topic.
-You can set these environment variables in your terminal or in a .env file in the project directory. Here's an example of how to set them in your terminal:
 ```
+
+You can set these environment variables in your terminal or in a .env file in the project directory. Here's an example of how to set them in your terminal:
 
 ```shell
 export AZURE_STORAGE_CONNECTION_STRING="<your_storage_connection_string>"

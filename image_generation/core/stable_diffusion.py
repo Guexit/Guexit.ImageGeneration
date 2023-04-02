@@ -96,7 +96,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v2")
+    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v4")
     parser.add_argument("--model_scheduler", type=str, default=None)
     parser.add_argument(
         "--positive_prompt",
