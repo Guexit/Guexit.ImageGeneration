@@ -35,6 +35,12 @@ AI Image Generation Service
     GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
     ```
 
+5. Install pre-commit:
+
+    ```shell
+    pre-commit install
+    ```
+
 ### Run
 
 1. In one terminal, start the server with:
