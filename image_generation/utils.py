@@ -1,7 +1,9 @@
-import grequests
-import zipfile, io
+import io
 import os
+import zipfile
 from tempfile import TemporaryDirectory
+
+import grequests
 from PIL import Image
 
 from image_generation.custom_logging import set_logger

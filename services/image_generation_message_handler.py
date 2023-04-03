@@ -1,21 +1,23 @@
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
+
 from gevent import monkey
 
 monkey.patch_all()
 import json
+import uuid
+from pathlib import Path
+
+from cloud_manager.azure_blob_storage import AzureBlobStorage
+from cloud_manager.azure_service_bus import AzureServiceBus
+from cloud_manager.interfaces.blob_storage import BlobStorageInterface
+from cloud_manager.interfaces.service_bus import ServiceBusInterface
+
 from image_generation.custom_logging import set_logger
 from image_generation.utils import (
     call_image_generation_api,
     store_zip_images_temporarily,
 )
-from cloud_manager.azure_blob_storage import AzureBlobStorage
-from cloud_manager.interfaces.blob_storage import BlobStorageInterface
-from cloud_manager.azure_service_bus import AzureServiceBus
-from cloud_manager.interfaces.service_bus import ServiceBusInterface
-import uuid
-from pathlib import Path
-
 from services import config
 
 logger = set_logger("Image Generation Message Handler")

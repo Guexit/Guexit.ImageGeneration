@@ -2,10 +2,9 @@
 Unit tests for image generation and services
 """
 
-import unittest
-
 import os
 import sys
+import unittest
 
 from tests.services.test_image_generation_message_handler import (
     TestImageGenerationMessageHandler,

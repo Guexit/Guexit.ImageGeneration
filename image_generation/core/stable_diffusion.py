@@ -1,5 +1,6 @@
 import torch
 from diffusers import StableDiffusionPipeline
+
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.custom_logging import set_logger

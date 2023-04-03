@@ -1,10 +1,12 @@
 from enum import Enum
+
 from diffusers.schedulers import (
+    DDIMScheduler,
     EulerAncestralDiscreteScheduler,
     EulerDiscreteScheduler,
-    DDIMScheduler,
     PNDMScheduler,
 )
+
 from image_generation.custom_logging import set_logger
 
 logger = set_logger("SD Scheduler Handler")

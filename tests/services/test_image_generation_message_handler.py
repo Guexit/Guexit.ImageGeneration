@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import MagicMock, patch
+
+from services import config
 from services.image_generation_message_handler import (
     ImageGenerationMessageHandler,
     create_message_to_send,
 )
-from services import config
 
 
 class TestImageGenerationMessageHandler(unittest.TestCase):

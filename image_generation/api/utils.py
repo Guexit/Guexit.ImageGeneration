@@ -1,8 +1,9 @@
 """Image Generation API Utils"""
 
 import io
-from typing import List
 import zipfile
+from typing import List
+
 from PIL import Image
 
 

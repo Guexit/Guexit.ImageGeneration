@@ -1,5 +1,7 @@
+import io
+import zipfile
+
 from image_generation.utils import call_image_generation_api
-import zipfile, io
 
 
 def extract_zip_images(response):

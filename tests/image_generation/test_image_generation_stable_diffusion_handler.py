@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, call
+
 from image_generation.api.models import Prompt, TextToImage
 from image_generation.core.stable_diffusion import (
     StableDiffusionHandler,

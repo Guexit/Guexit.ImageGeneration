@@ -1,10 +1,12 @@
 import os
+
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from image_generation.custom_logging import set_logger
-from image_generation.core.stable_diffusion import StableDiffusionHandler
+
 from image_generation.api.models import TextToImage
 from image_generation.api.utils import zip_images
+from image_generation.core.stable_diffusion import StableDiffusionHandler
+from image_generation.custom_logging import set_logger
 
 logger = set_logger("Image Generation API")
 logger.info("--- Image Generation API ---")
