@@ -52,6 +52,7 @@ pydocstyle = "*"
 [build-system]
 requires        = [
     "poetry-core>=1.0.0",
-    "setuptools"  # for pip install -e
+    "setuptools",  # for pip install -e
+    "cloud_manager @ git+https://${GH_TOKEN}@github.com/Guexit/Guexit.CloudManager"
 ]
 build-backend   = "poetry.core.masonry.api"
