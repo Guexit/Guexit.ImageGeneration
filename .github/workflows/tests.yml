@@ -23,12 +23,13 @@ jobs:
         python-version: 3.9
 
     - name: Install dependencies
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         pip install --upgrade pip
         pip install torch==1.12.1 torchvision>=0.13.1
+        git config --global url."https://${{ secrets.GH_TOKEN }}@github".insteadOf https://github
         pip install -e .
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     - name: Run tests
       run: python -m unittest discover tests

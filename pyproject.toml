@@ -33,10 +33,10 @@ taming_transformers = { git = "https://github.com/CompVis/taming-transformers" }
 cloud_manager       = { git = "https://github.com/Guexit/Guexit.CloudManager" }
 
 # dev
-pre-commit              = { version = ">= 3.1.1" }
-black                   = { version = ">= 23.1.0" }
-typer                   = { version = ">= 0.7.0" }
-isort                   = { version = "^5.12.0" }
+pre-commit          = { version = ">= 3.1.1" }
+black               = { version = ">= 23.1.0" }
+typer               = { version = ">= 0.7.0" }
+isort               = { version = "^5.12.0" }
 
 [tool.isort]
 profile = "black"
@@ -52,7 +52,6 @@ pydocstyle = "*"
 [build-system]
 requires        = [
     "poetry-core>=1.0.0",
-    "setuptools",  # for pip install -e
-    "cloud_manager @ git+https://${GH_TOKEN}@github.com/Guexit/Guexit.CloudManager"
+    "setuptools"  # for pip install -e
 ]
 build-backend   = "poetry.core.masonry.api"
