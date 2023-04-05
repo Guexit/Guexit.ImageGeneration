@@ -1,0 +1,8 @@
+.dockerignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.bak
+*.DS_Store
