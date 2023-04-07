@@ -3,9 +3,9 @@ import os
 import zipfile
 from tempfile import TemporaryDirectory
 
-import grequests
-from PIL import Image
+import requests
 import torch
+from PIL import Image
 
 from image_generation.custom_logging import set_logger
 
@@ -16,8 +16,8 @@ def call_image_generation_api(host, endpoint, request_object: dict):
     logger.info(f"Calling {host}{endpoint}")
     logger.info(f"Request object: {request_object}")
     # Call Image Generation API
-    async_req = grequests.post(f"{host}{endpoint}", json=request_object)
-    response = grequests.map([async_req])[0]
+    response = requests.post(f"{host}{endpoint}", json=request_object)
+
     # Check if the request was successful
     if response.status_code == 200:
         # Return the response
@@ -52,23 +52,25 @@ def store_zip_images_temporarily(response):
 
     return file_paths, temp_dir
 
+
 def bytesto(bytes, to, bsize=1024):
     """
     Convert bytes to megabytes, etc.
     sample code:
         print('mb= ' + str(bytesto(314575262000000, 'm')))
-    sample output: 
+    sample output:
         mb= 300002347.946
     """
 
-    a = {'k' : 1, 'm': 2, 'g' : 3, 't' : 4, 'p' : 5, 'e' : 6 }
+    a = {"k": 1, "m": 2, "g": 3, "t": 4, "p": 5, "e": 6}
     r = float(bytes)
     for i in range(a[to]):
         r = r / bsize
 
-    return(r)
+    return r
+
 
 def enough_gpu_memory(minimum_gb=3.0):
     total_memory = torch.cuda.mem_get_info()[1]
-    total_memory_gb = bytesto(total_memory, 'g')
+    total_memory_gb = bytesto(total_memory, "g")
     return total_memory_gb >= minimum_gb

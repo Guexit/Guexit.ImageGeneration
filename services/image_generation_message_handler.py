@@ -1,12 +1,8 @@
-from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Tuple
-
-from gevent import monkey
-
-monkey.patch_all()
 import json
 import uuid
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any, Dict, List, Tuple
 
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
