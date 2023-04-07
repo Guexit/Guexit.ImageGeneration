@@ -73,4 +73,5 @@ def bytesto(bytes, to, bsize=1024):
 def enough_gpu_memory(minimum_gb=3.0):
     total_memory = torch.cuda.mem_get_info()[1]
     total_memory_gb = bytesto(total_memory, "g")
+    logger.info(f"Total GPU memory: {total_memory_gb} GB")
     return total_memory_gb >= minimum_gb
