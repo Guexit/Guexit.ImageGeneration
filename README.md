@@ -19,11 +19,15 @@ AI Image Generation Service
 
 4. Install dependencies with:
 
-    If you are in Linux or Windows:
+    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version 11.7. You need a GPU with at least 4GB of memory. If not, you should send requests that are executed in the CPU.
 
     ```shell
-    pip3 install torch==1.12.1 torchvision>=0.13.1
+    # CUDA 11.7
     pip3 install -e .
+    # WINDOWS
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+    # LINUX
+    pip3 install torch torchvision torchaudio
     ```
 
     TODO: Instructions for installing with GPU support for Windows/Linux.
