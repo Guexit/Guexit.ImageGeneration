@@ -30,8 +30,6 @@ AI Image Generation Service
     pip3 install torch torchvision torchaudio
     ```
 
-    TODO: Instructions for installing with GPU support for Windows/Linux.
-
     If you are in MacOS:
 
     ```shell
@@ -103,6 +101,8 @@ AZURE_SERVICE_BUS_QUEUE_NAME: The name of the queue in your Azure Service Bus in
 AZURE_SERVICE_BUS_TOPIC_NAME: The name of the topic in your Azure Service Bus instance where messages will be published.
 AZURE_SERVICE_BUS_MESSAGE_TYPE: The message type for the messages sent to the Azure Service Bus topic.
 ```
+
+These are in `env_samples.env`, but you need to have them in a `.env` file in the project directory: `cp env_samples.env .env` and then substitute the values with the correct ones.
 
 You can set these environment variables in your terminal or in a .env file in the project directory. Here's an example of how to set them in your terminal:
 

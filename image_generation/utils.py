@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 
 import grequests
 from PIL import Image
+import torch
 
 from image_generation.custom_logging import set_logger
 
@@ -50,3 +51,24 @@ def store_zip_images_temporarily(response):
                 file_paths.append(file_path)
 
     return file_paths, temp_dir
+
+def bytesto(bytes, to, bsize=1024):
+    """
+    Convert bytes to megabytes, etc.
+    sample code:
+        print('mb= ' + str(bytesto(314575262000000, 'm')))
+    sample output: 
+        mb= 300002347.946
+    """
+
+    a = {'k' : 1, 'm': 2, 'g' : 3, 't' : 4, 'p' : 5, 'e' : 6 }
+    r = float(bytes)
+    for i in range(a[to]):
+        r = r / bsize
+
+    return(r)
+
+def enough_gpu_memory(minimum_gb=3.0):
+    total_memory = torch.cuda.mem_get_info()[1]
+    total_memory_gb = bytesto(total_memory, 'g')
+    return total_memory_gb >= minimum_gb

@@ -1,9 +1,12 @@
 # Using nvidia/cuda base image with Python 3.9
-FROM nvidia/cuda:12.1.0-runtime-ubuntu20.04
+FROM nvidia/cuda:11.7.0-devel-ubuntu20.04
+
+ARG GITHUB_TOKEN
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -15,10 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxrender-dev \
     libxext6 \
+    tzdata \
+    git \
     && rm -rf /var/lib/apt/lists/*
-
-# Install torch and torchvision
-RUN pip3 install torch==1.12.1 torchvision>=0.13.1
 
 # Set the working directory
 WORKDIR /app
@@ -27,7 +29,12 @@ WORKDIR /app
 COPY . .
 
 # Install the project dependencies
-RUN pip3 install -e .
+RUN pip3 install -U pip
+RUN pip3 install torch torchvision torchaudio
+RUN echo "machine github.com login ${GITHUB_TOKEN}" > ~/.netrc \
+    && chmod 600 ~/.netrc \
+    && pip3 install . \
+    && rm ~/.netrc
 
 # Start the server and consumer
-CMD ["./start_server.sh", "&&", "./start_consuming.sh"]
+CMD ["sh", "-c", "./start_server.sh && ./start_consuming.sh"]

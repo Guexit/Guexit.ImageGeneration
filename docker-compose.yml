@@ -2,10 +2,13 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     image: your-image-name:latest
     ports:
-      - "8000:8000"
+      - "5000:5000"
     env_file: .env
     deploy:
       resources:

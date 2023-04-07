@@ -4,6 +4,7 @@ from diffusers import StableDiffusionPipeline
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.custom_logging import set_logger
+from image_generation.utils import enough_gpu_memory
 
 import contextlib
 autocast = contextlib.nullcontext
@@ -14,9 +15,9 @@ logger = set_logger("Stable Diffusion Handler")
 class StableDiffusionHandler:
     def __init__(self, model_path: str, device: str = None):
         if device is None:
-            if torch.backends.mps.is_available():
+            if torch.backends.mps.is_available() and enough_gpu_memory():
                 device = torch.device("mps")
-            elif torch.cuda.is_available():
+            elif torch.cuda.is_available() and enough_gpu_memory():
                 device = torch.device("cuda")
             else:
                 device = torch.device("cpu")
