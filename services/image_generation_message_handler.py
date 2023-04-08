@@ -27,13 +27,13 @@ def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
         return f"{prompt_str}_{seed}_{idx}.png"
 
 
-def create_message_to_send(file_objects: List[Dict[str, str]]) -> str:
+def create_message_to_send(files_blob_urls: List[Dict[str, str]]) -> str:
     return f"""
     {{
         "destinationAddress": "",
         "headers": {{}},
         "message": {{
-            "urls": {file_objects}
+            "urls": {files_blob_urls}
         }},
         "messageType": [
             {config.AZURE_SERVICE_BUS_MESSAGE_TYPE}
@@ -83,10 +83,10 @@ class ImageGenerationMessageHandler:
         logger.info(f"Message content: {message_json}")
 
         processed_message, message_json = self.process_incoming_message(message_json)
-        file_objects, temp_dir = self.upload_images_to_blob_storage(
+        files_blob_urls, temp_dir = self.upload_images_to_blob_storage(
             processed_message, message_json
         )
-        message_to_send = create_message_to_send(file_objects)
+        message_to_send = create_message_to_send(files_blob_urls)
 
         logger.info(f"Sending message ImageGenerated: {message_to_send}")
         self.service_bus.publish(config.AZURE_SERVICE_BUS_TOPIC_NAME, message_to_send)
@@ -143,11 +143,11 @@ class ImageGenerationMessageHandler:
         ]
         logger.info(f"File objects: {file_objects}")
         logger.info("Uploading files to blob storage")
-        self.azure_cloud.push_objects(
+        files_blob_urls = self.azure_cloud.push_objects(
             config.AZURE_STORAGE_CONTAINER_NAME, file_objects, overwrite=True
         )
 
-        return file_objects, temp_dir
+        return files_blob_urls, temp_dir
 
 
 def main():
