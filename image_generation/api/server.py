@@ -12,12 +12,12 @@ logger = set_logger("Image Generation API")
 logger.info("--- Image Generation API ---")
 
 app = FastAPI()
-model = StableDiffusionHandler("prompthero/openjourney-v4")
+model = StableDiffusionHandler("prompthero/openjourney-v2")
 
 
 # health check
-@app.get("/")
-async def root():
+@app.get("/healthcheck")
+async def healthcheck():
     logger.info("Health check")
     return {"status": "healthy"}
 

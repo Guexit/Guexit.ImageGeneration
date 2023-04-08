@@ -128,3 +128,27 @@ sh start_consuming.sh
 ```
 
 This will start the ImageGenerationMessageHandler and begin processing messages from the specified Azure Service Bus queue. The generated images will be uploaded to the specified Azure Storage container, and the resulting image URLs will be sent as a message to the specified Azure Service Bus topic.
+
+## Docker
+
+To run the service and the handler in Docker:
+
+1. Have Docker installed.
+
+2. Git credentials must be stored in `~/.git-credentials`. To do so please execute:
+
+    ```shell
+    git config --global credential.helper "store --file ~/.git-credentials"
+    ```
+
+3. Build the docker image with:
+
+    ```shell
+    docker build . --secret id=git-credentials,src=~/.git-credentials -t guexit_image_generation
+    ```
+
+4. Run the docker image with:
+
+    ```shell
+    docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
+    ```

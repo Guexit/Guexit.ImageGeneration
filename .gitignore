@@ -133,3 +133,8 @@ output*
 images/
 
 .DS_Store
+
+# Ignore everything in the models folder
+models/*
+# But don't ignore the .gitkeep file
+!models/.gitkeep

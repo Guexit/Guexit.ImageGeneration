@@ -1,7 +1,5 @@
 # Using nvidia/cuda base image with Python 3.9
-FROM nvidia/cuda:11.7.0-devel-ubuntu20.04
-
-ARG GITHUB_TOKEN
+FROM nvidia/cuda:11.7.1-devel-ubuntu20.04
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -13,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.9 \
     python3-pip \
     python3.9-dev \
+    python3.9-venv \
     build-essential \
     libglib2.0-0 \
     libsm6 \
@@ -25,16 +24,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set the working directory
 WORKDIR /app
 
+# Create and activate virtual environment
+RUN python3.9 -m venv venv
+ENV PATH="/app/venv/bin:$PATH"
+
+# Install first what can be cached
+RUN python -m pip install -U pip
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+
 # Copy the project files
 COPY . .
 
 # Install the project dependencies
-RUN pip3 install -U pip
-RUN pip3 install torch torchvision torchaudio
-RUN echo "machine github.com login ${GITHUB_TOKEN}" > ~/.netrc \
-    && chmod 600 ~/.netrc \
-    && pip3 install . \
-    && rm ~/.netrc
+RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
+    git config --global credential.helper store && \
+    pip install .
 
 # Start the server and consumer
-CMD ["sh", "-c", "./start_server.sh && ./start_consuming.sh"]
+CMD ["sh", "-c", "./start_server.sh & ./start_consuming.sh"]
