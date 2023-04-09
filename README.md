@@ -23,11 +23,11 @@ AI Image Generation Service
 
     ```shell
     # CUDA 11.7
-    pip3 install -e .
+    pip install -e .
     # WINDOWS
-    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
     # LINUX
-    pip3 install torch torchvision torchaudio
+    pip install torch torchvision torchaudio
     ```
 
     If you are in MacOS:

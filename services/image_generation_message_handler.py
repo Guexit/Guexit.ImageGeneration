@@ -4,6 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
 
+import config
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
 from cloud_manager.interfaces.blob_storage import BlobStorageInterface
@@ -13,11 +14,11 @@ from image_generation.custom_logging import set_logger
 from image_generation.utils import (
     call_image_generation_api,
     store_zip_images_temporarily,
-    wait_for_service
+    wait_for_service,
 )
-import config
 
 logger = set_logger("Image Generation Message Handler")
+
 
 def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
     prompt_str = "_".join(prompt["positive"].split(" "))
@@ -57,7 +58,8 @@ class ImageGenerationMessageHandler:
             config.AZURE_STORAGE_CONNECTION_STRING
         )
         self.service_bus: ServiceBusInterface = AzureServiceBus(
-            config.AZURE_SERVICE_BUS_CONNECTION_STRING
+            config.AZURE_SERVICE_BUS_CONNECTION_STRING,
+            config.AZURE_SERVICE_BUS_MAX_LOCK_RENEWAL_DURATION,
         )
 
     def __call__(self, message: str) -> None:
@@ -92,7 +94,9 @@ class ImageGenerationMessageHandler:
         self.service_bus.publish(config.AZURE_SERVICE_BUS_TOPIC_NAME, message_to_send)
         temp_dir.cleanup()
 
-    def process_incoming_message(self, message_json: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def process_incoming_message(
+        self, message_json: Dict[str, Any]
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Process the incoming message JSON to determine the appropriate endpoint
         and pass the message to the image generation API.
