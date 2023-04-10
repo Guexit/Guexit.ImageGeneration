@@ -4,7 +4,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
 
-import config
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
 from cloud_manager.interfaces.blob_storage import BlobStorageInterface
@@ -16,6 +15,7 @@ from image_generation.utils import (
     store_zip_images_temporarily,
     wait_for_service,
 )
+from services import config
 
 logger = set_logger("Image Generation Message Handler")
 
@@ -23,7 +23,7 @@ logger = set_logger("Image Generation Message Handler")
 def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
     prompt_str = "_".join(prompt["positive"].split(" "))
     if seed == -1:
-        return f"{prompt_str}_{uuid.uuid4()}_{seed}_{idx}.png"
+        return f"{prompt_str}_{uuid.uuid1()}_{seed}_{idx}.png"
     else:
         return f"{prompt_str}_{seed}_{idx}.png"
 
