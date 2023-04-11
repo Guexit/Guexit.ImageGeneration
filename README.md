@@ -1,5 +1,7 @@
 # Guexit.ImageGeneration
 
+[![codecov](https://codecov.io/gh/Guexit/Guexit.ImageGeneration/branch/main/graph/badge.svg?token=U47OQU1RG5)](https://codecov.io/gh/Guexit/Guexit.ImageGeneration)
+
 AI Image Generation Service
 
 ## Local
