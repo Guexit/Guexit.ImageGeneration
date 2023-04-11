@@ -1,12 +1,12 @@
 import io
 import os
+import time
 import zipfile
 from tempfile import TemporaryDirectory
 
 import requests
 import torch
 from PIL import Image
-import time
 
 from image_generation.custom_logging import set_logger
 
@@ -26,9 +26,10 @@ def call_image_generation_api(host, endpoint, request_object: dict):
     else:
         raise Exception(f"Request failed with status code {response.status_code}")
 
-def wait_for_service(host, endpoint='/healthcheck', timeout=60):
+
+def wait_for_service(host, endpoint="/healthcheck", timeout=60):
     start_time = time.time()
-    url = f'{host}{endpoint}'
+    url = f"{host}{endpoint}"
 
     logger.info(f"Waiting for the service at {url} to become available")
     while True:
@@ -41,9 +42,12 @@ def wait_for_service(host, endpoint='/healthcheck', timeout=60):
             pass
 
         if time.time() - start_time > timeout:
-            raise TimeoutError(f"Timeout waiting for the service at {url} to become available")
+            raise TimeoutError(
+                f"Timeout waiting for the service at {url} to become available"
+            )
 
         time.sleep(1)
+
 
 def store_zip_images_temporarily(response):
     """
