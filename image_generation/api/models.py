@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -9,7 +11,7 @@ class Prompt(BaseModel):
 
 class TextToImage(BaseModel):
     model_path: str = "prompthero/openjourney-v4"
-    model_scheduler: str = None
+    model_scheduler: Optional[str]
     prompt: Prompt
     height: int
     width: int
@@ -34,8 +36,3 @@ class TextToImage(BaseModel):
                 "seed": 57857,
             }
         }
-
-
-class TextToImageOutput(BaseModel):
-    images_zip_file: str = None
-    image_url_path: str = None

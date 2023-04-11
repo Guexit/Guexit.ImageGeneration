@@ -31,5 +31,23 @@ jobs:
         git config --global url."https://${{ secrets.GH_TOKEN }}@github".insteadOf https://github
         pip install -e .
 
-    - name: Run tests
-      run: python -m unittest
+    - name: Install Coverage
+      run: |
+        pip install coverage
+
+    - name: Run tests with coverage
+      run: |
+        coverage run --source=image_generation,services -m unittest tests
+        coverage report
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        comment:                  # this is a top-level key
+          layout: "reach, diff, flags, files"
+          behavior: default
+          require_changes: true  # if true: only post the comment if coverage changes
+          require_base: no        # [yes :: must have a base report to post]
+          require_head: yes       # [yes :: must have a head report to post]

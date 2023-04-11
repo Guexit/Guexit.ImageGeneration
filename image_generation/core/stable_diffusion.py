@@ -1,9 +1,14 @@
+import contextlib
+
 import torch
 from diffusers import StableDiffusionPipeline
 
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.custom_logging import set_logger
+from image_generation.utils import enough_gpu_memory
+
+autocast = contextlib.nullcontext
 
 logger = set_logger("Stable Diffusion Handler")
 
@@ -13,7 +18,7 @@ class StableDiffusionHandler:
         if device is None:
             if torch.backends.mps.is_available():
                 device = torch.device("mps")
-            elif torch.cuda.is_available():
+            elif torch.cuda.is_available() and enough_gpu_memory():
                 device = torch.device("cuda")
             else:
                 device = torch.device("cpu")
@@ -35,9 +40,13 @@ class StableDiffusionHandler:
         self.pipe.scheduler = SchedulerHandler.set_scheduler(
             scheduler_name=scheduler_name, current_scheduler=self.pipe.scheduler
         )
-        self.pipe.to(self.device)
         # Recommended if computer has < 64 GB of RAM
-        self.pipe.enable_attention_slicing()
+        if self.device == torch.device("cpu"):
+            self.pipe.enable_sequential_cpu_offload()
+            self.pipe.enable_attention_slicing(1)
+        else:
+            self.pipe.enable_attention_slicing(1)
+            self.pipe.to(self.device)
         # Warm up the model
         self.pipe("", num_inference_steps=1)
 
@@ -63,7 +72,7 @@ class StableDiffusionHandler:
         num_images = input_data.num_images
         generator = self._set_seed(input_data.seed)
         if self.device.type == "mps":
-            logger.info(f"Running inference on MPS device")
+            logger.info("Running inference on MPS device")
             images = []
             for _ in range(num_images):
                 images.append(
@@ -79,7 +88,7 @@ class StableDiffusionHandler:
                     ).images[0]
                 )
         else:
-            logger.info(f"Running inference")
+            logger.info("Running inference")
             images = self.pipe(
                 prompt=positive_prompt,
                 negative_prompt=negative_prompt,

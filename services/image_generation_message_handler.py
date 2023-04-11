@@ -1,12 +1,8 @@
-from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Tuple
-
-from gevent import monkey
-
-monkey.patch_all()
 import json
 import uuid
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any, Dict, List, Tuple
 
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
@@ -17,6 +13,7 @@ from image_generation.custom_logging import set_logger
 from image_generation.utils import (
     call_image_generation_api,
     store_zip_images_temporarily,
+    wait_for_service,
 )
 from services import config
 
@@ -26,18 +23,18 @@ logger = set_logger("Image Generation Message Handler")
 def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
     prompt_str = "_".join(prompt["positive"].split(" "))
     if seed == -1:
-        return f"{prompt_str}_{uuid.uuid4()}_{seed}_{idx}.png"
+        return f"{prompt_str}_{uuid.uuid1()}_{seed}_{idx}.png"
     else:
         return f"{prompt_str}_{seed}_{idx}.png"
 
 
-def create_message_to_send(file_objects: List[Dict[str, str]]) -> str:
+def create_message_to_send(files_blob_urls: List[Dict[str, str]]) -> str:
     return f"""
     {{
         "destinationAddress": "",
         "headers": {{}},
         "message": {{
-            "urls": {file_objects}
+            "urls": {files_blob_urls}
         }},
         "messageType": [
             {config.AZURE_SERVICE_BUS_MESSAGE_TYPE}
@@ -61,7 +58,8 @@ class ImageGenerationMessageHandler:
             config.AZURE_STORAGE_CONNECTION_STRING
         )
         self.service_bus: ServiceBusInterface = AzureServiceBus(
-            config.AZURE_SERVICE_BUS_CONNECTION_STRING
+            config.AZURE_SERVICE_BUS_CONNECTION_STRING,
+            config.AZURE_SERVICE_BUS_MAX_LOCK_RENEWAL_DURATION,
         )
 
     def __call__(self, message: str) -> None:
@@ -87,16 +85,18 @@ class ImageGenerationMessageHandler:
         logger.info(f"Message content: {message_json}")
 
         processed_message, message_json = self.process_incoming_message(message_json)
-        file_objects, temp_dir = self.upload_images_to_blob_storage(
+        files_blob_urls, temp_dir = self.upload_images_to_blob_storage(
             processed_message, message_json
         )
-        message_to_send = create_message_to_send(file_objects)
+        message_to_send = create_message_to_send(files_blob_urls)
 
         logger.info(f"Sending message ImageGenerated: {message_to_send}")
         self.service_bus.publish(config.AZURE_SERVICE_BUS_TOPIC_NAME, message_to_send)
         temp_dir.cleanup()
 
-    def process_incoming_message(self, message_json: Dict[str, Any]) -> Dict[str, Any]:
+    def process_incoming_message(
+        self, message_json: Dict[str, Any]
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Process the incoming message JSON to determine the appropriate endpoint
         and pass the message to the image generation API.
@@ -147,14 +147,16 @@ class ImageGenerationMessageHandler:
         ]
         logger.info(f"File objects: {file_objects}")
         logger.info("Uploading files to blob storage")
-        self.azure_cloud.push_objects(
+        files_blob_urls = self.azure_cloud.push_objects(
             config.AZURE_STORAGE_CONTAINER_NAME, file_objects, overwrite=True
         )
+        logger.info(f"Uploaded files to blob storage: {files_blob_urls}")
 
-        return file_objects, temp_dir
+        return files_blob_urls, temp_dir
 
 
 def main():
+    wait_for_service(config.IMAGE_GENERATION_API, timeout=2260)
     service_bus: ServiceBusInterface = AzureServiceBus(
         config.AZURE_SERVICE_BUS_CONNECTION_STRING
     )

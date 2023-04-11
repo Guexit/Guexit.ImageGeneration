@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        GH_TOKEN: ${GH_TOKEN}
+    image: guexit-image-generation:latest
+    ports:
+      - "5000:5000"
+    env_file: .env
+    secrets:
+      - git-credentials
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+
+secrets:
+  git-credentials:
+    file:  ~/.git-credentials

@@ -1,5 +1,7 @@
 # Guexit.ImageGeneration
 
+[![codecov](https://codecov.io/gh/Guexit/Guexit.ImageGeneration/branch/main/graph/badge.svg?token=U47OQU1RG5)](https://codecov.io/gh/Guexit/Guexit.ImageGeneration)
+
 AI Image Generation Service
 
 ## Local
@@ -19,14 +21,16 @@ AI Image Generation Service
 
 4. Install dependencies with:
 
-    If you are in Linux or Windows:
+    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version 11.7. You need a GPU with at least 4GB of memory. If not, you should send requests that are executed in the CPU.
 
     ```shell
-    pip3 install torch==1.12.1 torchvision>=0.13.1
-    pip3 install -e .
+    # CUDA 11.7
+    pip install -e .
+    # WINDOWS
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+    # LINUX
+    pip install torch torchvision torchaudio
     ```
-
-    TODO: Instructions for installing with GPU support for Windows/Linux.
 
     If you are in MacOS:
 
@@ -100,6 +104,8 @@ AZURE_SERVICE_BUS_TOPIC_NAME: The name of the topic in your Azure Service Bus in
 AZURE_SERVICE_BUS_MESSAGE_TYPE: The message type for the messages sent to the Azure Service Bus topic.
 ```
 
+These are in `env_samples.env`, but you need to have them in a `.env` file in the project directory: `cp env_samples.env .env` and then substitute the values with the correct ones.
+
 You can set these environment variables in your terminal or in a .env file in the project directory. Here's an example of how to set them in your terminal:
 
 ```shell
@@ -124,3 +130,27 @@ sh start_consuming.sh
 ```
 
 This will start the ImageGenerationMessageHandler and begin processing messages from the specified Azure Service Bus queue. The generated images will be uploaded to the specified Azure Storage container, and the resulting image URLs will be sent as a message to the specified Azure Service Bus topic.
+
+## Docker
+
+To run the service and the handler in Docker:
+
+1. Have Docker installed.
+
+2. Git credentials must be stored in `~/.git-credentials`. To do so please execute:
+
+    ```shell
+    git config --global credential.helper "store --file ~/.git-credentials"
+    ```
+
+3. Build the docker image with:
+
+    ```shell
+    docker build . --secret id=git-credentials,src=~/.git-credentials -t guexit_image_generation
+    ```
+
+4. Run the docker image with:
+
+    ```shell
+    docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
+    ```
