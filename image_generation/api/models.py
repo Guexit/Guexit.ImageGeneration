@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 
 
 class Prompt(BaseModel):
@@ -13,11 +13,11 @@ class TextToImage(BaseModel):
     model_path: str = "prompthero/openjourney-v4"
     model_scheduler: Optional[str]
     prompt: Prompt
-    height: int
-    width: int
+    height: int = Field(..., gt=0)
+    width: int = Field(..., gt=0)
     seed: int = -1
-    num_inference_steps: int
-    num_images: int
+    num_inference_steps: int = Field(..., gt=0)
+    num_images: int = Field(..., gt=0)
 
     class Config:
         schema_extra = {
@@ -36,3 +36,9 @@ class TextToImage(BaseModel):
                 "seed": 57857,
             }
         }
+
+    @validator("seed", pre=True)
+    def validate_seed(cls, seed):
+        if seed < -1:
+            raise ValueError("Seed must be greater than or equal to -1")
+        return seed
