@@ -28,19 +28,14 @@ def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
         return f"{prompt_str}_{seed}_{idx}.png"
 
 
-def create_message_to_send(files_blob_urls: List[Dict[str, str]]) -> str:
-    return f"""
-    {{
+def create_message_to_send(file_blob_url: str) -> str:
+    message = {
         "destinationAddress": "",
-        "headers": {{}},
-        "message": {{
-            "urls": {files_blob_urls}
-        }},
-        "messageType": [
-            {config.AZURE_SERVICE_BUS_MESSAGE_TYPE}
-        ]
-    }}
-    """
+        "headers": {},
+        "message": {"url": file_blob_url},
+        "messageType": [config.AZURE_SERVICE_BUS_MESSAGE_TYPE],
+    }
+    return json.dumps(message)
 
 
 class ImageGenerationMessageHandler:
@@ -88,10 +83,13 @@ class ImageGenerationMessageHandler:
         files_blob_urls, temp_dir = self.upload_images_to_blob_storage(
             processed_message, message_json
         )
-        message_to_send = create_message_to_send(files_blob_urls)
+        for file_blob_url in files_blob_urls:
+            message_to_send = create_message_to_send(file_blob_url)
 
-        logger.info(f"Sending message ImageGenerated: {message_to_send}")
-        self.service_bus.publish(config.AZURE_SERVICE_BUS_TOPIC_NAME, message_to_send)
+            logger.info(f"Sending message ImageGenerated: {message_to_send}")
+            self.service_bus.publish(
+                config.AZURE_SERVICE_BUS_TOPIC_NAME, message_to_send
+            )
         temp_dir.cleanup()
 
     def process_incoming_message(
