@@ -76,7 +76,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             mock_blob_storage,
         )
 
-    def test_handle_valid_message(self):
+    def test_handle_valid_message_multiple_images(self):
         with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_azure_service_bus_message_type, self.patcher_call_image_generation_api as mock_api_call, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string:
             (
                 mock_azure_blob_storage,
@@ -95,11 +95,25 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             image_generation_handler = ImageGenerationMessageHandler()
             image_generation_handler.handle_message(self.mock_message)
 
+            # Configure mock return values to handle multiple images
+            mock_api_call.return_value = MagicMock()
+            mock_store_images.return_value = (
+                ["path/to/image_0.png", "path/to/image_1.png"],
+                MagicMock(),
+            )
+            mock_blob_storage.push_objects.return_value = [
+                "https://example.com/image_0.png",
+                "https://example.com/image_1.png",
+            ]
+
+            # Call the message handler again with the mock message
+            image_generation_handler.handle_message(self.mock_message)
+
             # Assert expected function calls
-            mock_api_call.assert_called_once()
-            mock_store_images.assert_called_once()
-            mock_blob_storage.push_objects.assert_called_once()
-            mock_publish.assert_called_once()
+            self.assertEqual(mock_api_call.call_count, 2)
+            self.assertEqual(mock_store_images.call_count, 2)
+            self.assertEqual(mock_blob_storage.push_objects.call_count, 2)
+            self.assertEqual(mock_publish.call_count, 3)
 
     def test_handle_invalid_message_format(self):
         with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_azure_service_bus_message_type, self.patcher_call_image_generation_api as mock_api_call, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string:
@@ -184,7 +198,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         message = create_message_to_send(file_objects)
 
         self.assertIsInstance(message, str)
-        self.assertIn('"urls":', message)
+        self.assertIn('"url":', message)
 
 
 if __name__ == "__main__":
