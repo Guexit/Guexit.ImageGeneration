@@ -30,7 +30,10 @@ ENV PATH="/app/venv/bin:$PATH"
 
 # Install first what can be cached
 RUN python -m pip install -U pip
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+RUN python -m pip install -U setuptools
+
+# Install torch, torchvision, and torchaudio (cacheable layer)
+RUN python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 
 # Copy the project files
 COPY . .
@@ -38,7 +41,7 @@ COPY . .
 # Install the project dependencies
 RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
     git config --global credential.helper store && \
-    pip install .
+    python -m pip install .
 
 # Start the server and consumer
 CMD ["sh", "-c", "./start_server.sh & ./start_consuming.sh"]

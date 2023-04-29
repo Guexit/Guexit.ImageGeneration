@@ -5,6 +5,7 @@ description = "Image Generation library and service"
 authors     = ["Unai Garay Maestre"]
 packages = [
     { include = "image_generation" },
+    { include = "services" }
 ]
 
 [tool.poetry.dependencies]
