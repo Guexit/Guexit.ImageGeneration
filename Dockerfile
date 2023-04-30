@@ -24,16 +24,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set the working directory
 WORKDIR /app
 
+# Install setuptools before creating virtual environment
+RUN pip install -U pip && pip install setuptools>=65.5.0
+
 # Create and activate virtual environment
 RUN python3.9 -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# Install first what can be cached
-RUN python -m pip install -U pip
-RUN python -m pip install -U setuptools
-
 # Install torch, torchvision, and torchaudio (cacheable layer)
-RUN python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 
 # Copy the project files
 COPY . .
@@ -41,7 +40,7 @@ COPY . .
 # Install the project dependencies
 RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
     git config --global credential.helper store && \
-    python -m pip install .
+    pip install .
 
 # Start the server and consumer
 CMD ["sh", "-c", "./start_server.sh & ./start_consuming.sh"]
