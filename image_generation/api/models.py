@@ -80,17 +80,17 @@ class TextToStyle(BaseModel):
                 updated_text_to_image.model_path = values["model_path"]
             if values.get("model_scheduler"):
                 updated_text_to_image.model_scheduler = values["model_scheduler"]
-            if values.get("height"):
+            if values.get("height") is not None:
                 updated_text_to_image.height = values["height"]
-            if values.get("width"):
+            if values.get("width") is not None:
                 updated_text_to_image.width = values["width"]
             if values.get("seed") is not None:
                 updated_text_to_image.seed = values["seed"]
-            if values.get("num_inference_steps"):
+            if values.get("num_inference_steps") is not None:
                 updated_text_to_image.num_inference_steps = values[
                     "num_inference_steps"
                 ]
-            if values.get("num_images"):
+            if values.get("num_images") is not None:
                 base_num_images = values["num_images"] // total_text_to_image_objects
                 extra_images = (
                     1

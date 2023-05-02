@@ -11,7 +11,7 @@ logger.info("--- Image Generation API ---")
 
 app = FastAPI()
 _model = None
-_model_init_path = "prompthero/openjourney-v2"
+_model_init_path = "prompthero/openjourney-v4"
 
 
 def get_model(model_init_path=_model_init_path):
