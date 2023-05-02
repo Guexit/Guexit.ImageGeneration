@@ -18,10 +18,13 @@ class StableDiffusionHandler:
         if device is None:
             if torch.backends.mps.is_available():
                 device = torch.device("mps")
+                logger.info("Using MPS device")
             elif torch.cuda.is_available() and enough_gpu_memory():
                 device = torch.device("cuda")
+                logger.info("Using CUDA device")
             else:
                 device = torch.device("cpu")
+                logger.info("Using CPU device")
         else:
             device = torch.device(device)
         self.device = device
