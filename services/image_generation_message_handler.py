@@ -106,7 +106,13 @@ class ImageGenerationMessageHandler:
             Dict[str, Any]: The response from the image generation API.
             message_json (Dict[str, Any]): The incoming message JSON.
         """
-        if "text_to_image" in message_json:
+        if "text_to_style" in message_json:
+            endpoint = "/text_to_style"
+            message_json = {
+                "style": message_json["text_to_style"]["style"],
+                "num_images": message_json["text_to_style"]["num_images"],
+            }
+        elif "text_to_image" in message_json:
             endpoint = "/text_to_image"
             message_json = message_json["text_to_image"]
         else:
