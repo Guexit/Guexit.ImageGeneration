@@ -6,7 +6,7 @@ ENDPOINT="/text_to_style"
 
 # Text to style settings
 STYLE="general"
-NUM_IMAGES=20
+NUM_IMAGES=1
 
 # Make the API call and save the response as a zip file
 curl -X POST -H "Content-Type: application/json" -d "{
