@@ -143,14 +143,16 @@ To run the service and the handler in Docker:
     git config --global credential.helper "store --file ~/.git-credentials"
     ```
 
-3. Build the docker image with:
+3. Make sure you've copied the `env_samples.env` into `.env` with the following command:
 
     ```shell
-    docker build . --secret id=git-credentials,src=~/.git-credentials -t guexit_image_generation
+    cp env_samples.env .env
     ```
 
-4. Run the docker image with:
+    Make sure to change the env variables accordingly.
+
+4. Use Docker Compose to build the image and run the container:
 
     ```shell
-    docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
+    docker compose up --build -d
     ```

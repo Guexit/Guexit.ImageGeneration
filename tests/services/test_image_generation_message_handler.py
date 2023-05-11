@@ -10,7 +10,7 @@ from services.image_generation_message_handler import (
 
 class TestImageGenerationMessageHandler(unittest.TestCase):
     def setUp(self):
-        self.mock_message = '{"message": {"text_to_image": {"prompt": {"positive": "test prompt"}, "seed": 1}}}'
+        self.mock_message = '{"message": {"text_to_style": {"style": "general", "seed": 1, "num_images": 2}}}'
         self.patcher_azure_service_bus_connection_string = patch.object(
             config, "AZURE_SERVICE_BUS_CONNECTION_STRING", "mock_connection_string"
         )
@@ -185,7 +185,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
                 file_objects,
                 temp_dir,
             ) = image_generation_handler.upload_images_to_blob_storage(
-                MagicMock(), {"prompt": {"positive": "test prompt"}, "seed": 1}
+                MagicMock(), {"style": "general", "seed": 1}
             )
 
             mock_store_images.assert_called_once()

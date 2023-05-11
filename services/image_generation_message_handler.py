@@ -20,15 +20,14 @@ from services import config
 logger = set_logger("Image Generation Message Handler")
 
 
-def get_file_name(prompt: Dict[str, str], seed: int, idx: int) -> str:
-    prompt_str = "_".join(prompt["positive"].split(" "))
+def get_file_name(style: str, seed: int, idx: int) -> str:
     if seed == -1:
-        return f"{prompt_str}_{uuid.uuid1()}_{seed}_{idx}.png"
+        return f"{style}_{uuid.uuid1()}_{seed}_{idx}.png"
     else:
-        return f"{prompt_str}_{seed}_{idx}.png"
+        return f"{style}_{seed}_{idx}.png"
 
 
-def create_message_to_send(file_blob_url: str) -> str:
+def create_message_to_send(file_blob_url: List[dict]) -> str:
     message = {
         "destinationAddress": "",
         "headers": {},
@@ -141,10 +140,16 @@ class ImageGenerationMessageHandler:
             Tuple[List[Dict[str, str]], TemporaryDirectory]: A tuple containing
             the list of file objects with URLs and a TemporaryDirectory object.
         """
+        logger.info("Getting file objects...")
         file_paths, temp_dir = store_zip_images_temporarily(response)
+        logger.debug(f"File paths: {file_paths}")
         file_objects = [
             {
-                "name": get_file_name(message_json["prompt"], message_json["seed"], i),
+                "name": get_file_name(
+                    style=message_json["style"],
+                    seed=message_json["seed"] if "seed" in message_json else -1,
+                    idx=i,
+                ),
                 "path": str(Path(file_path)),
             }
             for i, file_path in enumerate(file_paths)

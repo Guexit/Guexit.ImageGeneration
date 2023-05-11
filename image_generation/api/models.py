@@ -99,7 +99,9 @@ class TextToStyle(BaseModel):
                 )
                 updated_text_to_image.num_images = base_num_images + extra_images
 
-            updated_style.append(updated_text_to_image)
+            # Only add to updated_style if num_images > 0
+            if updated_text_to_image.num_images > 0:
+                updated_style.append(updated_text_to_image)
 
         values["text_to_images"] = updated_style
         return values

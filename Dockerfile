@@ -34,6 +34,17 @@ ENV PATH="/app/venv/bin:$PATH"
 # Install torch, torchvision, and torchaudio (cacheable layer)
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 
+# Install diffusers
+RUN pip install diffusers>=0.11.1 transformers>=4.25.1 accelerate>=0.15.0
+
+# Set environment variable for the model
+ENV DEFAULT_MODEL_NAME="prompthero/openjourney-v4"
+# Set the transformers cache directory
+ENV TRANSFORMERS_CACHE=/models
+
+# Pre-download the model
+RUN python -c "from diffusers import StableDiffusionPipeline; StableDiffusionPipeline.from_pretrained('${DEFAULT_MODEL_NAME}')"
+
 # Copy the project files
 COPY . .
 
