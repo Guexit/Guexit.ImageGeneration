@@ -16,12 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Docker Compose Action
-        uses: isbang/compose-action@v1.4.1
-
       - name: Build and run services
         run: |
-          docker-compose up --build --detach
+          docker-compose up --build --d
 
       - name: Wait for services to start
         run: |
