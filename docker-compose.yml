@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      secrets:
+        - git-credentials
     image: guexit_image_generation
     ports:
       - "5000:5000"
