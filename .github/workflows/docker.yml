@@ -14,25 +14,26 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Install Latest Docker
+        run: |
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
+          sudo apt-get update
+          sudo apt-get install docker-ce
 
       - name: Check Docker Version
         run: docker --version
 
-      - name: Check Docker Compose Version
-        run: docker-compose --version
-
-      - name: Build and run services
+      - name: Build the Docker image
         run: |
-          docker-compose up --build -d
+          docker build . --secret id=git-credentials,src=$HOME/.git-credentials -t guexit_image_generation
 
-      - name: Wait for services to start
+      - name: Run the Docker image
         run: |
-          sleep 10
+          docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
 
       - name: Run tests
         run: |
-          docker-compose exec guexit_image_generation sh -c "python -m unittest discover -s tests"
+          docker exec guexit_image_generation sh -c "python -m unittest"
