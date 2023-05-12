@@ -32,10 +32,14 @@ jobs:
       - name: Check Docker Version
         run: docker --version
 
-      - name: Check Docker Compose Version
+      - uses: KengoTODA/actions-setup-docker-compose@main
+        with:
+          version: '2.17.3'
         run: docker-compose --version
 
-      - name: Build and run services
+      - uses: KengoTODA/actions-setup-docker-compose@main
+        with:
+          version: '2.17.3'
         run: |
           docker-compose up --build --d
 
