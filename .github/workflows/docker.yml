@@ -1,0 +1,31 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        uses: docker/compose-action@v1
+        with:
+          compose-file: docker-compose.yml
+
+      - name: Build and run services
+        run: docker-compose up --build --detach
+
+      - name: Wait for services to start
+        run: docker-compose ps -q | xargs docker wait
+
+      - name: Run tests
+        run: docker-compose exec guexit_image_generation sh -c "python -m unittest"
