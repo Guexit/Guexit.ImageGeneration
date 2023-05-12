@@ -16,16 +16,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Docker Compose
-        uses: docker/compose-action@v1
-        with:
-          compose-file: docker-compose.yml
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get install docker-compose
 
       - name: Build and run services
-        run: docker-compose up --build --detach
+        run: |
+          docker-compose up --build --detach
 
       - name: Wait for services to start
-        run: docker-compose ps -q | xargs docker wait
+        run: |
+          sleep 10
 
       - name: Run tests
-        run: docker-compose exec guexit_image_generation sh -c "python -m unittest"
+        run: |
+          docker-compose exec guexit_image_generation sh -c "python -m unittest discover -s tests"
