@@ -19,9 +19,18 @@ AI Image Generation Service
 
 3. Install Poetry from [here](https://python-poetry.org/docs/#installation)
 
-4. Install dependencies with:
+4. Install CUDA:
 
-    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version 11.7. You need a GPU with at least 4GB of memory. If not, you should send requests that are executed in the CPU.
+    Ideally, we want to install CUDA 11.7.
+
+    - First of all, install your NVIDIA Drivers.
+    - Then, install CUDA:
+
+        - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
+
+5. Install dependencies with:
+
+    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version [11.7](https://developer.nvidia.com/cuda-11-7-0-download-archive). You need a GPU with at least 4GB of memory. If not, the program will automatically use CPU instead.
 
     ```shell
     # CUDA 11.7
@@ -39,7 +48,7 @@ AI Image Generation Service
     GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
     ```
 
-5. Install pre-commit:
+6. Install pre-commit:
 
     ```shell
     pre-commit install
