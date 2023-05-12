@@ -16,18 +16,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check Docker Version
-        run: docker --version
-
-      - name: Check Docker Version
-        run: docker --version
-
       - name: Install Latest Docker
         run: |
           curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
           sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
           sudo apt-get update
           sudo apt-get install docker-ce
+
+      - name: Install Specific Docker Compose Version
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/2.17.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
 
       - name: Check Docker Version
         run: docker --version
@@ -37,7 +36,7 @@ jobs:
 
       - name: Build and run services
         run: |
-          docker-compose up --build --d
+          docker-compose up --build -d
 
       - name: Wait for services to start
         run: |
