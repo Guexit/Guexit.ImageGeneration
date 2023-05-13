@@ -28,16 +28,12 @@ jobs:
 
       - name: Create .git-credentials file
         run: |
-          echo "https://${{ secrets.GH_TOKEN }}@github.com" > .git-credentials
+          echo "https://${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: Build the Docker image
         run: |
-          docker build . --secret id=git-credentials,src=.git-credentials -t guexit_image_generation
-
-      - name: Run the Docker image
-        run: |
-          docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
+          docker build . --secret id=git-credentials,src=~/.git-credentials -t guexit_image_generation
 
       - name: Run tests
         run: |
-          docker exec guexit_image_generation sh -c "python -m unittest"
+          docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation sh -c "python -m unittest"
