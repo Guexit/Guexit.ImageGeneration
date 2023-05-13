@@ -28,7 +28,7 @@ jobs:
 
       - name: Create .git-credentials file
         run: |
-          echo "https://ugm2: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@github.com" > .git-credentials
+          echo "https://ugm2:${{ secrets.GH_TOKEN }}@github.com" > .git-credentials
 
       - name: Build the Docker image
         run: |
