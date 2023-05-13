@@ -19,9 +19,18 @@ AI Image Generation Service
 
 3. Install Poetry from [here](https://python-poetry.org/docs/#installation)
 
-4. Install dependencies with:
+4. Install CUDA:
 
-    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version 11.7. You need a GPU with at least 4GB of memory. If not, you should send requests that are executed in the CPU.
+    Ideally, we want to install CUDA 11.7.
+
+    - First of all, install your NVIDIA Drivers.
+    - Then, install CUDA:
+
+        - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
+
+5. Install dependencies with:
+
+    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version [11.7](https://developer.nvidia.com/cuda-11-7-0-download-archive). You need a GPU with at least 4GB of memory. If not, the program will automatically use CPU instead.
 
     ```shell
     # CUDA 11.7
@@ -39,7 +48,7 @@ AI Image Generation Service
     GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
     ```
 
-5. Install pre-commit:
+6. Install pre-commit:
 
     ```shell
     pre-commit install
@@ -143,14 +152,16 @@ To run the service and the handler in Docker:
     git config --global credential.helper "store --file ~/.git-credentials"
     ```
 
-3. Build the docker image with:
+3. Make sure you've copied the `env_samples.env` into `.env` with the following command:
 
     ```shell
-    docker build . --secret id=git-credentials,src=~/.git-credentials -t guexit_image_generation
+    cp env_samples.env .env
     ```
 
-4. Run the docker image with:
+    Make sure to change the env variables accordingly.
+
+4. Use Docker Compose to build the image and run the container:
 
     ```shell
-    docker run --gpus all --env-file .env -p 5000:5000 guexit_image_generation
+    docker compose up --build -d
     ```
