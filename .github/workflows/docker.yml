@@ -28,7 +28,7 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker build . --secret id=git-credentials,src=$HOME/.git-credentials -t guexit_image_generation
+          docker build . -t guexit_image_generation
 
       - name: Run the Docker image
         run: |
