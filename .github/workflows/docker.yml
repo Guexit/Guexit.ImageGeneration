@@ -26,9 +26,14 @@ jobs:
       - name: Check Docker Version
         run: docker --version
 
+      - name: Create .git-credentials file
+        run: |
+          echo "https://${{ secrets.GH_TOKEN }}@github.com" > .git-credentials
+          echo $(cat .git-credentials | base64) > .git-credentials
+
       - name: Build the Docker image
         run: |
-          docker build . -t guexit_image_generation
+          docker build . --secret id=git-credentials,src=.git-credentials -t guexit_image_generation
 
       - name: Run the Docker image
         run: |
