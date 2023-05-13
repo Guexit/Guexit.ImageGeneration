@@ -29,7 +29,6 @@ jobs:
       - name: Create .git-credentials file
         run: |
           echo "https://${{ secrets.GH_TOKEN }}@github.com" > .git-credentials
-          echo $(cat .git-credentials | base64) > .git-credentials
 
       - name: Build the Docker image
         run: |
