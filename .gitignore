@@ -138,3 +138,5 @@ images*/
 models/*
 # But don't ignore the .gitkeep file
 !models/.gitkeep
+
+.vscode/
