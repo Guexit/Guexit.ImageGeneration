@@ -1,4 +1,5 @@
 import contextlib
+from typing import Optional
 
 import torch
 from diffusers import StableDiffusionPipeline
@@ -15,6 +16,12 @@ logger = set_logger("Stable Diffusion Handler")
 
 class StableDiffusionHandler:
     def __init__(self, model_path: str, device: str = None):
+        """
+        Initializes the StableDiffusionHandler
+
+        :param model_path: Path to the model
+        :param device: Device to use for computations (None will choose the best available)
+        """
         if device is None:
             if torch.backends.mps.is_available():
                 device = torch.device("mps")
@@ -31,6 +38,12 @@ class StableDiffusionHandler:
         self._init_model(model_path=model_path)
 
     def _init_model(self, model_path: str, scheduler_name: SchedulerEnum = None):
+        """
+        Initializes the model
+
+        :param model_path: Path to the model
+        :param scheduler_name: Name of the scheduler to use
+        """
         logger.info(f"Loading model from {model_path}")
         self.model_path = model_path
         torch_dtype = torch.float16
@@ -53,14 +66,26 @@ class StableDiffusionHandler:
         # Warm up the model
         self.pipe("", num_inference_steps=1)
 
-    def _set_seed(self, seed: int):
+    def _set_seed(self, seed: Optional[int]) -> Optional[torch.Generator]:
+        """
+        Sets the seed for the generator
+
+        :param seed: Seed for the generator
+        :return: The initialized generator, or None
+        """
         if seed == -1 or seed is None:
             return None
         generator = torch.Generator(device=self.device)
         generator = generator.manual_seed(seed)
         return generator
 
-    def txt_to_img(self, input_data: TextToImage):
+    def txt_to_img(self, input_data: TextToImage) -> list:
+        """
+        Converts input text to images
+
+        :param input_data: Input data for generating images
+        :return: Generated images
+        """
         if input_data.model_path != self.model_path:
             self._init_model(
                 model_path=input_data.model_path,

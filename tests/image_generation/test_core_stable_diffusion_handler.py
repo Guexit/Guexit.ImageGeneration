@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, call
 
+import torch
+
 from image_generation.api.models import Prompt, TextToImage
 from image_generation.core.stable_diffusion import (
     StableDiffusionHandler,
@@ -17,12 +19,13 @@ class TestStableDiffusionHandler(unittest.TestCase):
         )
 
         self.model_path = "test_model_path"
-        self.handler = StableDiffusionHandler(self.model_path)
 
     def tearDown(self):
         StableDiffusionPipeline.from_pretrained = self.original_from_pretrained
 
     def test_txt_to_img(self):
+        handler = StableDiffusionHandler(self.model_path)
+
         test_text_to_image = TextToImage(
             prompt=Prompt(
                 positive="A beautiful landscape with a clear sky",
@@ -35,7 +38,7 @@ class TestStableDiffusionHandler(unittest.TestCase):
             num_images=1,
         )
 
-        test_image = self.handler.txt_to_img(test_text_to_image)
+        test_image = handler.txt_to_img(test_text_to_image)
 
         # Check if the self.pipe() was called with the correct arguments in the last call
         last_call_args = self.mocked_pipeline.call_args_list[-1]
@@ -47,7 +50,7 @@ class TestStableDiffusionHandler(unittest.TestCase):
             width=test_text_to_image.width,
             num_inference_steps=test_text_to_image.num_inference_steps,
             num_images_per_prompt=test_text_to_image.num_images,
-            generator=self.handler._set_seed(test_text_to_image.seed),
+            generator=handler._set_seed(test_text_to_image.seed),
         )
         self.assertEqual(last_call_args, expected_call)
 
@@ -58,7 +61,84 @@ class TestStableDiffusionHandler(unittest.TestCase):
         )
 
     def test_pipeline_property(self):
-        self.assertEqual(self.handler.pipe, self.mocked_pipeline)
+        handler = StableDiffusionHandler(self.model_path)
+        self.assertEqual(handler.pipe, self.mocked_pipeline)
+
+    def test_init_with_device(self):
+        handler = StableDiffusionHandler(self.model_path, device="cuda")
+        self.assertEqual(handler.device, torch.device("cuda"))
+        self.assertEqual(handler.model_path, self.model_path)
+        self.assertEqual(handler.pipe, self.mocked_pipeline)
+
+    def test_init_without_device(self):
+        handler = StableDiffusionHandler(self.model_path)
+        self.assertIsNotNone(handler.device)
+        self.assertEqual(handler.model_path, self.model_path)
+        self.assertEqual(handler.pipe, self.mocked_pipeline)
+
+    def test_init_model(self):
+        handler = StableDiffusionHandler(self.model_path)
+        new_model_path = "new_model_path"
+        new_mocked_pipeline = MagicMock()
+        StableDiffusionPipeline.from_pretrained = MagicMock(
+            return_value=new_mocked_pipeline
+        )
+
+        handler._init_model(new_model_path)
+        self.assertEqual(handler.model_path, new_model_path)
+        self.assertEqual(handler.pipe, new_mocked_pipeline)
+
+    # Testing _set_seed method
+    def test_set_seed(self):
+        handler = StableDiffusionHandler(self.model_path)
+        # When seed is -1
+        self.assertIsNone(handler._set_seed(-1))
+
+        # When seed is None
+        self.assertIsNone(handler._set_seed(None))
+
+        # When seed is a valid integer
+        seed = 1234
+        generator = handler._set_seed(seed)
+        self.assertEqual(generator.initial_seed(), seed)
+
+    # Testing conditions inside the _init_model method
+    def test_init_model_cpu(self):
+        handler = StableDiffusionHandler(self.model_path, device="cpu")
+        self.assertTrue(handler.pipe.enable_sequential_cpu_offload.called)
+        handler.pipe.enable_sequential_cpu_offload.assert_called_once()
+        handler.pipe.enable_attention_slicing.assert_called_once_with(1)
+
+    def test_init_model_other(self):
+        handler = StableDiffusionHandler(self.model_path, device="cuda")
+        handler.pipe.enable_attention_slicing.assert_called_once_with(1)
+        handler.pipe.to.assert_called_once_with(handler.device)
+
+    # Testing different device scenarios in txt_to_img method
+    def test_txt_to_img_mps(self):
+        handler = StableDiffusionHandler(self.model_path)
+        handler.device = torch.device("mps")
+        handler.txt_to_img(self.get_test_text_to_image())
+        handler.pipe.assert_called()
+
+    def test_txt_to_img_other(self):
+        handler = StableDiffusionHandler(self.model_path)
+        handler.device = torch.device("cuda")
+        handler.txt_to_img(self.get_test_text_to_image())
+        handler.pipe.assert_called()
+
+    def get_test_text_to_image(self):
+        return TextToImage(
+            prompt=Prompt(
+                positive="A beautiful landscape with a clear sky",
+                negative="bad quality, pixelated",
+                guidance_scale=5.0,
+            ),
+            height=512,
+            width=512,
+            num_inference_steps=50,
+            num_images=1,
+        )
 
 
 if __name__ == "__main__":
