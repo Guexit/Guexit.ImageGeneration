@@ -40,6 +40,10 @@ class ImageGenerationMessageHandler:
         self.azure_cloud: BlobStorageInterface = AzureBlobStorage(
             config.AZURE_STORAGE_CONNECTION_STRING
         )
+
+        logger.info(
+            f"Using Azure Service Bus Max Lock Renewal Duration: {config.AZURE_SERVICE_BUS_MAX_LOCK_RENEWAL_DURATION}"
+        )
         self.service_bus: ServiceBusInterface = AzureServiceBus(
             config.AZURE_SERVICE_BUS_CONNECTION_STRING,
             config.AZURE_SERVICE_BUS_MAX_LOCK_RENEWAL_DURATION,
@@ -136,7 +140,9 @@ class ImageGenerationMessageHandler:
                 for i, file_path in enumerate(file_paths)
             ]
             logger.info(f"File objects: {file_objects}")
-            logger.info("Uploading files to blob storage")
+            logger.info(
+                f"Uploading files to blob storage '{config.AZURE_STORAGE_CONTAINER_NAME}'"
+            )
             files_blob_urls = self.azure_cloud.push_objects(
                 config.AZURE_STORAGE_CONTAINER_NAME, file_objects, overwrite=True
             )

@@ -34,6 +34,10 @@ jobs:
         run: |
           docker build . --secret id=git-credentials,src=.git-credentials -t guexit_image_generation
 
+      - name: Inspect the Docker container
+        run: |
+          docker run --entrypoint /bin/bash -it guexit_image_generation -c "ls -la /app"
+
       - name: Run tests
         run: |
           docker run -p 5000:5000 guexit_image_generation sh -c "python -m unittest discover -s tests"

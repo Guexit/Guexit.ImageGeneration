@@ -43,4 +43,4 @@ RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
     pip install .
 
 # Start the server and consumer
-CMD ["sh", "-c", "./start_server.sh & ./start_consuming.sh"]
+CMD ["sh", "-c", "python3 -m uvicorn image_generation.api.server:app --host 127.0.0.1 --port 5000 --timeout-keep-alive 600 & python3 services/image_generation_message_handler.py"]
