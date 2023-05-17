@@ -36,7 +36,7 @@ jobs:
 
       - name: Inspect the Docker container
         run: |
-          docker run --entrypoint /bin/bash -it guexit_image_generation -c "ls -la /app"
+          docker run --entrypoint /bin/bash guexit_image_generation -c "ls -la /app"
 
       - name: Run tests
         run: |
