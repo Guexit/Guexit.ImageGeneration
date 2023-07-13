@@ -1,6 +1,8 @@
 import copy
 import random
 
+import numpy as np
+
 from image_generation.core.styles import (
     STYLES,
     adjectives,
@@ -47,8 +49,20 @@ class PromptCrafter:
         style_templates = self.styles[style_key]
         prompts = []
 
-        for _ in range(num_images):
-            for style_template in style_templates:
+        # Calculate the base number of images per template and the remainder
+        num_templates = len(style_templates)
+        base_images_per_template = num_images // num_templates
+        remainder = num_images % num_templates
+
+        # Randomly assign the remainder among the templates
+        extra_images = np.zeros(num_templates, dtype=int)
+        extra_images[:remainder] = 1
+        np.random.shuffle(extra_images)
+
+        for i, style_template in enumerate(style_templates):
+            num_images_this_template = base_images_per_template + extra_images[i]
+
+            for _ in range(num_images_this_template):
                 prompt = copy.deepcopy(style_template)
                 filled_prompt = prompt["prompt"]["positive"]
 
