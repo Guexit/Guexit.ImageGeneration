@@ -46,7 +46,9 @@ class StableDiffusionHandler:
         """
         logger.info(f"Loading model from {model_path}")
         self.model_path = model_path
-        torch_dtype = torch.float16
+        torch_dtype = (
+            torch.float16 if self.device != torch.device("mps") else torch.float32
+        )
         self.pipe = StableDiffusionPipeline.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
