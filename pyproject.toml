@@ -25,6 +25,7 @@ kornia              = { version = ">=0.6" }
 safetensors         = { version = ">=0.2.8" }
 rich                = { version = ">=13.3.1" }
 httpx               = { version = ">=0.23.3" }
+typing_extensions   = { version = ">=4.7.1" }
 
 # github repos
 latent_diffusion    = { git = "https://github.com/CompVis/stable-diffusion.git" }
