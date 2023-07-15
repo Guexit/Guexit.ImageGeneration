@@ -1,59 +1,41 @@
 [tool.poetry]
-name        = "image_generation"
-version     = "0.0.1"
+name = "image-generation"
+version = "0.0.2"
 description = "Image Generation library and service"
-authors     = ["Unai Garay Maestre"]
+authors = ["ugm2 <unaigaraymaestre@gmail.com>"]
+readme = "README.md"
 packages = [
-    { include = "image_generation" },
-    { include = "services" }
+    {include = "image_generation"},
+    {include = "services"}
 ]
 
 [tool.poetry.dependencies]
-python              = { version = ">= 3.8, <= 3.10" }
-fastapi             = { version = ">=0.89.1" }
-uvicorn             = { version = ">=0.20.0" }
-transformers        = { version = ">=4.25.1" }
-diffusers           = { version = ">=0.11.1" }
-ftfy                = { version = ">=6.1.1" }
-pydantic            = { version = "==1.10.2" } # TODO: 2.0 fails
-accelerate          = { version = ">=0.15.0" }
-omegaconf           = { version = ">=2.1.1" }
-pytorch-lightning   = { version = ">=1.8.6" }
-tensorboard         = { version = ">=2.11.0" }
-einops              = { version = ">=0.6.0" }
-kornia              = { version = ">=0.6" }
-safetensors         = { version = ">=0.2.8" }
-rich                = { version = ">=13.3.1" }
-httpx               = { version = ">=0.23.3" }
-typing_extensions   = { version = ">=4.7.1" }
+python = "^3.9"
+fastapi = "^0.100.0"
+uvicorn = "^0.23.0"
+transformers = "^4.30.2"
+diffusers = "^0.18.2"
+ftfy = "^6.1.1"
+pydantic = "1.10.2"
+accelerate = "^0.21.0"
+omegaconf = "^2.3.0"
+pytorch-lightning = "^2.0.5"
+tensorboard = "^2.13.0"
+einops = "^0.6.1"
+kornia = "^0.6.12"
+rich = "^13.4.2"
+httpx = "^0.24.1"
+typing-extensions = "^4.7.1"
+cloud-manager = {git = "https://github.com/Guexit/Guexit.CloudManager"}
 
-# github repos
-latent_diffusion    = { git = "https://github.com/CompVis/stable-diffusion.git" }
-taming_transformers = { git = "https://github.com/CompVis/taming-transformers" }
 
-# Guexit repos
-cloud_manager       = { git = "https://github.com/Guexit/Guexit.CloudManager" }
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+black = "^23.7.0"
+typer = "^0.9.0"
+isort = "^5.12.0"
 
-# dev
-pre-commit          = { version = ">= 3.1.1" }
-black               = { version = ">= 23.1.0" }
-typer               = { version = ">= 0.7.0" }
-isort               = { version = "^5.12.0" }
-
-[tool.isort]
-profile = "black"
-
-[tool.poetry.dev-dependencies]
-click = "*"
-pre-commit = "*"
-black = "*"
-xenon = "*"
-mypy = "*"
-pydocstyle = "*"
 
 [build-system]
-requires        = [
-    "poetry-core>=1.0.0",
-    "setuptools"  # for pip install -e
-]
-build-backend   = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

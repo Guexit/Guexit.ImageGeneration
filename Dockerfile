@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.9 \
     python3-pip \
     python3.9-dev \
-    python3.9-venv \
     build-essential \
     libglib2.0-0 \
     libsm6 \
@@ -24,23 +23,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set the working directory
 WORKDIR /app
 
-# Install setuptools before creating virtual environment
-RUN pip install -U pip && pip install setuptools>=65.5.0
+# Install Poetry
+RUN pip install -U pip && \
+    pip install poetry
 
-# Create and activate virtual environment
-RUN python3.9 -m venv venv
-ENV PATH="/app/venv/bin:$PATH"
+# Set Poetry configuration to not create a virtual environment
+RUN poetry config virtualenvs.create false
 
-# Install torch, torchvision, and torchaudio (cacheable layer)
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+# Copy pyproject.toml and poetry.lock file for dependencies installation
+COPY pyproject.toml poetry.lock ./
+
+# Install the project dependencies
+RUN poetry install --no-interaction --no-root
 
 # Copy the project files
 COPY . .
-
-# Install the project dependencies
-RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
-    git config --global credential.helper store && \
-    pip install .
 
 # Start the server and consumer
 CMD ["sh", "-c", "python3 -m uvicorn image_generation.api.server:app --host 127.0.0.1 --port 5000 --timeout-keep-alive 600 & python3 services/image_generation_message_handler.py"]

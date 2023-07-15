@@ -19,7 +19,7 @@ AI Image Generation Service
 
 3. Install Poetry from [here](https://python-poetry.org/docs/#installation)
 
-4. Install CUDA:
+4. Install CUDA if you're in Linux or Windows:
 
     Ideally, we want to install CUDA 11.7.
 
@@ -32,20 +32,17 @@ AI Image Generation Service
 
     If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version [11.7](https://developer.nvidia.com/cuda-11-7-0-download-archive). You need a GPU with at least 4GB of memory. If not, the program will automatically use CPU instead.
 
+    Linux & Mac:
+
     ```shell
-    # CUDA 11.7
-    pip install -e .
-    # WINDOWS
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-    # LINUX
-    pip install torch torchvision torchaudio
+    poetry install
     ```
 
-    If you are in MacOS:
+    Windows:
 
     ```shell
-    pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu
-    GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
+    poetry install
+    pip install torch --index-url https://download.pytorch.org/whl/cu117
     ```
 
 6. Install pre-commit:
