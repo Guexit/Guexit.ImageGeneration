@@ -30,13 +30,14 @@ RUN pip install -U pip && \
     pip install poetry && \
     pip install --upgrade certifi
 
-RUN apt-get update && apt-get install -y ca-certificates
-
 # Set Poetry configuration to not create a virtual environment
 RUN poetry config virtualenvs.create false
 
 # Copy pyproject.toml and poetry.lock file for dependencies installation
 COPY pyproject.toml poetry.lock ./
+
+# Above your existing 'RUN poetry install' command...
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Install the project dependencies
 RUN poetry install --no-interaction --no-root
