@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     tzdata \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
 
 # Set the working directory
 WORKDIR /app
