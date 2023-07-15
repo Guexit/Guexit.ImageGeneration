@@ -35,12 +35,14 @@ AI Image Generation Service
     Linux & Mac:
 
     ```shell
+    poetry shell
     poetry install
     ```
 
     Windows:
 
     ```shell
+    poetry shell
     poetry install
     pip install torch --index-url https://download.pytorch.org/whl/cu117
     ```

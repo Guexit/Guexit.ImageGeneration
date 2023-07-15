@@ -40,7 +40,7 @@ COPY pyproject.toml poetry.lock ./
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Install the project dependencies
-RUN poetry install --no-interaction --no-root
+RUN poetry install --no-interaction
 
 # Copy the project files
 COPY . .

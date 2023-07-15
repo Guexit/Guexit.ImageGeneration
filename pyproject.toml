@@ -34,6 +34,8 @@ pre-commit = "^3.3.3"
 black = "^23.7.0"
 typer = "^0.9.0"
 isort = "^5.12.0"
+tox = "^4.6.4"
+coverage = "^7.2.7"
 
 [tool.isort]
 profile = "black"
