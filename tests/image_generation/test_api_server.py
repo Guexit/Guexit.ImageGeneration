@@ -88,11 +88,9 @@ class TestServer(unittest.TestCase):
 
         # Create mock PIL Image objects
         mock_image1 = Image.new("RGB", (512, 688), color="red")
-        mock_image2 = Image.new("RGB", (512, 688), color="blue")
 
         mock_stable_diffusion_handler_instance.txt_to_img.return_value = [
             mock_image1,
-            mock_image2,
         ]
 
         text_to_style_data = TextToStyle(

@@ -1,10 +1,10 @@
 import copy
 import random
+from typing import Dict, List
 
 import numpy as np
 
 from image_generation.core.styles import (
-    STYLES,
     adjectives,
     characters,
     contexts,
@@ -20,7 +20,13 @@ logger = set_logger("Prompt Crafter")
 
 
 class PromptCrafter:
-    def __init__(self, styles):
+    def __init__(self, styles: Dict[str, List[str]]) -> None:
+        """
+        Constructor for the PromptCrafter class.
+
+        Args:
+            styles (Dict[str, List[str]]): A dictionary containing styles as keys and list of templates as values.
+        """
         self.styles = styles
         self.variables = {
             "characters": characters,
@@ -33,7 +39,21 @@ class PromptCrafter:
             "themes": themes,
         }
 
-    def fill_placeholder(self, prompt, var, singular, plural):
+    def fill_placeholder(
+        self, prompt: str, var: str, singular: str, plural: str
+    ) -> str:
+        """
+        Replace placeholders in the prompt with actual values.
+
+        Args:
+            prompt (str): The initial prompt with placeholders.
+            var (str): The variable to be replaced in the prompt.
+            singular (str): The singular form of the variable.
+            plural (str): The plural form of the variable.
+
+        Returns:
+            str: The prompt with placeholders replaced with actual values.
+        """
         if singular in prompt:
             prompt = prompt.replace(singular, random.choice(self.variables[var]))
         if plural in prompt:
@@ -43,7 +63,20 @@ class PromptCrafter:
             )
         return prompt
 
-    def generate_prompts(self, style_key, num_images):
+    def generate_prompts(self, style_key: str, num_images: int) -> List[str]:
+        """
+        Generate a list of prompts based on a specific style.
+
+        Args:
+            style_key (str): The style key.
+            num_images (int): The number of images for each prompt.
+
+        Returns:
+            List[str]: A list of generated prompts.
+        """
+        if style_key not in self.styles:
+            raise ValueError(f"'{style_key}' is not a valid style key.")
+
         logger.info(f"Generating prompts for style key: {style_key}")
 
         style_templates = self.styles[style_key]
