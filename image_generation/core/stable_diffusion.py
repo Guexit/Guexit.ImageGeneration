@@ -36,8 +36,9 @@ class StableDiffusionHandler:
             device = torch.device(device)
         self.device = device
         self._init_model(model_path=model_path)
+        self.scheduler_name = None
 
-    def _init_model(self, model_path: str, scheduler_name: SchedulerEnum = None):
+    def _init_model(self, model_path: str):
         """
         Initializes the model
 
@@ -46,15 +47,14 @@ class StableDiffusionHandler:
         """
         logger.info(f"Loading model from {model_path}")
         self.model_path = model_path
-        torch_dtype = torch.float16
+        torch_dtype = (
+            torch.float16 if self.device != torch.device("mps") else torch.float32
+        )
         self.pipe = StableDiffusionPipeline.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
             # revision="fp16",
             safety_checker=None,
-        )
-        self.pipe.scheduler = SchedulerHandler.set_scheduler(
-            scheduler_name=scheduler_name, current_scheduler=self.pipe.scheduler
         )
         # Recommended if computer has < 64 GB of RAM
         if self.device == torch.device("cpu"):
@@ -65,6 +65,12 @@ class StableDiffusionHandler:
             self.pipe.to(self.device)
         # Warm up the model
         self.pipe("", num_inference_steps=1)
+
+    def _set_scheduler(self, scheduler_name: SchedulerEnum):
+        self.pipe.scheduler = SchedulerHandler.set_scheduler(
+            scheduler_name=scheduler_name, current_scheduler=self.pipe.scheduler
+        )
+        self.scheduler_name = scheduler_name
 
     def _set_seed(self, seed: Optional[int]) -> Optional[torch.Generator]:
         """
@@ -89,8 +95,9 @@ class StableDiffusionHandler:
         if input_data.model_path != self.model_path:
             self._init_model(
                 model_path=input_data.model_path,
-                scheduler_name=input_data.model_scheduler,
             )
+        if input_data.model_scheduler != self.scheduler_name:
+            self._set_scheduler(input_data.model_scheduler)
         positive_prompt = input_data.prompt.positive
         negative_prompt = input_data.prompt.negative
         guidance_scale = input_data.prompt.guidance_scale

@@ -15,7 +15,7 @@ uvicorn             = { version = ">=0.20.0" }
 transformers        = { version = ">=4.25.1" }
 diffusers           = { version = ">=0.11.1" }
 ftfy                = { version = ">=6.1.1" }
-pydantic            = { version = ">=1.10.2" }
+pydantic            = { version = "==1.10.2" } # TODO: 2.0 fails
 accelerate          = { version = ">=0.15.0" }
 omegaconf           = { version = ">=2.1.1" }
 pytorch-lightning   = { version = ">=1.8.6" }
@@ -25,6 +25,7 @@ kornia              = { version = ">=0.6" }
 safetensors         = { version = ">=0.2.8" }
 rich                = { version = ">=13.3.1" }
 httpx               = { version = ">=0.23.3" }
+typing_extensions   = { version = ">=4.7.1" }
 
 # github repos
 latent_diffusion    = { git = "https://github.com/CompVis/stable-diffusion.git" }

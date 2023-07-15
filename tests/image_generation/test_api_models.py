@@ -61,7 +61,10 @@ class TestModels(unittest.TestCase):
         self.assertEqual(text_to_style.style, text_to_style_data["style"])
 
         # Test if the model correctly updates the TextToImage objects
-        self.assertEqual(len(text_to_style.text_to_images), len(STYLES["test_style"]))
+        self.assertEqual(
+            len(text_to_style.text_to_images),
+            len(STYLES["test_style"]) * text_to_style_data["num_images"],
+        )
 
         # Test if the model throws an error for invalid data (non-existent style)
         with self.assertRaises(ValueError):

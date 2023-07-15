@@ -1,0 +1,111 @@
+import copy
+import random
+from typing import Dict, List
+
+import numpy as np
+
+from image_generation.core.styles import (
+    adjectives,
+    characters,
+    contexts,
+    creatures,
+    nouns,
+    objects,
+    settings,
+    themes,
+)
+from image_generation.custom_logging import set_logger
+
+logger = set_logger("Prompt Crafter")
+
+
+class PromptCrafter:
+    def __init__(self, styles: Dict[str, List[str]]) -> None:
+        """
+        Constructor for the PromptCrafter class.
+
+        Args:
+            styles (Dict[str, List[str]]): A dictionary containing styles as keys and list of templates as values.
+        """
+        self.styles = styles
+        self.variables = {
+            "characters": characters,
+            "settings": settings,
+            "objects": objects,
+            "creatures": creatures,
+            "contexts": contexts,
+            "adjectives": adjectives,
+            "nouns": nouns,
+            "themes": themes,
+        }
+
+    def fill_placeholder(
+        self, prompt: str, var: str, singular: str, plural: str
+    ) -> str:
+        """
+        Replace placeholders in the prompt with actual values.
+
+        Args:
+            prompt (str): The initial prompt with placeholders.
+            var (str): The variable to be replaced in the prompt.
+            singular (str): The singular form of the variable.
+            plural (str): The plural form of the variable.
+
+        Returns:
+            str: The prompt with placeholders replaced with actual values.
+        """
+        if singular in prompt:
+            prompt = prompt.replace(singular, random.choice(self.variables[var]))
+        if plural in prompt:
+            prompt = prompt.replace(
+                plural,
+                ", ".join(random.sample(self.variables[var], random.randint(2, 4))),
+            )
+        return prompt
+
+    def generate_prompts(self, style_key: str, num_images: int) -> List[str]:
+        """
+        Generate a list of prompts based on a specific style.
+
+        Args:
+            style_key (str): The style key.
+            num_images (int): The number of images for each prompt.
+
+        Returns:
+            List[str]: A list of generated prompts.
+        """
+        if style_key not in self.styles:
+            raise ValueError(f"'{style_key}' is not a valid style key.")
+
+        logger.info(f"Generating prompts for style key: {style_key}")
+
+        style_templates = self.styles[style_key]
+        prompts = []
+
+        # Calculate the base number of images per template and the remainder
+        num_templates = len(style_templates)
+        base_images_per_template = num_images // num_templates
+        remainder = num_images % num_templates
+
+        # Randomly assign the remainder among the templates
+        extra_images = np.zeros(num_templates, dtype=int)
+        extra_images[:remainder] = 1
+        np.random.shuffle(extra_images)
+
+        for i, style_template in enumerate(style_templates):
+            num_images_this_template = base_images_per_template + extra_images[i]
+
+            for _ in range(num_images_this_template):
+                prompt = copy.deepcopy(style_template)
+                filled_prompt = prompt["prompt"]["positive"]
+
+                for var in self.variables.keys():
+                    filled_prompt = self.fill_placeholder(
+                        filled_prompt, var, f"{{{var[:-1]}}}", f"{{{var}}}"
+                    )
+
+                prompt["prompt"]["positive"] = filled_prompt
+                prompts.append(prompt)
+
+        logger.debug(f"Generated {len(prompts)} prompts")
+        return prompts

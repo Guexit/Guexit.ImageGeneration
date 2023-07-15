@@ -2,7 +2,11 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, root_validator, validator
 
+from image_generation.core.prompt_crafter import PromptCrafter
 from image_generation.core.styles import STYLES
+from image_generation.custom_logging import set_logger
+
+logger = set_logger("API Models")
 
 
 class Prompt(BaseModel):
@@ -64,16 +68,23 @@ class TextToStyle(BaseModel):
     def update_text_to_image_objects(cls, values):
         style_name = values.get("style")
         style_json = STYLES.get(style_name)
+        num_images = values.get("num_images")
 
         if style_json is None:
             raise ValueError("Style not found")
 
-        style = [TextToImage(**text_to_image_json) for text_to_image_json in style_json]
+        # Initialize the PromptCrafter and generate populated prompts
+        prompt_crafter = PromptCrafter(STYLES)
+        populated_prompts = prompt_crafter.generate_prompts(style_name, num_images)
+
+        style = [
+            TextToImage(**text_to_image_json)
+            for text_to_image_json in populated_prompts
+        ]
+        logger.debug(f"Style: {style}")
         updated_style = []
 
-        total_text_to_image_objects = len(style)
-
-        for index, text_to_image in enumerate(style):
+        for text_to_image in style:
             updated_text_to_image = text_to_image.copy()
 
             if values.get("model_path"):
@@ -90,18 +101,10 @@ class TextToStyle(BaseModel):
                 updated_text_to_image.num_inference_steps = values[
                     "num_inference_steps"
                 ]
-            if values.get("num_images") is not None:
-                base_num_images = values["num_images"] // total_text_to_image_objects
-                extra_images = (
-                    1
-                    if index < values["num_images"] % total_text_to_image_objects
-                    else 0
-                )
-                updated_text_to_image.num_images = base_num_images + extra_images
 
-            # Only add to updated_style if num_images > 0
-            if updated_text_to_image.num_images > 0:
-                updated_style.append(updated_text_to_image)
+            updated_text_to_image.num_images = 1  # Set num_images for each prompt to 1
+
+            updated_style.append(updated_text_to_image)
 
         values["text_to_images"] = updated_style
         return values

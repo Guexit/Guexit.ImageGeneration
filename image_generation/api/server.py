@@ -16,7 +16,7 @@ _model = None
 _model_init_path = os.environ.get("DEFAULT_MODEL_NAME", "prompthero/openjourney-v4")
 
 
-def get_model(model_init_path=_model_init_path):
+def get_model(model_init_path: str = _model_init_path) -> StableDiffusionHandler:
     global _model
     if _model is None:
         _model = StableDiffusionHandler(model_init_path)
@@ -34,8 +34,9 @@ async def healthcheck():
 @app.post("/text_to_image", response_model=None)
 async def text_to_image(text_to_image: TextToImage):
     try:
-        logger.info(f"Text to image request: {text_to_image}")
+        logger.debug(f"Text to image request: {text_to_image}")
         model = get_model(text_to_image.model_path)
+        logger.info("Generating images")
         images = model.txt_to_img(text_to_image)
 
         logger.info("Zipping images")
@@ -47,6 +48,9 @@ async def text_to_image(text_to_image: TextToImage):
         return response
     except Exception as e:
         logger.error(f"Error during text_to_image: {str(e)}")
+        import traceback
+
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=500, detail="An error occurred during text_to_image processing."
         )
@@ -55,11 +59,11 @@ async def text_to_image(text_to_image: TextToImage):
 @app.post("/text_to_style", response_model=None)
 async def text_to_style(text_to_style: TextToStyle):
     try:
-        logger.info(f"Text to style request: {text_to_style}")
+        logger.debug(f"Text to style request: {text_to_style}")
         all_images = []
-
+        logger.info("Generating images")
         for index, text_to_image in enumerate(text_to_style.text_to_images):
-            logger.info(f"Processing prompt {index + 1}: {text_to_image}")
+            logger.debug(f"Processing prompt {index + 1}: {text_to_image}")
             model = get_model(text_to_image.model_path)
             images = model.txt_to_img(text_to_image)
             all_images.extend(images)
@@ -73,6 +77,9 @@ async def text_to_style(text_to_style: TextToStyle):
         return response
     except Exception as e:
         logger.error(f"Error during text_to_image_with_style: {str(e)}")
+        import traceback
+
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=500,
             detail="An error occurred during text_to_image_with_style processing.",

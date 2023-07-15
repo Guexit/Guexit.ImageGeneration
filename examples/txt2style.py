@@ -5,10 +5,10 @@ import zipfile
 from image_generation.utils import call_image_generation_api
 
 
-def extract_zip_images(response):
+def extract_zip_images(response, style):
     # Extract zip images
     z = zipfile.ZipFile(io.BytesIO(response.content))
-    z.extractall("images/")
+    z.extractall(f"images/{style}/")
 
 
 if __name__ == "__main__":
@@ -29,4 +29,4 @@ if __name__ == "__main__":
     )
 
     # Save images
-    extract_zip_images(response)
+    extract_zip_images(response, args.style)

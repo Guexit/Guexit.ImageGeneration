@@ -1,9 +1,10 @@
 import unittest
-from unittest.mock import MagicMock, call
+from unittest.mock import ANY, MagicMock, call, patch
 
 import torch
 
 from image_generation.api.models import Prompt, TextToImage
+from image_generation.core.schedulers import SchedulerEnum
 from image_generation.core.stable_diffusion import (
     StableDiffusionHandler,
     StableDiffusionPipeline,
@@ -139,6 +140,23 @@ class TestStableDiffusionHandler(unittest.TestCase):
             num_inference_steps=50,
             num_images=1,
         )
+
+    def test_set_scheduler(self):
+        handler = StableDiffusionHandler(self.model_path)
+        mock_scheduler = MagicMock()
+        with patch(
+            "image_generation.core.schedulers.SchedulerHandler.set_scheduler",
+            return_value=mock_scheduler,
+        ) as mock_set_scheduler:
+            scheduler_name = SchedulerEnum.EULER_A
+
+            handler._set_scheduler(scheduler_name)
+
+            mock_set_scheduler.assert_called_once_with(
+                scheduler_name=scheduler_name, current_scheduler=ANY
+            )
+            self.assertEqual(handler.pipe.scheduler, mock_scheduler)
+            self.assertEqual(handler.scheduler_name, scheduler_name)
 
 
 if __name__ == "__main__":
