@@ -27,7 +27,8 @@ WORKDIR /app
 
 # Install Poetry
 RUN pip install -U pip && \
-    pip install poetry
+    pip install poetry && \
+    pip install --upgrade certifi
 
 # Set Poetry configuration to not create a virtual environment
 RUN poetry config virtualenvs.create false
