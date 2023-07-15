@@ -30,6 +30,8 @@ RUN pip install -U pip && \
     pip install poetry && \
     pip install --upgrade certifi
 
+RUN apt-get update && apt-get install -y ca-certificates
+
 # Set Poetry configuration to not create a virtual environment
 RUN poetry config virtualenvs.create false
 
