@@ -17,33 +17,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     libxext6 \
     tzdata \
+    curl \
     git \
     && rm -rf /var/lib/apt/lists/* && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
-
 # Set the working directory
 WORKDIR /app
 
-# Install Poetry
+# Update pip
 RUN pip install -U pip && \
-    pip install poetry && \
     pip install --upgrade certifi
 
-# Set Poetry configuration to not create a virtual environment
-RUN poetry config virtualenvs.create false
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# Copy pyproject.toml and poetry.lock file for dependencies installation
-COPY pyproject.toml poetry.lock ./
+# Set PATH for poetry
+ENV PATH="/root/.local/bin:$PATH"
 
-# Above your existing 'RUN poetry install' command...
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-# Install the project dependencies
-RUN poetry install --no-interaction
-
-# Copy the project files
+# Copy project files
 COPY . .
 
+# Install dependencies
+RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
+    git config --global credential.helper store && \
+    poetry install --no-dev
+
 # Start the server and consumer
-CMD ["sh", "-c", "python3 -m uvicorn image_generation.api.server:app --host 127.0.0.1 --port 5000 --timeout-keep-alive 600 & python3 services/image_generation_message_handler.py"]
+CMD ["sh", "-c", "poetry run python3 -m uvicorn image_generation.api.server:app --host 0.0.0.0 --port 5000 --timeout-keep-alive 600 & poetry run python services/image_generation_message_handler.py"]
