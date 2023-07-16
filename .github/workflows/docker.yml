@@ -29,4 +29,4 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run -p 5000:5000 guexit_image_generation sh -c "python -m unittest"
+          docker run -p 5000:5000 guexit_image_generation sh -c "tox"
