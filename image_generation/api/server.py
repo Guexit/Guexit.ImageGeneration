@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 
 from image_generation.api.models import TextToImage, TextToStyle
-from image_generation.api.utils import zip_images
+from image_generation.api.utils import sanitize_filename, zip_images
 from image_generation.core.stable_diffusion import StableDiffusionHandler
 from image_generation.custom_logging import set_logger
 
@@ -66,7 +66,9 @@ async def text_to_style(text_to_style: TextToStyle):
             logger.debug(f"Processing prompt {index + 1}: {text_to_image}")
             model = get_model(text_to_image.model_path)
             images = model.txt_to_img(text_to_image)
-            all_images.extend(images)
+            metadata = text_to_image.dict()
+            sanitized_prompt = sanitize_filename(text_to_image.prompt.positive)
+            all_images.extend([(sanitized_prompt, image, metadata) for image in images])
 
         logger.info("Zipping images")
         images_bytes = zip_images(all_images)

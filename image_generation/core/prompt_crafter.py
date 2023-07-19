@@ -5,6 +5,7 @@ from typing import Dict, List
 import numpy as np
 
 from image_generation.core.styles import (
+    actions,
     adjectives,
     characters,
     contexts,
@@ -37,6 +38,7 @@ class PromptCrafter:
             "adjectives": adjectives,
             "nouns": nouns,
             "themes": themes,
+            "actions": actions,
         }
 
     def fill_placeholder(
