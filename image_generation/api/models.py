@@ -76,7 +76,6 @@ class TextToStyle(BaseModel):
         # Initialize the PromptCrafter and generate populated prompts
         prompt_crafter = PromptCrafter(STYLES)
         populated_prompts = prompt_crafter.generate_prompts(style_name, num_images)
-
         style = [
             TextToImage(**text_to_image_json)
             for text_to_image_json in populated_prompts

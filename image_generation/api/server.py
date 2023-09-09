@@ -40,6 +40,9 @@ async def text_to_image(text_to_image: TextToImage):
         images = model.txt_to_img(text_to_image)
 
         logger.info("Zipping images")
+        sanitized_prompt = sanitize_filename(text_to_image.prompt.positive)
+        metadata = text_to_image.dict()
+        images = [(sanitized_prompt, image, metadata) for image in images]
         images_bytes = zip_images(images)
         response = StreamingResponse(
             images_bytes, media_type="application/x-zip-compressed"

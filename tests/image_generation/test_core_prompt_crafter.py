@@ -12,14 +12,14 @@ class TestPromptCrafter(unittest.TestCase):
         }
 
         self.sample_variables = {
-            "characters": ["character1", "character2"],
-            "settings": ["setting1", "setting2"],
-            "objects": ["object1", "object2"],
-            "creatures": ["creature1", "creature2"],
-            "contexts": ["context1", "context2"],
-            "adjectives": ["adjective1", "adjective2"],
-            "nouns": ["noun1", "noun2"],
-            "themes": ["theme1", "theme2"],
+            "characters": ["character1", "character2", "character3"],
+            "settings": ["setting1", "setting2", "setting3"],
+            "objects": ["object1", "object2", "object3"],
+            "creatures": ["creature1", "creature2", "creature3"],
+            "contexts": ["context1", "context2", "context3"],
+            "adjectives": ["adjective1", "adjective2", "adjective3"],
+            "nouns": ["noun1", "noun2", "noun3"],
+            "themes": ["theme1", "theme2", "theme3"],
         }
 
         self.prompt_crafter = PromptCrafter(self.sample_styles)
@@ -43,6 +43,51 @@ class TestPromptCrafter(unittest.TestCase):
     def test_generate_prompts_invalid_style(self):
         with self.assertRaises(ValueError):
             self.prompt_crafter.generate_prompts("invalid_style", 1)
+
+    def test_generate_prompts_unique(self):
+        num_images = 6
+        prompts = self.prompt_crafter.generate_prompts("style1", num_images)
+        self.assertEqual(len(prompts), num_images)
+
+        # Check that all prompts are unique
+        positive_prompts = [prompt["prompt"]["positive"] for prompt in prompts]
+        self.assertEqual(len(positive_prompts), len(set(positive_prompts)))
+
+    def test_duplicate_prompts(self):
+        num_images = 3
+        prompts = self.prompt_crafter.generate_prompts("style1", num_images)
+        positive_prompts = [prompt["prompt"]["positive"] for prompt in prompts]
+        self.assertEqual(len(positive_prompts), len(set(positive_prompts)))
+
+    def test_plural_forms(self):
+        prompt = "Some {characters} and {settings}."
+        filled_prompt = self.prompt_crafter.fill_placeholder(
+            prompt, "characters", "{character}", "{characters}"
+        )
+        self.assertNotIn("{characters}", filled_prompt)
+
+    def test_multiple_same_placeholders(self):
+        prompt = "A {character} and another {character}."
+        filled_prompt = self.prompt_crafter.fill_placeholder(
+            prompt, "characters", "{character}", "{characters}"
+        )
+        self.assertNotIn("{character}", filled_prompt)
+
+    def test_multiple_different_placeholders(self):
+        prompt = "A {character} in a {setting}."
+        filled_prompt = self.prompt_crafter.fill_placeholder(
+            prompt, "characters", "{character}", "{characters}"
+        )
+        filled_prompt = self.prompt_crafter.fill_placeholder(
+            filled_prompt, "settings", "{setting}", "{settings}"
+        )
+        self.assertNotIn("{character}", filled_prompt)
+        self.assertNotIn("{setting}", filled_prompt)
+
+    def test_exceed_unique_combinations(self):
+        num_images = 1000  # an arbitrary large number
+        prompts = self.prompt_crafter.generate_prompts("style1", num_images)
+        self.assertEqual(len(prompts), num_images)
 
 
 if __name__ == "__main__":
