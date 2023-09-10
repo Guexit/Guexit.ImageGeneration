@@ -134,10 +134,10 @@ class ImageGenerationMessageHandler:
             logger.debug(f"File paths: {file_paths}")
             file_objects = [
                 {
-                    "name": message.get_file_name(i),
+                    "name": message.get_file_name(file_path),
                     "path": str(Path(file_path)),
                 }
-                for i, file_path in enumerate(file_paths)
+                for file_path in file_paths
             ]
             logger.info(f"File objects: {file_objects}")
             logger.info(

@@ -272,7 +272,7 @@ STYLES = {
             "model_path": "nitrosocke/Ghibli-Diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "ghibli style {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "ghibli style {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },
@@ -314,7 +314,7 @@ STYLES = {
             "model_path": "Envvi/Inkpunk-Diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "nvinkpunk {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "nvinkpunk {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },
@@ -386,7 +386,7 @@ STYLES = {
             "model_path": "nitrosocke/Ghibli-Diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "ghibli style {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "ghibli style {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },
@@ -444,7 +444,7 @@ STYLES = {
             "model_path": "s3nh/beksinski-style-stable-diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "beksinski style {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "beksinski style {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },
@@ -502,7 +502,7 @@ STYLES = {
             "model_path": "Envvi/Inkpunk-Diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "nvinkpunk {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "nvinkpunk {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },
@@ -560,7 +560,7 @@ STYLES = {
             "model_path": "nitrosocke/elden-ring-diffusion",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "elden ring style {adjective} {setting} with a {character} {action} a/an {object} {context}",
+                "positive": "elden ring style {adjective} {setting} with a {character} {action} a {object} {context}",
                 "negative": "bad quality, text, card, landscape only",
                 "guidance_scale": 7,
             },
@@ -676,7 +676,7 @@ STYLES = {
             "model_path": "digiplay/Juggernaut_final",
             "model_scheduler": "euler_a",
             "prompt": {
-                "positive": "{theme} {adjective} {setting} with a {character} {action} a/an {object} {context} close-up, 8k, high quality",
+                "positive": "{theme} {adjective} {setting} with a {character} {action} a {object} {context} close-up, 8k, high quality",
                 "negative": "bad quality, text, landscape only",
                 "guidance_scale": 7,
             },

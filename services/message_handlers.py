@@ -34,22 +34,17 @@ class MessageInterface(ABC):
         """
         pass
 
-    def get_file_name(self, idx: int, name: str) -> str:
+    def get_file_name(self, name: str) -> str:
         """
-        Generate a file name based on the message and a unique index.
+        Get the last part of the file name.
 
-        Args:
-            idx (int): A unique index to append to the file name.
-            name (str): The base name for the file.
+        Parameters:
+            name (str): The full file name including the path.
 
         Returns:
-            str: The generated file name.
+            str: The last part of the file name without the extension.
         """
-        seed = self.message_json.get("seed", -1)
-        if seed == -1:
-            return f"{name}_{uuid.uuid1()}_{seed}_{idx}.png"
-        else:
-            return f"{name}_{seed}_{idx}.png"
+        return name.split("/")[-1].split(".")[0]
 
 
 class TextToStyleMessage(MessageInterface):
@@ -77,7 +72,7 @@ class TextToStyleMessage(MessageInterface):
             config.IMAGE_GENERATION_API, "/text_to_style", self.message_json
         )
 
-    def get_file_name(self, idx: int) -> str:
+    def get_file_name(self, file_path: str) -> str:
         """
         Generate a file name based on the style in the message and a unique index.
 
@@ -87,8 +82,7 @@ class TextToStyleMessage(MessageInterface):
         Returns:
             str: The generated file name.
         """
-        style = self.message_json["style"]
-        return super().get_file_name(idx, style)
+        return super().get_file_name(file_path)
 
 
 class TextToImageMessage(MessageInterface):
@@ -116,9 +110,9 @@ class TextToImageMessage(MessageInterface):
             config.IMAGE_GENERATION_API, "/text_to_image", self.message_json
         )
 
-    def get_file_name(self, idx: int) -> str:
+    def get_file_name(self, file_path: str) -> str:
         """
-        Generate a file name based on the prompt in the message and a unique index.
+        Generate a file name based on the style in the message and a unique index.
 
         Args:
             idx (int): A unique index to append to the file name.
@@ -126,8 +120,7 @@ class TextToImageMessage(MessageInterface):
         Returns:
             str: The generated file name.
         """
-        prompt_str = "_".join(self.message_json["prompt"]["positive"].split(" "))
-        return super().get_file_name(idx, prompt_str)
+        return super().get_file_name(file_path)
 
 
 class MessageFactory:

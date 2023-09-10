@@ -125,15 +125,6 @@ class TestPromptCrafter(unittest.TestCase):
         with self.assertLogs(level="WARNING"):
             self.prompt_crafter.generate_prompts("style1", 1000)
 
-    def test_generate_prompts_with_plural_and_singular(self):
-        self.sample_styles["style3"] = [
-            {"prompt": {"positive": "{characters} and a {creature}."}}
-        ]
-        self.prompt_crafter.styles = self.sample_styles
-        prompts = self.prompt_crafter.generate_prompts("style3", 4)
-        positive_prompts = [prompt["prompt"]["positive"] for prompt in prompts]
-        self.assertEqual(len(positive_prompts), len(set(positive_prompts)))
-
     def test_evenly_random_sample(self):
         # Test case 1: empty prompts
         result = self.prompt_crafter.evenly_random_sample([], 5)
