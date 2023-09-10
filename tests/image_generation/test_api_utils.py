@@ -4,7 +4,12 @@ import zipfile
 
 from PIL import Image
 
-from image_generation.api.utils import get_zip_buffer, image_to_bytes, zip_images
+from image_generation.api.utils import (
+    construct_filename,
+    get_zip_buffer,
+    image_to_bytes,
+    zip_images,
+)
 
 
 class TestUtils(unittest.TestCase):
@@ -37,6 +42,11 @@ class TestUtils(unittest.TestCase):
 
         with zipfile.ZipFile(io.BytesIO(zip_buffer.read()), "r") as zip_file:
             self.assertEqual(len(zip_file.namelist()), 2)
+
+    def test_construct_filename(self):
+        filename = construct_filename("my_file", 123)
+        self.assertTrue(filename.startswith("my_file"))
+        self.assertTrue(filename.endswith("123"))
 
 
 if __name__ == "__main__":

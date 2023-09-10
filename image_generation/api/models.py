@@ -46,7 +46,9 @@ class TextToImage(BaseModel):
     @validator("seed", pre=True)
     def validate_seed(cls, seed):
         if seed < -1:
+            logger.error(f"Invalid seed value: {seed}")
             raise ValueError("Seed must be greater than or equal to -1")
+        logger.info(f"Valid seed value: {seed}")
         return seed
 
 
@@ -66,44 +68,55 @@ class TextToStyle(BaseModel):
 
     @root_validator
     def update_text_to_image_objects(cls, values):
-        style_name = values.get("style")
-        style_json = STYLES.get(style_name)
-        num_images = values.get("num_images")
+        try:
+            style_name = values.get("style")
+            style_json = STYLES.get(style_name)
+            num_images = values.get("num_images")
 
-        if style_json is None:
-            raise ValueError("Style not found")
+            if style_json is None:
+                raise ValueError("Style not found")
 
-        # Initialize the PromptCrafter and generate populated prompts
-        prompt_crafter = PromptCrafter(STYLES)
-        populated_prompts = prompt_crafter.generate_prompts(style_name, num_images)
-        style = [
-            TextToImage(**text_to_image_json)
-            for text_to_image_json in populated_prompts
-        ]
-        logger.debug(f"Style: {style}")
-        updated_style = []
+            # Initialize the PromptCrafter and generate populated prompts
+            prompt_crafter = PromptCrafter(STYLES)
+            logger.debug(
+                f"Calling PromptCrafter with style: {style_name} and num_images: {num_images}"
+            )
+            populated_prompts = prompt_crafter.generate_prompts(style_name, num_images)
+            logger.debug(f"Populated prompts generated: {populated_prompts}")
+            style = [
+                TextToImage(**text_to_image_json)
+                for text_to_image_json in populated_prompts
+            ]
+            logger.debug(f"Style: {style}")
+            updated_style = []
 
-        for text_to_image in style:
-            updated_text_to_image = text_to_image.copy()
+            for text_to_image in style:
+                updated_text_to_image = text_to_image.copy()
 
-            if values.get("model_path"):
-                updated_text_to_image.model_path = values["model_path"]
-            if values.get("model_scheduler"):
-                updated_text_to_image.model_scheduler = values["model_scheduler"]
-            if values.get("height") is not None:
-                updated_text_to_image.height = values["height"]
-            if values.get("width") is not None:
-                updated_text_to_image.width = values["width"]
-            if values.get("seed") is not None:
-                updated_text_to_image.seed = values["seed"]
-            if values.get("num_inference_steps") is not None:
-                updated_text_to_image.num_inference_steps = values[
-                    "num_inference_steps"
-                ]
+                if values.get("model_path"):
+                    updated_text_to_image.model_path = values["model_path"]
+                if values.get("model_scheduler"):
+                    updated_text_to_image.model_scheduler = values["model_scheduler"]
+                if values.get("height") is not None:
+                    updated_text_to_image.height = values["height"]
+                if values.get("width") is not None:
+                    updated_text_to_image.width = values["width"]
+                if values.get("seed") is not None:
+                    updated_text_to_image.seed = values["seed"]
+                if values.get("num_inference_steps") is not None:
+                    updated_text_to_image.num_inference_steps = values[
+                        "num_inference_steps"
+                    ]
 
-            updated_text_to_image.num_images = 1  # Set num_images for each prompt to 1
+                updated_text_to_image.num_images = (
+                    1  # Set num_images for each prompt to 1
+                )
 
-            updated_style.append(updated_text_to_image)
+                updated_style.append(updated_text_to_image)
 
-        values["text_to_images"] = updated_style
+            values["text_to_images"] = updated_style
+        except ValueError as e:
+            logger.error(f"Validation error: {e}")
+            raise
+        logger.info("Validation successful.")
         return values

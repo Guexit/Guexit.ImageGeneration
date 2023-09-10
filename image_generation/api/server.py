@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 
 from image_generation.api.models import TextToImage, TextToStyle
-from image_generation.api.utils import sanitize_filename, zip_images
+from image_generation.api.utils import construct_filename, zip_images
 from image_generation.core.stable_diffusion import StableDiffusionHandler
 from image_generation.custom_logging import set_logger
 
@@ -40,9 +40,9 @@ async def text_to_image(text_to_image: TextToImage):
         images = model.txt_to_img(text_to_image)
 
         logger.info("Zipping images")
-        sanitized_prompt = sanitize_filename(text_to_image.prompt.positive)
+        filename = construct_filename(text_to_image.prompt.positive, text_to_image.seed)
         metadata = text_to_image.dict()
-        images = [(sanitized_prompt, image, metadata) for image in images]
+        images = [(filename, image, metadata) for image in images]
         images_bytes = zip_images(images)
         response = StreamingResponse(
             images_bytes, media_type="application/x-zip-compressed"
@@ -70,8 +70,10 @@ async def text_to_style(text_to_style: TextToStyle):
             model = get_model(text_to_image.model_path)
             images = model.txt_to_img(text_to_image)
             metadata = text_to_image.dict()
-            sanitized_prompt = sanitize_filename(text_to_image.prompt.positive)
-            all_images.extend([(sanitized_prompt, image, metadata) for image in images])
+            filename = construct_filename(
+                text_to_image.prompt.positive, text_to_image.seed
+            )
+            all_images.extend([(filename, image, metadata) for image in images])
 
         logger.info("Zipping images")
         images_bytes = zip_images(all_images)

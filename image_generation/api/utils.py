@@ -2,6 +2,7 @@
 
 import io
 import json
+import uuid
 import zipfile
 from typing import BinaryIO, List, Tuple
 
@@ -82,8 +83,13 @@ def zip_images(images: List[Tuple[str, Image.Image, dict]]) -> BinaryIO:
     return zip_buffer
 
 
-def sanitize_filename(filename):
+def construct_filename(filename, seed):
     invalid_chars = '/\\:*?"<>|'  # Characters that are invalid in file names
     for char in invalid_chars:
         filename = filename.replace(char, "")  # Replace invalid characters with nothing
+    if seed == -1:
+        filename_id = "_-1_{}".format(uuid.uuid4())
+    else:
+        filename_id = "_{}".format(seed)
+    filename = filename + filename_id
     return filename
