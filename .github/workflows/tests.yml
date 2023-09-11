@@ -24,9 +24,7 @@ jobs:
 
     - name: Instal Poetry
       run: |
-        pip install -U pip
-        pip install poetry
-        pip show poetry
+        curl -sSL https://install.python-poetry.org | python3 -
 
     - name: gh token
       env:
@@ -35,12 +33,12 @@ jobs:
         git config --global url."https://${{ secrets.GH_TOKEN }}@github".insteadOf https://github
 
     - name: Install dependencies
-      run: poetry install --no-interaction
+      run: poetry install --with dev
 
     - name: Run tests with coverage
       run: |
-        poetry run coverage run -m unittest
-        poetry run coverage report -i
+        tox -e test
+        tox -e coverage
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
