@@ -22,23 +22,24 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install dependencies
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.create false
+
+    - name: gh token
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        pip install --upgrade pip
-        pip install torch==1.12.1 torchvision>=0.13.1
         git config --global url."https://${{ secrets.GH_TOKEN }}@github".insteadOf https://github
-        pip install -e .
 
-    - name: Install Coverage
-      run: |
-        pip install coverage
+    - name: Install dependencies
+      run: poetry install --with dev --sync
 
     - name: Run tests with coverage
       run: |
-        coverage run --source=image_generation,services -m unittest tests
-        coverage report
+        tox -e test
+        tox -e coverage
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3

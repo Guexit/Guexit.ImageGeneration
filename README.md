@@ -8,18 +8,31 @@ AI Image Generation Service
 
 ### Setup
 
-1. Install [Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html)
+1. Install [Python](https://www.python.org/downloads/) if you haven't already.
 
-2. Create and activate environment with:
+2. Install Poetry from [here](https://python-poetry.org/docs/#installation).
+
+3. If you're on Linux or Windows, install CUDA 11.7.
+
+    - First, install your NVIDIA Drivers.
+    - Then, install CUDA:
+
+        - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
+
+4. Initialize a new Poetry environment and install dependencies:
 
     ```shell
-    conda create -n sd_guexit python=3.9 --no-default-packages -y
-    conda activate sd_guexit
+    poetry shell
+    poetry install
     ```
 
-3. Install Poetry from [here](https://python-poetry.org/docs/#installation)
+    If you want to develop locally, you can install poetry with the following command:
 
-4. Install CUDA:
+    ```shell
+    poetry install --with dev
+    ```
+
+5. Install CUDA if you're in Linux or Windows:
 
     Ideally, we want to install CUDA 11.7.
 
@@ -27,26 +40,6 @@ AI Image Generation Service
     - Then, install CUDA:
 
         - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
-
-5. Install dependencies with:
-
-    If you are in Linux or Windows you have to check what CUDA version you have installed and use [this Pytorch guide](https://pytorch.org/get-started/locally/) to know what to install. Ideally you would want to install version [11.7](https://developer.nvidia.com/cuda-11-7-0-download-archive). You need a GPU with at least 4GB of memory. If not, the program will automatically use CPU instead.
-
-    ```shell
-    # CUDA 11.7
-    pip install -e .
-    # WINDOWS
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-    # LINUX
-    pip install torch torchvision torchaudio
-    ```
-
-    If you are in MacOS:
-
-    ```shell
-    pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu
-    GRPC_PYTHON_BUILD_SYSTEM_ZLIB=true pip3 install -e .
-    ```
 
 6. Install pre-commit:
 

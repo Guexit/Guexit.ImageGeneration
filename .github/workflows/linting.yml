@@ -22,8 +22,13 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Install pre-commit
-      run: pip install pre-commit
+    - name: Instal Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.create false
 
-    - name: Run pre-commit
-      run: pre-commit run --all-files
+    - name: Install lint
+      run: poetry install --only dev --sync
+
+    - name: Run linting
+      run: tox -e lint
