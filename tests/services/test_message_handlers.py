@@ -41,18 +41,10 @@ class TestTextToStyleMessage(unittest.TestCase):
     def test_get_file_name(self):
         message_json = {"text_to_style": {"style": "general", "seed": 1}}
         message = TextToStyleMessage(message_json)
-        file_name = message.get_file_name(0)
+        file_name = message.get_file_name("path/to/filename/this is a prompt_1.png")
         self.assertIsInstance(file_name, str)
-        self.assertIn("general", file_name)
-        self.assertIn("_1_", file_name)
-
-    def test_get_file_name_no_seed(self):
-        message_json = {"text_to_style": {"style": "general"}}
-        message = TextToStyleMessage(message_json)
-        file_name = message.get_file_name(0)
-        self.assertIsInstance(file_name, str)
-        self.assertIn("general", file_name)
-        self.assertIn("_-1_", file_name)
+        self.assertIn("this is a prompt_1", file_name)
+        self.assertIn(".png", file_name)
 
 
 class TestTextToImageMessage(unittest.TestCase):
@@ -71,18 +63,10 @@ class TestTextToImageMessage(unittest.TestCase):
             "text_to_image": {"prompt": {"positive": "test prompt"}, "seed": 1}
         }
         message = TextToImageMessage(message_json)
-        file_name = message.get_file_name(0)
+        file_name = message.get_file_name("path/to/filename/this is a prompt_1.png")
         self.assertIsInstance(file_name, str)
-        self.assertIn("test_prompt", file_name)
-        self.assertIn("_1_", file_name)
-
-    def test_get_file_name_no_seed(self):
-        message_json = {"text_to_image": {"prompt": {"positive": "test prompt"}}}
-        message = TextToImageMessage(message_json)
-        file_name = message.get_file_name(0)
-        self.assertIsInstance(file_name, str)
-        self.assertIn("test_prompt", file_name)
-        self.assertIn("_-1_", file_name)
+        self.assertIn("this is a prompt_1", file_name)
+        self.assertIn(".png", file_name)
 
 
 if __name__ == "__main__":

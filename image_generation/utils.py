@@ -61,16 +61,19 @@ def store_zip_images_temporarily(response):
     z = zipfile.ZipFile(io.BytesIO(response.content))
     temp_dir = TemporaryDirectory()
     file_paths = []
+    metadata_list = []
 
     for file_name in z.namelist():
         if file_name.lower().endswith(VALID_IMAGE_EXTENSIONS):
             with z.open(file_name) as image_file:
                 img = Image.open(image_file)
+                pnginfo = img.info
                 file_path = os.path.join(temp_dir.name, os.path.basename(file_name))
                 img.save(file_path)
                 file_paths.append(file_path)
+                metadata_list.append(pnginfo)
 
-    return file_paths, temp_dir
+    return file_paths, metadata_list, temp_dir
 
 
 def enough_gpu_memory(minimum_gb=MINIMUM_MEMORY_GB):
