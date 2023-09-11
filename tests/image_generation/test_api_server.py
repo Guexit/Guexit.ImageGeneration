@@ -46,7 +46,7 @@ class TestServer(unittest.TestCase):
             width=512,
             num_inference_steps=50,
             num_images=2,
-            seed=57857,
+            seed=-1,
         )
 
         response = client.post("/text_to_image", json=text_to_image_data.dict())
@@ -58,6 +58,10 @@ class TestServer(unittest.TestCase):
         # Test if response is a valid zip file
         with zipfile.ZipFile(io.BytesIO(response.content), "r") as zip_file:
             self.assertEqual(len(zip_file.namelist()), 2)
+
+            # Test if the names of the files are different
+            file_names = zip_file.namelist()
+            self.assertEqual(len(file_names), len(set(file_names)))
 
     @patch("image_generation.api.server.get_model")
     @patch(

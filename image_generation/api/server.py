@@ -40,9 +40,14 @@ async def text_to_image(text_to_image: TextToImage):
         images = model.txt_to_img(text_to_image)
 
         logger.info("Zipping images")
-        filename = construct_filename(text_to_image.prompt.positive, text_to_image.seed)
+        filenames = [
+            construct_filename(text_to_image.prompt.positive, text_to_image.seed)
+            for _ in range(len(images))
+        ]
         metadata = text_to_image.dict()
-        images = [(filename, image, metadata) for image in images]
+        images = [
+            (filename, image, metadata) for filename, image in zip(filenames, images)
+        ]
         images_bytes = zip_images(images)
         response = StreamingResponse(
             images_bytes, media_type="application/x-zip-compressed"

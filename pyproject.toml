@@ -26,6 +26,7 @@ kornia = "^0.6.12"
 rich = "^13.4.2"
 httpx = "^0.24.1"
 typing-extensions = "^4.7.1"
+torch = ">=2.0.0, !=2.0.1"
 cloud-manager = {git = "https://github.com/Guexit/Guexit.CloudManager"}
 
 
@@ -36,10 +37,15 @@ typer = "^0.9.0"
 isort = "^5.12.0"
 tox = "^4.6.4"
 coverage = "^7.2.7"
+pytest = "^7.4.2"
 
 [tool.isort]
 profile = "black"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
 
 [build-system]
 requires = ["poetry-core"]
