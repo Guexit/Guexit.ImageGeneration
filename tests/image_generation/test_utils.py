@@ -2,6 +2,8 @@ import io
 import unittest
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from image_generation import utils
 
 
@@ -18,6 +20,21 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         mock_post.assert_called_once_with(f"{host}{endpoint}", json=request_object)
 
+    @patch("image_generation.utils.requests.post")
+    def test_call_image_generation_api_failure(self, mock_post):
+        mock_post.return_value.status_code = 404  # Simulate failure
+        host = "http://localhost:5000"
+        endpoint = "/text_to_image"
+        request_object = {"model_path": "test_model_path"}
+
+        with self.assertRaises(Exception) as context:
+            utils.call_image_generation_api(host, endpoint, request_object)
+
+        self.assertTrue(
+            f"Request to {host}{endpoint} failed with status code 404"
+            in str(context.exception)
+        )
+
     @patch("image_generation.utils.requests.get")
     def test_wait_for_service(self, mock_get):
         mock_get.return_value.status_code = 200
@@ -25,6 +42,35 @@ class TestUtils(unittest.TestCase):
         endpoint = "/healthcheck"
 
         utils.wait_for_service(host, endpoint)
+
+    @patch("image_generation.utils.requests.get")
+    def test_wait_for_service_non_200_status(self, mock_get):
+        mock_get.return_value.status_code = 404
+        host = "http://localhost:5000"
+        endpoint = "/healthcheck"
+
+        with self.assertRaises(TimeoutError):
+            utils.wait_for_service(host, endpoint, timeout=1)
+
+    @patch("image_generation.utils.requests.get")
+    def test_wait_for_service_request_exception(self, mock_get):
+        mock_get.side_effect = requests.exceptions.RequestException("Mocked exception")
+        host = "http://localhost:5000"
+        endpoint = "/healthcheck"
+
+        with self.assertRaises(TimeoutError):
+            utils.wait_for_service(host, endpoint, timeout=1)
+
+    @patch("image_generation.utils.time.time")
+    @patch("image_generation.utils.requests.get")
+    def test_wait_for_service_timeout(self, mock_get, mock_time):
+        mock_get.return_value.status_code = 404  # Simulate service not available
+        mock_time.side_effect = iter([0, 0.5, 1, 1.5, 2])  # Simulate elapsed time
+        host = "http://localhost:5000"
+        endpoint = "/healthcheck"
+
+        with self.assertRaises(TimeoutError):
+            utils.wait_for_service(host, endpoint, timeout=1)
 
     @patch("image_generation.utils.zipfile.ZipFile")
     @patch("image_generation.utils.TemporaryDirectory")

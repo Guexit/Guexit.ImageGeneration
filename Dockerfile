@@ -30,7 +30,6 @@ RUN pip install -U pip && \
     pip install --upgrade certifi
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
-RUN poetry config virtualenvs.create false
 
 # Set PATH for poetry
 ENV PATH="/root/.local/bin:$PATH"

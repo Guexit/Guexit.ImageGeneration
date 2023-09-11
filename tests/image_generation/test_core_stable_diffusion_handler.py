@@ -9,6 +9,7 @@ from image_generation.core.stable_diffusion import (
     StableDiffusionHandler,
     StableDiffusionPipeline,
 )
+from image_generation.utils import enough_gpu_memory
 
 
 class TestStableDiffusionHandler(unittest.TestCase):
@@ -23,6 +24,34 @@ class TestStableDiffusionHandler(unittest.TestCase):
 
     def tearDown(self):
         StableDiffusionPipeline.from_pretrained = self.original_from_pretrained
+
+    def test_init_conditions(self):
+        with patch("torch.backends.mps.is_available", return_value=True), patch(
+            "torch.cuda.is_available", return_value=False
+        ):
+            handler = StableDiffusionHandler(self.model_path)
+            self.assertEqual(handler.device, torch.device("mps"))
+
+        with patch("torch.backends.mps.is_available", return_value=False), patch(
+            "torch.cuda.is_available", return_value=True
+        ), patch("torch.cuda.mem_get_info", return_value=(0, 1000000000)), patch(
+            "image_generation.core.stable_diffusion.enough_gpu_memory",
+            return_value=True,
+        ):
+            handler = StableDiffusionHandler(self.model_path)
+            self.assertEqual(handler.device, torch.device("cuda"))
+
+        with patch("torch.backends.mps.is_available", return_value=False), patch(
+            "torch.cuda.is_available", return_value=False
+        ), patch("image_generation.utils.enough_gpu_memory", return_value=False):
+            handler = StableDiffusionHandler(self.model_path)
+            self.assertEqual(handler.device, torch.device("cpu"))
+
+        custom_device = "custom_device"
+        with patch("torch.device") as mock_device:
+            mock_device.return_value = custom_device
+            handler = StableDiffusionHandler(self.model_path, device=custom_device)
+        self.assertEqual(handler.device, custom_device)
 
     def test_txt_to_img(self):
         handler = StableDiffusionHandler(self.model_path)
