@@ -16,7 +16,7 @@ uvicorn = "^0.23.0"
 transformers = "^4.30.2"
 diffusers = "^0.18.2"
 ftfy = "^6.1.1"
-pydantic = "1.10.2"
+pydantic = "^1.10.2"
 accelerate = "^0.21.0"
 omegaconf = "^2.3.0"
 pytorch-lightning = "^2.0.5"
@@ -26,7 +26,7 @@ kornia = "^0.6.12"
 rich = "^13.4.2"
 httpx = "^0.24.1"
 typing-extensions = "^4.7.1"
-torch = ">=2.0.0, !=2.0.1"
+torch = "^2.0.0, !=2.0.1"
 cloud-manager = {git = "https://github.com/Guexit/Guexit.CloudManager"}
 
 
