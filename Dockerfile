@@ -30,6 +30,7 @@ RUN pip install -U pip && \
     pip install --upgrade certifi
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN poetry config virtualenvs.create false
 
 # Set PATH for poetry
 ENV PATH="/root/.local/bin:$PATH"
@@ -42,7 +43,7 @@ COPY . .
 # Install dependencies
 RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
     git config --global credential.helper store && \
-    poetry install
+    poetry install --with dev --sync
 
 # Start the server and consumer
 CMD ["sh", "-c", "poetry run python3 -m uvicorn image_generation.api.server:app --host 0.0.0.0 --port 5000 --timeout-keep-alive 600 & poetry run python services/image_generation_message_handler.py"]

@@ -25,9 +25,10 @@ jobs:
     - name: Instal Poetry
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.create false
 
     - name: Install lint
-      run: poetry install --only dev
+      run: poetry install --only dev --sync
 
     - name: Run linting
       run: tox -e lint
