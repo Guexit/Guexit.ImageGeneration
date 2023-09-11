@@ -44,6 +44,7 @@ class TestTextToStyleMessage(unittest.TestCase):
         file_name = message.get_file_name("path/to/filename/this is a prompt_1.png")
         self.assertIsInstance(file_name, str)
         self.assertIn("this is a prompt_1", file_name)
+        self.assertIn(".png", file_name)
 
 
 class TestTextToImageMessage(unittest.TestCase):
@@ -65,6 +66,7 @@ class TestTextToImageMessage(unittest.TestCase):
         file_name = message.get_file_name("path/to/filename/this is a prompt_1.png")
         self.assertIsInstance(file_name, str)
         self.assertIn("this is a prompt_1", file_name)
+        self.assertIn(".png", file_name)
 
 
 if __name__ == "__main__":

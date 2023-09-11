@@ -39,9 +39,12 @@ class TestUtils(unittest.TestCase):
         mock_image = MagicMock()
         mock_image_open.return_value = mock_image
 
-        file_paths, temp_dir = utils.store_zip_images_temporarily(mock_response)
+        file_paths, metadata_list, temp_dir = utils.store_zip_images_temporarily(
+            mock_response
+        )
 
         self.assertEqual(len(file_paths), 2)
+        self.assertEqual(len(metadata_list), 2)
         self.assertIsInstance(mock_zip.call_args[0][0], io.BytesIO)
 
     @patch("image_generation.utils.torch.cuda.mem_get_info")

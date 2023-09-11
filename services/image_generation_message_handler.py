@@ -130,14 +130,15 @@ class ImageGenerationMessageHandler:
         """
         logger.info("Getting file objects...")
         try:
-            file_paths, temp_dir = store_zip_images_temporarily(response)
+            file_paths, metadata_list, temp_dir = store_zip_images_temporarily(response)
             logger.debug(f"File paths: {file_paths}")
             file_objects = [
                 {
                     "name": message.get_file_name(file_path),
                     "path": str(Path(file_path)),
+                    "metadata": metadata,
                 }
-                for file_path in file_paths
+                for file_path, metadata in zip(file_paths, metadata_list)
             ]
             logger.info(f"File objects: {file_objects}")
             logger.info(

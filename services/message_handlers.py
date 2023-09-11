@@ -44,7 +44,7 @@ class MessageInterface(ABC):
         Returns:
             str: The last part of the file name without the extension.
         """
-        return name.split("/")[-1].split(".")[0]
+        return name.split("/")[-1]
 
 
 class TextToStyleMessage(MessageInterface):
