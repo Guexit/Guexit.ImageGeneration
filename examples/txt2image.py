@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # Text to image input args
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v4")
+    parser.add_argument("--model_path", type=str, default="digiplay/Juggernaut_final")
     parser.add_argument("--model_scheduler", type=str, default="euler_a")
     parser.add_argument(
         "--positive_prompt",
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         type=str,
         default="bad quality, malformed",
     )
-    parser.add_argument("--guidance_scale", type=float, default=16.5)
+    parser.add_argument("--guidance_scale", type=float, default=10)
     parser.add_argument("--height", type=int, default=688)
     parser.add_argument("--width", type=int, default=512)
     parser.add_argument("--num_inference_steps", type=int, default=50)

@@ -83,7 +83,7 @@ def zip_images(images: List[Tuple[str, Image.Image, dict]]) -> BinaryIO:
     return zip_buffer
 
 
-def construct_filename(filename, seed):
+def construct_filename(filename, seed, max_length=200):
     invalid_chars = '/\\:*?"<>|'  # Characters that are invalid in file names
     for char in invalid_chars:
         filename = filename.replace(char, "")  # Replace invalid characters with nothing
@@ -91,5 +91,9 @@ def construct_filename(filename, seed):
         filename_id = "_-1_{}".format(uuid.uuid4())
     else:
         filename_id = "_{}".format(seed)
+    # Truncate the filename to fit within the maximum length
+    max_filename_length = max_length - len(filename_id)
+    filename = filename[:max_filename_length]
+
     filename = filename + filename_id
     return filename

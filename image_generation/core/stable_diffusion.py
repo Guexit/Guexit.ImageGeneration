@@ -2,7 +2,7 @@ import contextlib
 from typing import Optional
 
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import AutoPipelineForText2Image
 
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
@@ -50,7 +50,7 @@ class StableDiffusionHandler:
         torch_dtype = (
             torch.float16 if self.device != torch.device("mps") else torch.float32
         )
-        self.pipe = StableDiffusionPipeline.from_pretrained(
+        self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
             # revision="fp16",

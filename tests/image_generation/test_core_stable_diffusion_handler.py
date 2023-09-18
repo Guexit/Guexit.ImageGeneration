@@ -6,24 +6,23 @@ import torch
 from image_generation.api.models import Prompt, TextToImage
 from image_generation.core.schedulers import SchedulerEnum
 from image_generation.core.stable_diffusion import (
+    AutoPipelineForText2Image,
     StableDiffusionHandler,
-    StableDiffusionPipeline,
 )
-from image_generation.utils import enough_gpu_memory
 
 
 class TestStableDiffusionHandler(unittest.TestCase):
     def setUp(self):
         self.mocked_pipeline = MagicMock()
-        self.original_from_pretrained = StableDiffusionPipeline.from_pretrained
-        StableDiffusionPipeline.from_pretrained = MagicMock(
+        self.original_from_pretrained = AutoPipelineForText2Image.from_pretrained
+        AutoPipelineForText2Image.from_pretrained = MagicMock(
             return_value=self.mocked_pipeline
         )
 
         self.model_path = "test_model_path"
 
     def tearDown(self):
-        StableDiffusionPipeline.from_pretrained = self.original_from_pretrained
+        AutoPipelineForText2Image.from_pretrained = self.original_from_pretrained
 
     def test_init_conditions(self):
         with patch("torch.backends.mps.is_available", return_value=True), patch(
@@ -110,7 +109,7 @@ class TestStableDiffusionHandler(unittest.TestCase):
         handler = StableDiffusionHandler(self.model_path)
         new_model_path = "new_model_path"
         new_mocked_pipeline = MagicMock()
-        StableDiffusionPipeline.from_pretrained = MagicMock(
+        AutoPipelineForText2Image.from_pretrained = MagicMock(
             return_value=new_mocked_pipeline
         )
 

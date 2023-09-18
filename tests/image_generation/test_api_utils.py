@@ -112,7 +112,6 @@ class TestAPIUtils(unittest.TestCase):
     def test_construct_filename_with_invalid_chars(self):
         filename = construct_filename("my:file?", 123)
         sanitized_filename = "myfile_123"
-
         self.assertEqual(filename, sanitized_filename)
 
     def test_construct_filename_with_negative_seed(self):
@@ -127,6 +126,13 @@ class TestAPIUtils(unittest.TestCase):
             uuid.UUID(uuid_part, version=4)
         except ValueError:
             self.fail("UUID part of filename is not a valid UUID.")
+
+    def test_construct_filename_max_length(self):
+        long_name = "a" * 300  # A filename that is too long
+        filename = construct_filename(long_name, 123)
+        self.assertTrue(
+            len(filename) <= 200
+        )  # Check that the filename length is within the limit
 
 
 if __name__ == "__main__":
