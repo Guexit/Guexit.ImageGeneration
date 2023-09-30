@@ -1,5 +1,6 @@
 import copy
 import random
+from collections import Counter
 from typing import Dict, List
 
 from image_generation.core.styles import (
@@ -87,21 +88,17 @@ class PromptCrafter:
         logger.info(f"Unique combinations: {unique_combinations}")
         return unique_combinations
 
-    def evenly_random_sample(self, prompts: List[str], num_images: int) -> List[str]:
+    def evenly_random_sample(self, prompts: List[dict], num_images: int) -> List[dict]:
         """
         Generates a random sample of prompts from a given list of prompts.
-
-        Args:
-            prompts (List[str]): A list of strings representing the prompts.
-            num_images (int): The number of images to be randomly sampled.
-
-        Returns:
-            List[str]: A list of strings representing the randomly sampled prompts.
         """
         logger.info("Performing evenly random sampling...")
+
         if len(prompts) == 0 or num_images == 0:
             logger.warning("Empty prompt list or zero images requested.")
             return []
+
+        template_counter = Counter()  # To keep track of how often each template is used
 
         if num_images >= len(prompts):
             base_count = num_images // len(prompts)
@@ -111,15 +108,28 @@ class PromptCrafter:
             prompts_output = [
                 style_template for style_template in prompts for _ in range(base_count)
             ]
+            template_counter.update(
+                prompt["prompt"]["positive"] for prompt in prompts_output
+            )
 
             # Add the remainder, as evenly as possible
             random.shuffle(prompts)
             for i in range(remainder):
                 prompts_output.append(prompts[i % len(prompts)])
+            template_counter.update(
+                prompts[i % len(prompts)]["prompt"]["positive"]
+                for i in range(remainder)
+            )
         else:
             prompts_output = prompts.copy()
             random.shuffle(prompts_output)
             prompts_output = prompts_output[:num_images]
+            template_counter.update(
+                prompt["prompt"]["positive"] for prompt in prompts_output
+            )
+
+        # Log the usage count of each template
+        logger.info(f"Template usage counts: {template_counter}")
 
         return prompts_output
 
