@@ -31,11 +31,6 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self.patcher_azure_service_bus_topic_name = patch.object(
             config, "AZURE_SERVICE_BUS_TOPIC_NAME", "guexit-imagegeneration"
         )
-        self.patcher_azure_service_bus_message_type = patch.object(
-            config,
-            "AZURE_SERVICE_BUS_MESSAGE_TYPE",
-            "urn:message:Guexit.Game.Messages:ImageGenerated",
-        )
         self.patcher_call_image_generation_api = patch(
             "services.message_handlers.call_image_generation_api"
         )
@@ -97,7 +92,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         )
 
     def test_handle_valid_message_multiple_images(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_azure_service_bus_message_type, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
@@ -137,7 +132,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             self.assertEqual(mock_publish.call_count, 2)
 
     def test_handle_invalid_message_format(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_azure_service_bus_message_type, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
@@ -162,7 +157,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
                 image_generation_handler.handle_message(invalid_message)
 
     def test_process_incoming_message(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_azure_service_bus_message_type, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,

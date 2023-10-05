@@ -17,12 +17,7 @@ logger = set_logger("Image Generation Message Handler")
 
 
 def create_message_to_send(file_blob_url: List[dict]) -> str:
-    message = {
-        "destinationAddress": "",
-        "headers": {},
-        "message": {"url": file_blob_url},
-        "messageType": [config.AZURE_SERVICE_BUS_MESSAGE_TYPE],
-    }
+    message = {"url": file_blob_url}
     return json.dumps(message)
 
 

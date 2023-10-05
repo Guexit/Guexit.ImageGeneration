@@ -103,7 +103,6 @@ AZURE_SERVICE_BUS_CONNECTION_STRING: The connection string for your Azure Servic
 AZURE_STORAGE_CONTAINER_NAME: The name of the container in your Azure Storage account where the images will be uploaded.
 AZURE_SERVICE_BUS_QUEUE_NAME: The name of the queue in your Azure Service Bus instance where messages will be consumed.
 AZURE_SERVICE_BUS_TOPIC_NAME: The name of the topic in your Azure Service Bus instance where messages will be published.
-AZURE_SERVICE_BUS_MESSAGE_TYPE: The message type for the messages sent to the Azure Service Bus topic.
 ```
 
 These are in `env_samples.env`, but you need to have them in a `.env` file in the project directory: `cp env_samples.env .env` and then substitute the values with the correct ones.
@@ -116,7 +115,6 @@ export AZURE_SERVICE_BUS_CONNECTION_STRING="<your_service_bus_connection_string>
 export AZURE_STORAGE_CONTAINER_NAME="<your_storage_container_name>"
 export AZURE_SERVICE_BUS_QUEUE_NAME="<your_service_bus_queue_name>"
 export AZURE_SERVICE_BUS_TOPIC_NAME="<your_service_bus_topic_name>"
-export AZURE_SERVICE_BUS_MESSAGE_TYPE="<your_service_bus_message_type>"
 ```
 
 Once you have the environment variables set up, you first need to have the service running on one terminal:
