@@ -16,6 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Display disk space
+        run: df -h
+
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
 
@@ -29,9 +32,15 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GH_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Display disk space
+        run: df -h
+
       - name: Build the Docker image
         run: |
           DOCKER_BUILDKIT=1 docker build . --secret id=git-credentials,src=.git-credentials -t ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
+
+      - name: Display disk space
+        run: df -h
 
       - name: Run tests
         run: |
