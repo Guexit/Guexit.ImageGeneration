@@ -20,7 +20,6 @@ jobs:
         run: |
           df -h
           du -sh
-          sudo du -h --max-depth=1 /
 
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
@@ -49,7 +48,6 @@ jobs:
         run: |
           df -h
           du -sh
-          sudo du -h --max-depth=1 /
 
       - name: Load Docker image
         run: docker load -i guexit-image-generation.tar
@@ -58,7 +56,6 @@ jobs:
         run: |
           df -h
           du -sh
-          sudo du -h --max-depth=1 /
 
       - name: Run tests
         run: |
