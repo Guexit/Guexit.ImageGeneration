@@ -34,4 +34,6 @@ jobs:
       run: poetry install --only dev --sync
 
     - name: Run linting
-      run: tox -e lint
+      run: |
+        which tox
+        python -m tox -e lint
