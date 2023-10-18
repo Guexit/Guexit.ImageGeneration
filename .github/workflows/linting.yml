@@ -27,13 +27,8 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
         poetry config virtualenvs.create false
 
-    - name: Install Tox
-      run: pip install tox
-
     - name: Install lint
       run: poetry install --only dev --sync
 
     - name: Run linting
-      run: |
-        which tox
-        python -m tox -e lint
+      run: tox -e lint

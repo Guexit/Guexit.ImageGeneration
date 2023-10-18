@@ -27,7 +27,7 @@ WORKDIR /app
 
 # Update pip
 RUN pip install -U pip && \
-    pip install --upgrade certifi tox
+    pip install --upgrade certifi
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
