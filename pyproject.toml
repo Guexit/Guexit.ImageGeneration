@@ -26,7 +26,7 @@ kornia = "^0.6.12"
 rich = "^13.4.2"
 httpx = "^0.24.1"
 typing-extensions = "^4.7.1"
-torch = "^2.0.0, !=2.0.1"
+torch = "2.0.0"
 cloud-manager = {git = "https://github.com/Guexit/Guexit.CloudManager"}
 
 
