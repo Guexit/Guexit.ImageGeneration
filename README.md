@@ -12,14 +12,16 @@ AI Image Generation Service
 
 2. Install Poetry from [here](https://python-poetry.org/docs/#installation).
 
-3. If you're on Linux or Windows, install CUDA 11.7.
+3. Install Tox globally too for running tests and linting with `pip install tox`.
+
+4. If you're on Linux or Windows, install CUDA 11.7.
 
     - First, install your NVIDIA Drivers.
     - Then, install CUDA:
 
         - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
 
-4. Initialize a new Poetry environment and install dependencies:
+5. Initialize a new Poetry environment and install dependencies:
 
     ```shell
     poetry shell
@@ -32,7 +34,7 @@ AI Image Generation Service
     poetry install --with dev
     ```
 
-5. Install CUDA if you're in Linux or Windows:
+6. Install CUDA if you're in Linux or Windows:
 
     Ideally, we want to install CUDA 11.7.
 
@@ -41,7 +43,7 @@ AI Image Generation Service
 
         - If in WSL, execute: `sudo apt install nvidia-cuda-toolkit`
 
-6. Install pre-commit:
+7. Install pre-commit:
 
     ```shell
     pre-commit install
