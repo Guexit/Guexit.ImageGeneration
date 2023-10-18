@@ -21,6 +21,16 @@ jobs:
           df -h
           du -sh
 
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+      - name: Display disk space
+        run: |
+          df -h
+          du -sh
+
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
 
@@ -37,20 +47,6 @@ jobs:
       - name: Build the Docker image
         run: |
           DOCKER_BUILDKIT=1 docker build . --secret id=git-credentials,src=.git-credentials -t ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
-
-      - name: Save Docker image
-        run: docker save -o guexit-image-generation.tar ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
-
-      - name: Cleanup Docker images
-        run: docker system prune -af
-
-      - name: Display disk space
-        run: |
-          df -h
-          du -sh
-
-      - name: Load Docker image
-        run: docker load -i guexit-image-generation.tar
 
       - name: Display disk space
         run: |
