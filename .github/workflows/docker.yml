@@ -16,6 +16,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Display disk space
+        run: |
+          df -h
+          du -sh
+          sudo du -h --max-depth=1 /
+
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
 
@@ -33,14 +39,32 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker build . --secret id=git-credentials,src=.git-credentials -t ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
 
+      - name: Save Docker image
+        run: docker save -o guexit-image-generation.tar ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
+
       - name: Cleanup Docker images
         run: docker system prune -af
+
+      - name: Display disk space
+        run: |
+          df -h
+          du -sh
+          sudo du -h --max-depth=1 /
+
+      - name: Load Docker image
+        run: docker load -i guexit-image-generation.tar
+
+      - name: Display disk space
+        run: |
+          df -h
+          du -sh
+          sudo du -h --max-depth=1 /
+
+      - name: Run tests
+        run: |
+          docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
 
       - name: Push to GitHub Container Registry
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
-
-      - name: Run tests
-        run: |
-          docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
