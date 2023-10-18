@@ -16,11 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Display disk space
-        run: |
-          df -h
-          du -sh
-
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
 
@@ -41,16 +36,11 @@ jobs:
       - name: Cleanup Docker images
         run: docker system prune -af
 
-      - name: Display disk space
-        run: |
-          df -h
-          du -sh
-
-      - name: Run tests
-        run: |
-          docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
-
       - name: Push to GitHub Container Registry
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
+
+      - name: Run tests
+        run: |
+          docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
