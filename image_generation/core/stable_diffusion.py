@@ -59,7 +59,12 @@ class StableDiffusionHandler:
         if self.device == torch.device("cpu"):
             self.pipe.enable_sequential_cpu_offload()
             self.pipe.enable_attention_slicing(1)
+        elif self.device == torch.device("mps"):
+            self.pipe.enable_attention_slicing(1)
         else:
+            self.pipe.unet = torch.compile(
+                self.pipe.unet, mode="reduce-overhead", fullgraph=True
+            )
             self.pipe.enable_attention_slicing(1)
             self.pipe.to(self.device)
         # Warm up the model

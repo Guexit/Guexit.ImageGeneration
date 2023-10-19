@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser.add_argument("--height", type=int, default=688)
     parser.add_argument("--width", type=int, default=512)
     parser.add_argument("--num_inference_steps", type=int, default=25)
-    parser.add_argument("--num_images", type=int, default=3)
+    parser.add_argument("--num_images", type=int, default=1)
     parser.add_argument("--seed", type=int, default=-1)
     args = parser.parse_args()
     # Call Image Generation API
