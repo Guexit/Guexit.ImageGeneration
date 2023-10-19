@@ -636,7 +636,7 @@ STYLES = {
     "general": [
         {
             "model_path": "digiplay/Juggernaut_final",
-            "model_scheduler": "euler_a",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "{theme} {adjective} {setting} with {objects} {context} close-up, 8k, high quality",
                 "negative": "bad quality, text, landscape only",
@@ -644,13 +644,13 @@ STYLES = {
             },
             "height": 688,
             "width": 512,
-            "num_inference_steps": 50,
+            "num_inference_steps": 25,
             "num_images": 1,
             "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
-            "model_scheduler": "euler_a",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "{theme} {object} {context} close-up, 8k, high quality",
                 "negative": "bad quality, text",
@@ -658,13 +658,13 @@ STYLES = {
             },
             "height": 688,
             "width": 512,
-            "num_inference_steps": 50,
+            "num_inference_steps": 25,
             "num_images": 1,
             "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
-            "model_scheduler": "euler_a",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "{theme} {creature} {action} {context} 8k, high quality",
                 "negative": "bad quality, text",
@@ -672,13 +672,13 @@ STYLES = {
             },
             "height": 688,
             "width": 512,
-            "num_inference_steps": 50,
+            "num_inference_steps": 25,
             "num_images": 1,
             "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
-            "model_scheduler": "euler_a",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "{theme} {character} {action} {context} close-up, 8k, high quality",
                 "negative": "bad quality, text",
@@ -686,13 +686,13 @@ STYLES = {
             },
             "height": 688,
             "width": 512,
-            "num_inference_steps": 50,
+            "num_inference_steps": 25,
             "num_images": 1,
             "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
-            "model_scheduler": "euler_a",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "{theme} {adjective} {objects} at a {setting} 8k, high quality",
                 "negative": "bad quality, text",
@@ -700,7 +700,7 @@ STYLES = {
             },
             "height": 688,
             "width": 512,
-            "num_inference_steps": 50,
+            "num_inference_steps": 25,
             "num_images": 1,
             "seed": -1,
         },

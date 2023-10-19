@@ -2,6 +2,7 @@ from enum import Enum
 
 from diffusers.schedulers import (
     DDIMScheduler,
+    DPMSolverMultistepScheduler,
     EulerAncestralDiscreteScheduler,
     EulerDiscreteScheduler,
     PNDMScheduler,
@@ -17,6 +18,7 @@ class SchedulerEnum(Enum):
     EULER = "euler"
     DDIMS = "ddims"
     PNDM = "pndm"
+    DPMSolverMultistep = "dpmsolver_multistep"
 
 
 class SchedulerHandler:
@@ -25,6 +27,7 @@ class SchedulerHandler:
         SchedulerEnum.EULER.value: EulerDiscreteScheduler,
         SchedulerEnum.DDIMS.value: DDIMScheduler,
         SchedulerEnum.PNDM.value: PNDMScheduler,
+        SchedulerEnum.DPMSolverMultistep.value: DPMSolverMultistepScheduler,
     }
 
     @classmethod

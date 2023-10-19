@@ -54,9 +54,8 @@ class StableDiffusionHandler:
             model_path,
             torch_dtype=torch_dtype,
             # revision="fp16",
-            safety_checker=None,
         )
-        # Recommended if computer has < 64 GB of RAM
+        # Recommended if computer has < 16 GB of RAM
         if self.device == torch.device("cpu"):
             self.pipe.enable_sequential_cpu_offload()
             self.pipe.enable_attention_slicing(1)
@@ -106,34 +105,17 @@ class StableDiffusionHandler:
         num_inference_steps = input_data.num_inference_steps
         num_images = input_data.num_images
         generator = self._set_seed(input_data.seed)
-        if self.device.type == "mps":
-            logger.info("Running inference on MPS device")
-            images = []
-            for _ in range(num_images):
-                images.append(
-                    self.pipe(
-                        prompt=positive_prompt,
-                        negative_prompt=negative_prompt,
-                        guidance_scale=guidance_scale,
-                        height=height,
-                        width=width,
-                        num_inference_steps=num_inference_steps,
-                        num_images_per_prompt=1,
-                        generator=generator,
-                    ).images[0]
-                )
-        else:
-            logger.info("Running inference")
-            images = self.pipe(
-                prompt=positive_prompt,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                height=height,
-                width=width,
-                num_inference_steps=num_inference_steps,
-                num_images_per_prompt=num_images,
-                generator=generator,
-            ).images
+        logger.info("Running inference")
+        images = self.pipe(
+            prompt=positive_prompt,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            height=height,
+            width=width,
+            num_inference_steps=num_inference_steps,
+            num_images_per_prompt=num_images,
+            generator=generator,
+        ).images
         return images
 
 
