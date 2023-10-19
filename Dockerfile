@@ -1,4 +1,4 @@
-# Using nvidia/cuda base image with Python 3.9
+# Using nvidia/cuda base image with Python 3.11
 FROM nvidia/cuda:11.7.1-devel-ubuntu20.04
 
 # Set environment variables
@@ -8,9 +8,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.9 \
+    python3.11 \
     python3-pip \
-    python3.9-dev \
+    python3.11-dev \
     build-essential \
     libglib2.0-0 \
     libsm6 \
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     && rm -rf /var/lib/apt/lists/* && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 # Set the working directory
 WORKDIR /app

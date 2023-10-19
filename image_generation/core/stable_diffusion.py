@@ -53,6 +53,7 @@ class StableDiffusionHandler:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
+            safety_checker=None,
             # revision="fp16",
         )
         # Recommended if computer has < 16 GB of RAM
@@ -61,6 +62,7 @@ class StableDiffusionHandler:
             self.pipe.enable_attention_slicing(1)
         elif self.device == torch.device("mps"):
             self.pipe.enable_attention_slicing(1)
+            self.pipe.to(self.device)
         else:
             self.pipe.unet = torch.compile(
                 self.pipe.unet, mode="reduce-overhead", fullgraph=True

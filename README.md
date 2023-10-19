@@ -8,7 +8,7 @@ AI Image Generation Service
 
 ### Setup
 
-1. Install [Python](https://www.python.org/downloads/) if you haven't already.
+1. Install [Python](https://www.python.org/downloads/) (look for 3.11 version) if you haven't already.
 
 2. Install Poetry from [here](https://python-poetry.org/docs/#installation).
 
