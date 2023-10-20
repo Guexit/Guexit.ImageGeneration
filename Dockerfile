@@ -7,10 +7,14 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     python3.11 \
-    python3-pip \
     python3.11-dev \
+    python3-pip \
     build-essential \
     libglib2.0-0 \
     libsm6 \
@@ -18,8 +22,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     tzdata \
     curl \
-    git \
-    && rm -rf /var/lib/apt/lists/* && \
+    git && \
+    rm -rf /var/lib/apt/lists/* && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 # Set the working directory
