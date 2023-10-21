@@ -12,6 +12,7 @@ from image_generation.core.styles import (
     objects,
     settings,
     themes,
+    famous_characters,
 )
 from image_generation.custom_logging import set_logger
 
@@ -38,6 +39,7 @@ class PromptCrafter:
             "nouns": nouns,
             "themes": themes,
             "actions": actions,
+            "famous_characters": famous_characters,
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
