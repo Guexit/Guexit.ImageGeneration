@@ -9,8 +9,6 @@ from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.custom_logging import set_logger
 from image_generation.utils import enough_gpu_memory
 
-autocast = contextlib.nullcontext
-
 logger = set_logger("Stable Diffusion Handler")
 
 
@@ -53,23 +51,19 @@ class StableDiffusionHandler:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
+            use_safetensors=True,
             safety_checker=None,
-            # revision="fp16",
         )
         # Recommended if computer has < 16 GB of RAM
         if self.device == torch.device("cpu"):
             self.pipe.enable_sequential_cpu_offload()
             self.pipe.enable_attention_slicing(1)
-        elif self.device == torch.device("mps"):
-            self.pipe.enable_attention_slicing(1)
-            self.pipe.to(self.device)
         else:
-            self.pipe.unet = torch.compile(
-                self.pipe.unet, mode="reduce-overhead", fullgraph=True
-            )
-            self.pipe.enable_attention_slicing(1)
             self.pipe.to(self.device)
+            self.pipe.enable_attention_slicing(1)
+            self.pipe.enable_vae_slicing()
         # Warm up the model
+        logger.info("Warming up model")
         self.pipe("", num_inference_steps=1)
 
     def _set_scheduler(self, scheduler_name: SchedulerEnum):
@@ -112,7 +106,7 @@ class StableDiffusionHandler:
         num_inference_steps = input_data.num_inference_steps
         num_images = input_data.num_images
         generator = self._set_seed(input_data.seed)
-        logger.info("Running inference")
+        logger.info(f"Running inference on {num_images} images")
         images = self.pipe(
             prompt=positive_prompt,
             negative_prompt=negative_prompt,

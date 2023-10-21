@@ -12,8 +12,8 @@ RUN apt-get update && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3.11 \
-    python3.11-dev \
+    python3.10 \
+    python3.10-dev \
     python3-distutils \
     python3-pip \
     build-essential \
@@ -25,11 +25,11 @@ RUN apt-get update && \
     curl \
     git && \
     rm -rf /var/lib/apt/lists/* && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 # Update pip
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3.11 get-pip.py && \
+    python3.10 get-pip.py && \
     rm get-pip.py
 
 # Set the working directory
