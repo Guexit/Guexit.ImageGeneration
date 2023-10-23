@@ -8,11 +8,11 @@ from image_generation.core.styles import (
     characters,
     contexts,
     creatures,
+    famous_characters,
     nouns,
     objects,
     settings,
     themes,
-    famous_characters,
 )
 from image_generation.custom_logging import set_logger
 
