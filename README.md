@@ -4,6 +4,8 @@
 
 AI Image Generation Service
 
+[View Changelog](CHANGELOG.md)
+
 ## Local
 
 ### Setup
