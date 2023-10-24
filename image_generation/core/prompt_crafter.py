@@ -9,6 +9,7 @@ from image_generation.core.styles import (
     characters,
     contexts,
     creatures,
+    famous_characters,
     nouns,
     objects,
     settings,
@@ -39,6 +40,7 @@ class PromptCrafter:
             "nouns": nouns,
             "themes": themes,
             "actions": actions,
+            "famous_characters": famous_characters,
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")

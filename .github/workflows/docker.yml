@@ -16,6 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
       - name: Extract version from pyproject.toml
         run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
 
