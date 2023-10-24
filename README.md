@@ -4,11 +4,13 @@
 
 AI Image Generation Service
 
+[View Changelog](CHANGELOG.md)
+
 ## Local
 
 ### Setup
 
-1. Install [Python](https://www.python.org/downloads/) if you haven't already.
+1. Install [Python](https://www.python.org/downloads/) (look for 3.11 version) if you haven't already.
 
 2. Install Poetry from [here](https://python-poetry.org/docs/#installation).
 
@@ -60,8 +62,8 @@ AI Image Generation Service
     ```json
     {
         "text_to_image": {
-            "model_path": "prompthero/openjourney-v4",
-            "model_scheduler": "euler_a",
+            "model_path": "digiplay/Juggernaut_final",
+            "model_scheduler": "dpmsolver_multistep",
             "prompt": {
                 "positive": "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed",
                 "negative": "bad quality, malformed",
@@ -79,8 +81,8 @@ AI Image Generation Service
 3. You can also execute the script in the example folder to test the API:
 
 ```shell
-python3 examples/txt2image.py --model_path "prompthero/openjourney-v4" /
-                               --model_scheduler euler_a /
+python3 examples/txt2image.py --model_path "digiplay/Juggernaut_final" /
+                               --model_scheduler dpmsolver_multistep /
                                --positive_prompt "portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed"
                                --negative_prompt "bad quality, malformed"
                                --guidance_scale 16.5

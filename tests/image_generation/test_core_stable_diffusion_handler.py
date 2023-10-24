@@ -24,7 +24,8 @@ class TestStableDiffusionHandler(unittest.TestCase):
     def tearDown(self):
         AutoPipelineForText2Image.from_pretrained = self.original_from_pretrained
 
-    def test_init_conditions(self):
+    @patch("torch.compile")
+    def test_init_conditions(self, torch_compile_mock):
         with patch("torch.backends.mps.is_available", return_value=True), patch(
             "torch.cuda.is_available", return_value=False
         ):
@@ -93,7 +94,8 @@ class TestStableDiffusionHandler(unittest.TestCase):
         handler = StableDiffusionHandler(self.model_path)
         self.assertEqual(handler.pipe, self.mocked_pipeline)
 
-    def test_init_with_device(self):
+    @patch("torch.compile")
+    def test_init_with_device(self, torch_compile_mock):
         handler = StableDiffusionHandler(self.model_path, device="cuda")
         self.assertEqual(handler.device, torch.device("cuda"))
         self.assertEqual(handler.model_path, self.model_path)
@@ -138,7 +140,8 @@ class TestStableDiffusionHandler(unittest.TestCase):
         handler.pipe.enable_sequential_cpu_offload.assert_called_once()
         handler.pipe.enable_attention_slicing.assert_called_once_with(1)
 
-    def test_init_model_other(self):
+    @patch("torch.compile")
+    def test_init_model_other(self, torch_compile_mock):
         handler = StableDiffusionHandler(self.model_path, device="cuda")
         handler.pipe.enable_attention_slicing.assert_called_once_with(1)
         handler.pipe.to.assert_called_once_with(handler.device)
@@ -150,7 +153,8 @@ class TestStableDiffusionHandler(unittest.TestCase):
         handler.txt_to_img(self.get_test_text_to_image())
         handler.pipe.assert_called()
 
-    def test_txt_to_img_other(self):
+    @patch("torch.compile")
+    def test_txt_to_img_other(self, torch_compile_mock):
         handler = StableDiffusionHandler(self.model_path)
         handler.device = torch.device("cuda")
         handler.txt_to_img(self.get_test_text_to_image())

@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  guexit_image_generation:
+  image_generation:
+    container_name: guexit_image_generation
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,6 +14,13 @@ services:
     environment:
       - CUDA_VERSION=11.7.1
     env_file: .env
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [ gpu ]
 
 secrets:
   git-credentials:

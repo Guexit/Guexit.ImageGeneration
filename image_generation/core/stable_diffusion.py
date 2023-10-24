@@ -9,8 +9,6 @@ from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
 from image_generation.custom_logging import set_logger
 from image_generation.utils import enough_gpu_memory
 
-autocast = contextlib.nullcontext
-
 logger = set_logger("Stable Diffusion Handler")
 
 
@@ -53,17 +51,19 @@ class StableDiffusionHandler:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
-            # revision="fp16",
+            use_safetensors=True,
             safety_checker=None,
         )
-        # Recommended if computer has < 64 GB of RAM
+        # Recommended if computer has < 16 GB of RAM
         if self.device == torch.device("cpu"):
             self.pipe.enable_sequential_cpu_offload()
             self.pipe.enable_attention_slicing(1)
         else:
-            self.pipe.enable_attention_slicing(1)
             self.pipe.to(self.device)
+            self.pipe.enable_attention_slicing(1)
+            self.pipe.enable_vae_slicing()
         # Warm up the model
+        logger.info("Warming up model")
         self.pipe("", num_inference_steps=1)
 
     def _set_scheduler(self, scheduler_name: SchedulerEnum):
@@ -106,34 +106,17 @@ class StableDiffusionHandler:
         num_inference_steps = input_data.num_inference_steps
         num_images = input_data.num_images
         generator = self._set_seed(input_data.seed)
-        if self.device.type == "mps":
-            logger.info("Running inference on MPS device")
-            images = []
-            for _ in range(num_images):
-                images.append(
-                    self.pipe(
-                        prompt=positive_prompt,
-                        negative_prompt=negative_prompt,
-                        guidance_scale=guidance_scale,
-                        height=height,
-                        width=width,
-                        num_inference_steps=num_inference_steps,
-                        num_images_per_prompt=1,
-                        generator=generator,
-                    ).images[0]
-                )
-        else:
-            logger.info("Running inference")
-            images = self.pipe(
-                prompt=positive_prompt,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                height=height,
-                width=width,
-                num_inference_steps=num_inference_steps,
-                num_images_per_prompt=num_images,
-                generator=generator,
-            ).images
+        logger.info(f"Running inference on {num_images} images")
+        images = self.pipe(
+            prompt=positive_prompt,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            height=height,
+            width=width,
+            num_inference_steps=num_inference_steps,
+            num_images_per_prompt=num_images,
+            generator=generator,
+        ).images
         return images
 
 
