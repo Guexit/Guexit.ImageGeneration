@@ -1,6 +1,6 @@
-import contextlib
 from typing import Optional
 
+import numpy as np
 import torch
 from diffusers import AutoPipelineForText2Image
 
@@ -52,7 +52,6 @@ class StableDiffusionHandler:
             model_path,
             torch_dtype=torch_dtype,
             use_safetensors=True,
-            safety_checker=None,
         )
         # Recommended if computer has < 16 GB of RAM
         if self.device == torch.device("cpu"):
@@ -85,6 +84,13 @@ class StableDiffusionHandler:
         generator = generator.manual_seed(seed)
         return generator
 
+    def _is_black_image(self, image):
+        """
+        Checks if an image is entirely black.
+        """
+        image_array = np.array(image)
+        return np.all(image_array == 0)
+
     def txt_to_img(self, input_data: TextToImage) -> list:
         """
         Converts input text to images
@@ -107,63 +113,49 @@ class StableDiffusionHandler:
         num_images = input_data.num_images
         generator = self._set_seed(input_data.seed)
         logger.info(f"Running inference on {num_images} images")
-        images = self.pipe(
-            prompt=positive_prompt,
-            negative_prompt=negative_prompt,
-            guidance_scale=guidance_scale,
-            height=height,
-            width=width,
-            num_inference_steps=num_inference_steps,
-            num_images_per_prompt=num_images,
-            generator=generator,
-        ).images
+        images = []
+        max_attempts = 10
+        while len(images) < num_images and max_attempts > 0:
+            # Generate the remaining images
+            num_images_to_generate = num_images - len(images)
+            logger.debug(f"Num images to generate: {num_images_to_generate}")
+            candidate_images = self.pipe(
+                prompt=positive_prompt,
+                negative_prompt=negative_prompt,
+                guidance_scale=guidance_scale,
+                height=height,
+                width=width,
+                num_inference_steps=num_inference_steps,
+                num_images_per_prompt=num_images_to_generate,
+                generator=generator,
+            ).images
+
+            max_attempts -= 1
+
+            for img in candidate_images:
+                if not self._is_black_image(img):
+                    images.append(img)  # Keep this image if it is not black
+                else:
+                    logger.info(
+                        f"Black image detected. Retrying with {max_attempts} remaining attempts"
+                    )
+                    logger.debug(
+                        f"""Parameters:
+                        prompt: {positive_prompt}
+                        negative_prompt: {negative_prompt}
+                        guidance_scale: {guidance_scale}
+                        height: {height}
+                        width: {width}
+                        num_inference_steps: {num_inference_steps}
+                        num_images_per_prompt: {num_images_to_generate}
+                        seed: {input_data.seed}
+                        """
+                    )
+                    # Set seed to -1 to generate vary the image generated to avoid black images
+                    generator = self._set_seed(-1)
+
+            logger.debug(
+                f"Generated {len(images)} non-black images out of {num_images} so far."
+            )
+
         return images
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="prompthero/openjourney-v4")
-    parser.add_argument("--model_scheduler", type=str, default=None)
-    parser.add_argument(
-        "--positive_prompt",
-        type=str,
-        default="portrait of samantha prince set in fire, cinematic lighting, photorealistic, ornate, intricate, realistic, detailed, volumetric light and shadow, hyper HD, octane render, unreal engine insanely detailed and intricate, hypermaximalist, elegant, ornate, hyper-realistic, super detailed",
-    )
-    parser.add_argument(
-        "--negative_prompt",
-        type=str,
-        default="bad quality, malformed",
-    )
-    parser.add_argument("--guidance_scale", type=float, default=16.5)
-    parser.add_argument("--height", type=int, default=688)
-    parser.add_argument("--width", type=int, default=512)
-    parser.add_argument("--num_inference_steps", type=int, default=50)
-    parser.add_argument("--num_images", type=int, default=2)
-    parser.add_argument("--seed", type=int, default=57857)
-    parser.add_argument("--id", type=str, default=None)
-    args = parser.parse_args()
-
-    model = StableDiffusionHandler(args.model_path)
-    images = model.txt_to_img(
-        TextToImage(
-            **{
-                "model_path": args.model_path,
-                "prompt": {
-                    "positive": args.positive_prompt,
-                    "negative": args.negative_prompt,
-                    "guidance_scale": args.guidance_scale,
-                },
-                "height": args.height,
-                "width": args.width,
-                "num_inference_steps": args.num_inference_steps,
-                "num_images": args.num_images,
-                "seed": args.seed,
-            }
-        )
-    )
-    # Save images
-    prefix_id = args.id + "_" if args.id is not None else ""
-    for i, image in enumerate(images):
-        image.save(f"output_{prefix_id}{i}.png")

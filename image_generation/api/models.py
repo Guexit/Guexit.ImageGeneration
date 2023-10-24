@@ -48,7 +48,7 @@ class TextToImage(BaseModel):
         if seed < -1:
             logger.error(f"Invalid seed value: {seed}")
             raise ValueError("Seed must be greater than or equal to -1")
-        logger.info(f"Valid seed value: {seed}")
+        logger.debug(f"Valid seed value: {seed}")
         return seed
 
 
