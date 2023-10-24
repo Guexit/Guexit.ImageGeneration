@@ -61,16 +61,14 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(TimeoutError):
             utils.wait_for_service(host, endpoint, timeout=1)
 
-    @patch("image_generation.utils.time.time")
     @patch("image_generation.utils.requests.get")
-    def test_wait_for_service_timeout(self, mock_get, mock_time):
+    def test_wait_for_service_timeout(self, mock_get):
         mock_get.return_value.status_code = 404  # Simulate service not available
-        mock_time.side_effect = iter([0, 0.5, 1, 1.5, 2])  # Simulate elapsed time
         host = "http://localhost:5000"
         endpoint = "/healthcheck"
 
         with self.assertRaises(TimeoutError):
-            utils.wait_for_service(host, endpoint, timeout=1)
+            utils.wait_for_service(host, endpoint, timeout=1.5)
 
     @patch("image_generation.utils.zipfile.ZipFile")
     @patch("image_generation.utils.TemporaryDirectory")
