@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import ANY, MagicMock, call, patch
 
+import numpy as np
 import torch
 from PIL import Image
-import numpy as np
 
 from image_generation.api.models import Prompt, TextToImage
 from image_generation.core.schedulers import SchedulerEnum

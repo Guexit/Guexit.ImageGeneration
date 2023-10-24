@@ -1,8 +1,8 @@
 from typing import Optional
 
+import numpy as np
 import torch
 from diffusers import AutoPipelineForText2Image
-import numpy as np
 
 from image_generation.api.models import TextToImage
 from image_generation.core.schedulers import SchedulerEnum, SchedulerHandler
