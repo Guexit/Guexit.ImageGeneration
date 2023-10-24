@@ -1159,7 +1159,7 @@ STYLES = {
             "width": 512,
             "num_inference_steps": 35,
             "num_images": 1,
-            "seed": 10,
+            "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
@@ -1173,7 +1173,7 @@ STYLES = {
             "width": 512,
             "num_inference_steps": 35,
             "num_images": 1,
-            "seed": 10,
+            "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
@@ -1187,7 +1187,7 @@ STYLES = {
             "width": 512,
             "num_inference_steps": 35,
             "num_images": 1,
-            "seed": 10,
+            "seed": -1,
         },
         {
             "model_path": "digiplay/Juggernaut_final",
@@ -1201,7 +1201,7 @@ STYLES = {
             "width": 512,
             "num_inference_steps": 35,
             "num_images": 1,
-            "seed": 10,
+            "seed": -1,
         },
     ],
     "general_old": [
