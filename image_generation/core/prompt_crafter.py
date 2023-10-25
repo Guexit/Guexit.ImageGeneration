@@ -198,21 +198,28 @@ class PromptCrafter:
         return return_prompts
 
 
-if __name__ == "__main__":
-    from rich import print
+# if __name__ == "__main__":
+#     from rich import print
 
-    from image_generation.core.styles import STYLES
+#     from image_generation.core.styles import STYLES
 
-    # Initialize the PromptCrafter
-    prompt_crafter = PromptCrafter(STYLES)
+#     prompt_crafter = PromptCrafter(STYLES)
 
-    # Specify the number of images and the style
-    num_images = 28
-    style_key = "general"
+#     # Print out frequency of each variable value
+#     for variable, values in prompt_crafter.variables.items():
+#         print(f"Variable: {variable}")
+#         value_counts = {value: 0 for value in values}
+#         for i in range(1):
+#             prompt = prompt_crafter.generate_prompts("general", 1000)
+#             for value in values:
+#                 if value in prompt:
+#                     value_counts[value] += 1
+#         for value, count in value_counts.items():
+#             print(f"{value}: {count}")
 
-    # Generate the prompts
-    prompts = prompt_crafter.generate_prompts(style_key, num_images)
-
-    # Print the generated prompts
-    for i, prompt in enumerate(prompts, start=1):
-        print(f"Prompt {i}: {prompt['prompt']['positive']}")
+#     # # Generate prompts
+#     # style_key = "style1"
+#     # num_images = 10
+#     # prompts = prompt_crafter.generate_prompts(style_key, num_images)
+#     # for prompt in prompts:
+#     #     print(prompt)
