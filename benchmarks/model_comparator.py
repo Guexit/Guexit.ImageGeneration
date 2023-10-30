@@ -1,6 +1,7 @@
+import argparse
 import os
+import random
 
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from rich import print
 
@@ -18,7 +19,10 @@ class ModelComparisonExperiment:
             os.makedirs(output_directory)
 
     def generate_prompts(self, style, num_comparisons):
-        return self.prompt_crafter.generate_prompts(style, num_comparisons)
+        prompts = self.prompt_crafter.generate_prompts(style, num_comparisons)
+        # Set a random seed using random instead of -1 for reproducibility
+        prompts = [{**prompt, "seed": random.randint(0, 1000)} for prompt in prompts]
+        return prompts
 
     def generate_image(self, prompt, model, model_path):
         model_prompt = prompt.copy()
@@ -26,26 +30,43 @@ class ModelComparisonExperiment:
         image = model.txt_to_img(TextToImage(**model_prompt))[0]
         return image
 
-    def create_comparison_image(self, image1, image2, prompt):
+    def create_comparison_image(
+        self, image1, image2, prompt, model_name_1, model_name_2
+    ):
+        margin_top = 80
         combined_width = image1.width + image2.width
-        max_height = max(image1.height, image2.height) + 50  # 50 pixels for the title
+        max_height = (
+            max(image1.height, image2.height) + margin_top
+        )  # 50 pixels for the title
 
         comparison_image = Image.new("RGB", (combined_width, max_height), "white")
-        comparison_image.paste(image1, (0, 50))
-        comparison_image.paste(image2, (image1.width, 50))
+        comparison_image.paste(image1, (0, margin_top))
+        comparison_image.paste(image2, (image1.width, margin_top))
 
         # Create an ImageDraw object
         draw = ImageDraw.Draw(comparison_image)
 
         # Load a font object
-        font = ImageFont.load_default()  # Using a default font
+        font = ImageFont.load_default(size=18)  # Using a default font
+        font_model = ImageFont.load_default(size=20)  # Using a default font
 
         # Calculate text size using getbbox()
-        text_width, text_height = draw.textbbox((0, 0), prompt, font=font)[2:]
+        prompt_text = prompt["prompt"]["positive"] + " | seed=" + str(prompt["seed"])
+        text_width, text_height = draw.textbbox((0, 0), prompt_text, font=font)[2:]
 
-        # Add the prompt as a title, centered at the top of the comparison image
+        # Add the prompt_text as a title, centered at the top of the comparison image
         draw.text(
-            ((combined_width - text_width) / 2, 10), prompt, font=font, fill="black"
+            ((combined_width - text_width) / 2, 10),
+            prompt_text,
+            font=font,
+            fill="black",
+        )
+        draw.text((15, margin_top - 30), model_name_1, font=font_model, fill="black")
+        draw.text(
+            (image1.width + 15, margin_top - 30),
+            model_name_2,
+            font=font_model,
+            fill="black",
         )
 
         return comparison_image
@@ -73,18 +94,31 @@ class ModelComparisonExperiment:
         # Now create all comparison images
         for i, (image1, image2, prompt) in enumerate(zip(images1, images2, prompts)):
             comparison_image = self.create_comparison_image(
-                image1, image2, prompt["prompt"]["positive"]
+                image1, image2, prompt, model_path_1, model_path_2
             )
             self.save_image(comparison_image, f"comparison_{i+1}.png")
 
 
 # Test the class
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run a model comparison experiment.")
+    parser.add_argument("--model_1", required=True, help="Path to the first model.")
+    parser.add_argument("--model_2", required=True, help="Path to the second model.")
+    parser.add_argument(
+        "--style", default="general", help="Style for generating prompts."
+    )
+    parser.add_argument(
+        "--num_comparisons",
+        type=int,
+        default=1,
+        help="Number of comparisons to perform.",
+    )
+    args = parser.parse_args()
     # Assuming STYLES is a dictionary containing prompt styles as defined previously
     model_comparison = ModelComparisonExperiment()
     model_comparison.run_experiment(
-        model_path_1="digiplay/Juggernaut_final",
-        model_path_2="digiplay/Juggernaut_final",
-        style="general",
-        num_comparisons=1,
+        model_path_1=args.model_1,
+        model_path_2=args.model_2,
+        style=args.style,
+        num_comparisons=args.num_comparisons,
     )
