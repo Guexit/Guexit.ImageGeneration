@@ -12,6 +12,24 @@ from image_generation.core.styles import STYLES
 
 
 class ModelComparisonExperiment:
+    """
+    Class for running a model comparison experiment.
+
+    Args:
+        output_directory (str): Directory to save the comparison images. Defaults to "images/comparison_results".
+
+    Attributes:
+        prompt_crafter (PromptCrafter): Instance of PromptCrafter class.
+        output_directory (str): Directory to save the comparison images.
+
+    Methods:
+        generate_prompts(style, num_comparisons): Generates prompts for the experiment.
+        generate_image(prompt, model, model_path): Generates an image for a given prompt and model.
+        create_comparison_image(image1, image2, prompt, model_name_1, model_name_2): Creates a comparison image for two given images and prompts.
+        save_image(image, file_name): Saves an image to the output directory.
+        run_experiment(model_path_1, model_path_2, style, num_comparisons): Runs the model comparison experiment.
+    """
+
     def __init__(self, output_directory="images/comparison_results"):
         self.prompt_crafter = PromptCrafter(STYLES)
         self.output_directory = output_directory
@@ -19,12 +37,33 @@ class ModelComparisonExperiment:
             os.makedirs(output_directory)
 
     def generate_prompts(self, style, num_comparisons):
+        """
+        Generates prompts for the experiment.
+
+        Args:
+            style (str): Style of the prompts.
+            num_comparisons (int): Number of comparisons to generate.
+
+        Returns:
+            list: List of prompts.
+        """
         prompts = self.prompt_crafter.generate_prompts(style, num_comparisons)
         # Set a random seed using random instead of -1 for reproducibility
         prompts = [{**prompt, "seed": random.randint(0, 1000)} for prompt in prompts]
         return prompts
 
     def generate_image(self, prompt, model, model_path):
+        """
+        Generates an image for a given prompt and model.
+
+        Args:
+            prompt (dict): Prompt to generate the image for.
+            model (StableDiffusionHandler): Model to use for generating the image.
+            model_path (str): Path to the model.
+
+        Returns:
+            PIL.Image.Image: Generated image.
+        """
         model_prompt = prompt.copy()
         model_prompt["model_path"] = model_path
         image = model.txt_to_img(TextToImage(**model_prompt))[0]
@@ -33,6 +72,19 @@ class ModelComparisonExperiment:
     def create_comparison_image(
         self, image1, image2, prompt, model_name_1, model_name_2
     ):
+        """
+        Creates a comparison image for two given images and prompts.
+
+        Args:
+            image1 (PIL.Image.Image): First image to compare.
+            image2 (PIL.Image.Image): Second image to compare.
+            prompt (dict): Prompt used to generate the images.
+            model_name_1 (str): Name of the first model.
+            model_name_2 (str): Name of the second model.
+
+        Returns:
+            PIL.Image.Image: Comparison image.
+        """
         margin_top = 80
         combined_width = image1.width + image2.width
         max_height = (
@@ -72,11 +124,27 @@ class ModelComparisonExperiment:
         return comparison_image
 
     def save_image(self, image, file_name):
+        """
+        Saves an image to the output directory.
+
+        Args:
+            image (PIL.Image.Image): Image to save.
+            file_name (str): Name of the file to save the image as.
+        """
         image_path = os.path.join(self.output_directory, file_name)
         image.save(image_path)
         print(f"Saved image: {image_path}")
 
     def run_experiment(self, model_path_1, model_path_2, style, num_comparisons=1):
+        """
+        Runs the model comparison experiment.
+
+        Args:
+            model_path_1 (str): Path to the first model.
+            model_path_2 (str): Path to the second model.
+            style (str): Style of the prompts.
+            num_comparisons (int): Number of comparisons to generate. Defaults to 1.
+        """
         prompts = self.generate_prompts(style, num_comparisons)
 
         # Generate all 'image1' instances for all prompts
