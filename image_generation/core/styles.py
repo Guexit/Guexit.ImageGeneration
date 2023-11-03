@@ -684,7 +684,6 @@ famous_characters = [
     "Talking lion with royal demeanor",
     "Agile elf with archery skills",
     "Old wizard with a grey cloak",
-    "Headmaster wizard with twinkling eyes",
     "Ring-wielding dark sorcerer",
     "Sailor-suited magical girl with moon tiara",
     "Sword-wielding adventurer in green",
@@ -736,18 +735,14 @@ famous_characters = [
     "Daring desert prince with a magic lamp",
     "French rat with culinary dreams",
     "Eccentric chocolate factory owner",
-    "Fiery red-haired Scottish princess",
-    "Giggly pink emotion",
-    "Blue sad emotion",
-    "Green envious emotion",
-    "Fearful purple emotion",
-    "Fiery red emotion",
     "Musical skeleton king",
     "Kind-hearted Victorian corpse bride",
     "Pampered Chihuahua in a pink purse",
     "Vengeful toy-spurning cowboy",
     "Inventive boy with a yellow dog",
     "Galactic princess with cinnamon bun hairstyle",
+    "Sherlock Holmes",
+    "Winnie-the-Pooh",
 ]
 
 actions = [
