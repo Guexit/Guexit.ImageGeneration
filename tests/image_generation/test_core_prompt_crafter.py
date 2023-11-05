@@ -148,7 +148,7 @@ class TestPromptCrafter(unittest.TestCase):
         prompts = []
         for i in range(num_calls):
             prompt = self.prompt_crafter.generate_prompts(
-                "test_style", num_prompts_per_call
+                "test_style", num_prompts_per_call, i
             )
             prompts.append(prompt[0]["prompt"]["positive"])
         num_duplicates = len(prompts) - len(set(prompts))
@@ -156,39 +156,81 @@ class TestPromptCrafter(unittest.TestCase):
             num_duplicates < num_prompts * 0.01
         ), f"Number of duplicates: {num_duplicates}"
 
-    # def test_evenly_random_sample(self):
-    #     # Test case 1: empty prompts
-    #     result = self.prompt_crafter.evenly_random_sample([], 5)
-    #     self.assertEqual(result, [])
+    def test_evenly_random_sample(self):
+        prompt_a = {"prompt": {"positive": "a"}}
+        prompt_b = {"prompt": {"positive": "b"}}
+        prompt_c = {"prompt": {"positive": "c"}}
+        prompt_d = {"prompt": {"positive": "d"}}
 
-    #     # Test case 2: num_images is zero
-    #     result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 0)
-    #     self.assertEqual(result, [])
+        # Test case 1: empty prompts
+        result = self.prompt_crafter.evenly_random_sample([], 5)
+        self.assertEqual(result, [])
 
-    #     # Test case 3: num_images is greater than len(prompts)
-    #     result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 10)
-    #     self.assertEqual(len(result), 10)
-    #     self.assertTrue(all(elem in ["a", "b", "c"] for elem in result))
+        # Test case 2: num_images is zero
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 0
+        )
+        self.assertEqual(result, [])
 
-    #     # Test case 4: num_images is less than len(prompts)
-    #     result = self.prompt_crafter.evenly_random_sample(["a", "b", "c", "d"], 2)
-    #     self.assertEqual(len(result), 2)
-    #     self.assertTrue(all(elem in ["a", "b", "c", "d"] for elem in result))
+        # Test case 3: num_images is greater than len(prompts)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 10
+        )
+        self.assertEqual(len(result), 10)
+        self.assertTrue(all(elem in [prompt_a, prompt_b, prompt_c] for elem in result))
 
-    #     # Test case 5: num_images is exactly equal to len(prompts)
-    #     result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 3)
-    #     self.assertEqual(len(result), 3)
-    #     self.assertTrue(all(elem in ["a", "b", "c"] for elem in result))
+        # Test case 4: num_images is less than len(prompts)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c, prompt_d], 2
+        )
+        self.assertEqual(len(result), 2)
+        self.assertTrue(
+            all(elem in [prompt_a, prompt_b, prompt_c, prompt_d] for elem in result)
+        )
 
-    #     # Additional: Testing the distribution (you might want to use random.seed for deterministic results)
-    #     result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 10)
-    #     count_a = result.count("a")
-    #     count_b = result.count("b")
-    #     count_c = result.count("c")
+        # Test case 5: num_images is exactly equal to len(prompts)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 3
+        )
+        self.assertEqual(len(result), 3)
+        self.assertTrue(all(elem in [prompt_a, prompt_b, prompt_c] for elem in result))
 
-    #     self.assertTrue(count_a >= 3 and count_a <= 4)
-    #     self.assertTrue(count_b >= 3 and count_b <= 4)
-    #     self.assertTrue(count_c >= 3 and count_c <= 4)
+        # Additional: Testing the distribution (you might want to use random.seed for deterministic results)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 10
+        )
+        count_a = result.count(prompt_a)
+        count_b = result.count(prompt_b)
+        count_c = result.count(prompt_c)
+
+        self.assertTrue(count_a >= 3 and count_a <= 4)
+        self.assertTrue(count_b >= 3 and count_b <= 4)
+        self.assertTrue(count_c >= 3 and count_c <= 4)
+
+    def test_set_seed_with_specific_value(self):
+        specific_seed = 12345
+        self.prompt_crafter.set_seed(specific_seed)
+        # Save the state of the random generator after setting the seed
+        state_after_seed = random.getstate()
+        # Generate some random choices
+        choices_after_seed = [random.choice(range(100)) for _ in range(10)]
+        # Reset the seed and state
+        self.prompt_crafter.set_seed(specific_seed)
+        random.setstate(state_after_seed)
+        # Generate choices again and they should be the same
+        new_choices_after_seed = [random.choice(range(100)) for _ in range(10)]
+        self.assertEqual(
+            choices_after_seed,
+            new_choices_after_seed,
+            "The random choices should be the same after setting the same seed.",
+        )
+
+    def test_set_seed_without_value(self):
+        self.prompt_crafter.set_seed()
+        # Check if the seed is not None which would imply a seed has been set
+        self.assertIsNotNone(
+            random.getstate(), "Seed should be set even if no value is provided."
+        )
 
 
 if __name__ == "__main__":

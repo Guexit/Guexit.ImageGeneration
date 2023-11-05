@@ -1,7 +1,8 @@
 import copy
+import datetime
 import random
 from collections import Counter
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from image_generation.core.styles import (
     actions,
@@ -44,6 +45,19 @@ class PromptCrafter:
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
+
+    def set_seed(self, seed: Optional[int] = None) -> None:
+        """
+        Set the seed for the random number generator.
+
+        Args:
+            seed (Optional[int]): The seed to use for the random number generator.
+        """
+        if seed is None:
+            current_time = datetime.datetime.now()
+            seed = int(current_time.timestamp())
+        random.seed(seed)
+        logger.info(f"Set seed: {seed}")
 
     def fill_placeholder(
         self, prompt: str, var: str, singular: str, plural: str
@@ -135,17 +149,21 @@ class PromptCrafter:
 
         return prompts_output
 
-    def generate_prompts(self, style_key: str, num_images: int) -> List[dict]:
+    def generate_prompts(
+        self, style_key: str, num_images: int, seed: Optional[int] = None
+    ) -> List[dict]:
         """
         Generate a list of prompts based on a specific style.
 
         Args:
             style_key (str): The style key.
             num_images (int): The number of images for each prompt.
+            seed (Optional[int]): The seed to use for the random number generator. Defaults to None and will use the current time.
 
         Returns:
             List[str]: A list of generated prompts.
         """
+        self.set_seed(seed)
         logger.info(f"Generating prompts for style key: {style_key}")
         if style_key not in self.styles:
             logger.error(f"'{style_key}' is not a valid style key.")
@@ -205,21 +223,9 @@ if __name__ == "__main__":
 
     prompt_crafter = PromptCrafter(STYLES)
 
-    # Print out frequency of each variable value
-    for variable, values in prompt_crafter.variables.items():
-        print(f"Variable: {variable}")
-        value_counts = {value: 0 for value in values}
-        for i in range(1):
-            prompt = prompt_crafter.generate_prompts("general", 1000)
-            for value in values:
-                if value in prompt:
-                    value_counts[value] += 1
-        for value, count in value_counts.items():
-            print(f"{value}: {count}")
-
-    # # Generate prompts
-    # style_key = "style1"
-    # num_images = 10
-    # prompts = prompt_crafter.generate_prompts(style_key, num_images)
-    # for prompt in prompts:
-    #     print(prompt)
+    # Generate prompts
+    style_key = "general"
+    num_images = 3
+    prompts = prompt_crafter.generate_prompts(style_key, num_images)
+    for prompt in prompts:
+        print(prompt)
