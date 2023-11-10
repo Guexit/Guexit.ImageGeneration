@@ -29,6 +29,11 @@ typing-extensions = "^4.7.1"
 torch = "2.0.0"
 cloud-manager = {git = "https://github.com/Guexit/Guexit.CloudManager"}
 
+plotly = {version = "^5.18.0", optional = true}
+
+[tool.poetry.extras]
+utils = ["plotly"]
+
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.3"

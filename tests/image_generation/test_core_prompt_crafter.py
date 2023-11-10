@@ -3,6 +3,8 @@ import string
 import unittest
 from unittest.mock import patch
 
+import numpy as np
+
 from image_generation.core.prompt_crafter import PromptCrafter
 
 
@@ -12,11 +14,24 @@ class TestPromptCrafter(unittest.TestCase):
             "style1": [{"prompt": {"positive": "A {character} in a {setting}."}}],
             "style2": [{"prompt": {"positive": "A {creature} with a {object}."}}],
             "test_style": [
-                {"prompt": {"positive": "{adjective} {noun} in {setting}."}},
-                {"prompt": {"positive": "{noun} {action} {adjective} {setting}."}},
-                {"prompt": {"positive": "{creature} {action} {object} in {setting}."}},
+                {
+                    "prompt": {
+                        "positive": "{adjective} {noun} {action} {object} in {setting}."
+                    }
+                },
+                {
+                    "prompt": {
+                        "positive": "{theme} {context} {creature} {action} {object} in {setting}."
+                    }
+                },
+                {
+                    "prompt": {
+                        "positive": "{theme} {character} {action} {object} in {setting}."
+                    }
+                },
             ],
         }
+        random.seed(12345)
 
         self.sample_variables = {
             "characters": ["character1", "character2", "character3"],
@@ -25,16 +40,16 @@ class TestPromptCrafter(unittest.TestCase):
             "creatures": ["creature1", "creature2", "creature3"],
             "contexts": ["context1", "context2", "context3"],
             "adjectives": [
-                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(10)
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
             ],
             "nouns": [
-                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(10)
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
             ],
             "themes": [
-                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(10)
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
             ],
             "actions": [
-                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(10)
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
             ],
         }
 
@@ -146,15 +161,44 @@ class TestPromptCrafter(unittest.TestCase):
         num_prompts_per_call = 30
         num_prompts = num_calls * num_prompts_per_call
         prompts = []
+        prompt_crafter = PromptCrafter(self.sample_styles)
+        prompt_crafter.variables = self.sample_variables
         for i in range(num_calls):
+            prompt_crafter.set_seed(i)
             prompt = self.prompt_crafter.generate_prompts(
-                "test_style", num_prompts_per_call, i
+                "test_style", num_prompts_per_call
             )
             prompts.append(prompt[0]["prompt"]["positive"])
         num_duplicates = len(prompts) - len(set(prompts))
         assert (
             num_duplicates < num_prompts * 0.01
         ), f"Number of duplicates: {num_duplicates}"
+
+    def test_variable_value_distribution(self):
+        num_images = 1000
+        prompt_crafter = PromptCrafter(self.sample_styles)
+        prompt_crafter.set_seed(12345)
+        prompt_crafter.variables = self.sample_variables
+        prompts = prompt_crafter.generate_prompts("test_style", num_images)
+        percentage_threshold = 15
+
+        def count_occurrences(prompts, variable_value):
+            return sum(
+                1
+                for prompt in prompts
+                if variable_value in prompt["prompt"]["positive"]
+            )
+
+        for variable_name, variable_values in self.sample_variables.items():
+            occurrences = []
+            for variable_value in variable_values:
+                occurrences.append(count_occurrences(prompts, variable_value))
+            counts = np.array(occurrences)
+            mean_count = np.mean(counts)
+            percentage_deviations = np.abs((counts - mean_count) / mean_count * 100)
+            max_deviation = np.max(percentage_deviations)
+            test_passed = max_deviation < percentage_threshold
+            self.assertTrue(test_passed, f"Variable: {variable_name}")
 
     def test_evenly_random_sample(self):
         prompt_a = {"prompt": {"positive": "a"}}

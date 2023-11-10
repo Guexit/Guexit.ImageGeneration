@@ -149,9 +149,7 @@ class PromptCrafter:
 
         return prompts_output
 
-    def generate_prompts(
-        self, style_key: str, num_images: int, seed: Optional[int] = None
-    ) -> List[dict]:
+    def generate_prompts(self, style_key: str, num_images: int) -> List[dict]:
         """
         Generate a list of prompts based on a specific style.
 
@@ -163,7 +161,6 @@ class PromptCrafter:
         Returns:
             List[str]: A list of generated prompts.
         """
-        self.set_seed(seed)
         logger.info(f"Generating prompts for style key: {style_key}")
         if style_key not in self.styles:
             logger.error(f"'{style_key}' is not a valid style key.")
@@ -222,10 +219,10 @@ if __name__ == "__main__":
     from image_generation.core.styles import STYLES
 
     prompt_crafter = PromptCrafter(STYLES)
+    prompt_crafter.set_seed(42)
 
     # Generate prompts
     style_key = "general"
     num_images = 3
     prompts = prompt_crafter.generate_prompts(style_key, num_images)
-    for prompt in prompts:
-        print(prompt)
+    print(prompts)
