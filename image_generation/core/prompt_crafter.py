@@ -1,6 +1,8 @@
 import copy
+import datetime
 import random
-from typing import Dict, List
+from collections import Counter
+from typing import Dict, List, Optional
 
 from image_generation.core.styles import (
     actions,
@@ -43,6 +45,19 @@ class PromptCrafter:
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
+
+    def set_seed(self, seed: Optional[int] = None) -> None:
+        """
+        Set the seed for the random number generator.
+
+        Args:
+            seed (Optional[int]): The seed to use for the random number generator.
+        """
+        if seed is None:
+            current_time = datetime.datetime.now()
+            seed = int(current_time.timestamp())
+        random.seed(seed)
+        logger.info(f"Set seed: {seed}")
 
     def fill_placeholder(
         self, prompt: str, var: str, singular: str, plural: str
@@ -89,21 +104,17 @@ class PromptCrafter:
         logger.info(f"Unique combinations: {unique_combinations}")
         return unique_combinations
 
-    def evenly_random_sample(self, prompts: List[str], num_images: int) -> List[str]:
+    def evenly_random_sample(self, prompts: List[dict], num_images: int) -> List[dict]:
         """
         Generates a random sample of prompts from a given list of prompts.
-
-        Args:
-            prompts (List[str]): A list of strings representing the prompts.
-            num_images (int): The number of images to be randomly sampled.
-
-        Returns:
-            List[str]: A list of strings representing the randomly sampled prompts.
         """
         logger.info("Performing evenly random sampling...")
+
         if len(prompts) == 0 or num_images == 0:
             logger.warning("Empty prompt list or zero images requested.")
             return []
+
+        template_counter = Counter()  # To keep track of how often each template is used
 
         if num_images >= len(prompts):
             base_count = num_images // len(prompts)
@@ -113,15 +124,28 @@ class PromptCrafter:
             prompts_output = [
                 style_template for style_template in prompts for _ in range(base_count)
             ]
+            template_counter.update(
+                prompt["prompt"]["positive"] for prompt in prompts_output
+            )
 
             # Add the remainder, as evenly as possible
             random.shuffle(prompts)
             for i in range(remainder):
                 prompts_output.append(prompts[i % len(prompts)])
+            template_counter.update(
+                prompts[i % len(prompts)]["prompt"]["positive"]
+                for i in range(remainder)
+            )
         else:
             prompts_output = prompts.copy()
             random.shuffle(prompts_output)
             prompts_output = prompts_output[:num_images]
+            template_counter.update(
+                prompt["prompt"]["positive"] for prompt in prompts_output
+            )
+
+        # Log the usage count of each template
+        logger.info(f"Template usage counts: {template_counter}")
 
         return prompts_output
 
@@ -132,6 +156,7 @@ class PromptCrafter:
         Args:
             style_key (str): The style key.
             num_images (int): The number of images for each prompt.
+            seed (Optional[int]): The seed to use for the random number generator. Defaults to None and will use the current time.
 
         Returns:
             List[str]: A list of generated prompts.
@@ -193,16 +218,11 @@ if __name__ == "__main__":
 
     from image_generation.core.styles import STYLES
 
-    # Initialize the PromptCrafter
     prompt_crafter = PromptCrafter(STYLES)
+    prompt_crafter.set_seed(42)
 
-    # Specify the number of images and the style
-    num_images = 28
+    # Generate prompts
     style_key = "general"
-
-    # Generate the prompts
+    num_images = 3
     prompts = prompt_crafter.generate_prompts(style_key, num_images)
-
-    # Print the generated prompts
-    for i, prompt in enumerate(prompts, start=1):
-        print(f"Prompt {i}: {prompt['prompt']['positive']}")
+    print(prompts)

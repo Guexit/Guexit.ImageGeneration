@@ -1,5 +1,9 @@
+import random
+import string
 import unittest
 from unittest.mock import patch
+
+import numpy as np
 
 from image_generation.core.prompt_crafter import PromptCrafter
 
@@ -9,7 +13,25 @@ class TestPromptCrafter(unittest.TestCase):
         self.sample_styles = {
             "style1": [{"prompt": {"positive": "A {character} in a {setting}."}}],
             "style2": [{"prompt": {"positive": "A {creature} with a {object}."}}],
+            "test_style": [
+                {
+                    "prompt": {
+                        "positive": "{adjective} {noun} {action} {object} in {setting}."
+                    }
+                },
+                {
+                    "prompt": {
+                        "positive": "{theme} {context} {creature} {action} {object} in {setting}."
+                    }
+                },
+                {
+                    "prompt": {
+                        "positive": "{theme} {character} {action} {object} in {setting}."
+                    }
+                },
+            ],
         }
+        random.seed(12345)
 
         self.sample_variables = {
             "characters": ["character1", "character2", "character3"],
@@ -17,9 +39,18 @@ class TestPromptCrafter(unittest.TestCase):
             "objects": ["object1", "object2", "object3"],
             "creatures": ["creature1", "creature2", "creature3"],
             "contexts": ["context1", "context2", "context3"],
-            "adjectives": ["adjective1", "adjective2", "adjective3"],
-            "nouns": ["noun1", "noun2", "noun3"],
-            "themes": ["theme1", "theme2", "theme3"],
+            "adjectives": [
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
+            ],
+            "nouns": [
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
+            ],
+            "themes": [
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
+            ],
+            "actions": [
+                "".join(random.choices(string.ascii_lowercase, k=5)) for _ in range(4)
+            ],
         }
 
         self.prompt_crafter = PromptCrafter(self.sample_styles)
@@ -125,39 +156,125 @@ class TestPromptCrafter(unittest.TestCase):
         with self.assertLogs(level="WARNING"):
             self.prompt_crafter.generate_prompts("style1", 1000)
 
+    def test_minimum_non_duplicate_prompts_after_several_calls(self):
+        num_calls = 1000
+        num_prompts_per_call = 30
+        num_prompts = num_calls * num_prompts_per_call
+        prompts = []
+        prompt_crafter = PromptCrafter(self.sample_styles)
+        prompt_crafter.variables = self.sample_variables
+        for i in range(num_calls):
+            prompt_crafter.set_seed(i)
+            prompt = self.prompt_crafter.generate_prompts(
+                "test_style", num_prompts_per_call
+            )
+            prompts.append(prompt[0]["prompt"]["positive"])
+        num_duplicates = len(prompts) - len(set(prompts))
+        assert (
+            num_duplicates < num_prompts * 0.01
+        ), f"Number of duplicates: {num_duplicates}"
+
+    def test_variable_value_distribution(self):
+        num_images = 1000
+        prompt_crafter = PromptCrafter(self.sample_styles)
+        prompt_crafter.set_seed(12345)
+        prompt_crafter.variables = self.sample_variables
+        prompts = prompt_crafter.generate_prompts("test_style", num_images)
+        percentage_threshold = 15
+
+        def count_occurrences(prompts, variable_value):
+            return sum(
+                1
+                for prompt in prompts
+                if variable_value in prompt["prompt"]["positive"]
+            )
+
+        for variable_name, variable_values in self.sample_variables.items():
+            occurrences = []
+            for variable_value in variable_values:
+                occurrences.append(count_occurrences(prompts, variable_value))
+            counts = np.array(occurrences)
+            mean_count = np.mean(counts)
+            percentage_deviations = np.abs((counts - mean_count) / mean_count * 100)
+            max_deviation = np.max(percentage_deviations)
+            test_passed = max_deviation < percentage_threshold
+            self.assertTrue(test_passed, f"Variable: {variable_name}")
+
     def test_evenly_random_sample(self):
+        prompt_a = {"prompt": {"positive": "a"}}
+        prompt_b = {"prompt": {"positive": "b"}}
+        prompt_c = {"prompt": {"positive": "c"}}
+        prompt_d = {"prompt": {"positive": "d"}}
+
         # Test case 1: empty prompts
         result = self.prompt_crafter.evenly_random_sample([], 5)
         self.assertEqual(result, [])
 
         # Test case 2: num_images is zero
-        result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 0)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 0
+        )
         self.assertEqual(result, [])
 
         # Test case 3: num_images is greater than len(prompts)
-        result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 10)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 10
+        )
         self.assertEqual(len(result), 10)
-        self.assertTrue(all(elem in ["a", "b", "c"] for elem in result))
+        self.assertTrue(all(elem in [prompt_a, prompt_b, prompt_c] for elem in result))
 
         # Test case 4: num_images is less than len(prompts)
-        result = self.prompt_crafter.evenly_random_sample(["a", "b", "c", "d"], 2)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c, prompt_d], 2
+        )
         self.assertEqual(len(result), 2)
-        self.assertTrue(all(elem in ["a", "b", "c", "d"] for elem in result))
+        self.assertTrue(
+            all(elem in [prompt_a, prompt_b, prompt_c, prompt_d] for elem in result)
+        )
 
         # Test case 5: num_images is exactly equal to len(prompts)
-        result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 3)
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 3
+        )
         self.assertEqual(len(result), 3)
-        self.assertTrue(all(elem in ["a", "b", "c"] for elem in result))
+        self.assertTrue(all(elem in [prompt_a, prompt_b, prompt_c] for elem in result))
 
         # Additional: Testing the distribution (you might want to use random.seed for deterministic results)
-        result = self.prompt_crafter.evenly_random_sample(["a", "b", "c"], 10)
-        count_a = result.count("a")
-        count_b = result.count("b")
-        count_c = result.count("c")
+        result = self.prompt_crafter.evenly_random_sample(
+            [prompt_a, prompt_b, prompt_c], 10
+        )
+        count_a = result.count(prompt_a)
+        count_b = result.count(prompt_b)
+        count_c = result.count(prompt_c)
 
         self.assertTrue(count_a >= 3 and count_a <= 4)
         self.assertTrue(count_b >= 3 and count_b <= 4)
         self.assertTrue(count_c >= 3 and count_c <= 4)
+
+    def test_set_seed_with_specific_value(self):
+        specific_seed = 12345
+        self.prompt_crafter.set_seed(specific_seed)
+        # Save the state of the random generator after setting the seed
+        state_after_seed = random.getstate()
+        # Generate some random choices
+        choices_after_seed = [random.choice(range(100)) for _ in range(10)]
+        # Reset the seed and state
+        self.prompt_crafter.set_seed(specific_seed)
+        random.setstate(state_after_seed)
+        # Generate choices again and they should be the same
+        new_choices_after_seed = [random.choice(range(100)) for _ in range(10)]
+        self.assertEqual(
+            choices_after_seed,
+            new_choices_after_seed,
+            "The random choices should be the same after setting the same seed.",
+        )
+
+    def test_set_seed_without_value(self):
+        self.prompt_crafter.set_seed()
+        # Check if the seed is not None which would imply a seed has been set
+        self.assertIsNotNone(
+            random.getstate(), "Seed should be set even if no value is provided."
+        )
 
 
 if __name__ == "__main__":

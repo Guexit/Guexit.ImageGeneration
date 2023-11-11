@@ -22,7 +22,7 @@ jobs:
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
       - name: Extract version from pyproject.toml
-        run: echo "LIB_VERSION=$(grep -oP '(?<=version = \")[^\"]+' pyproject.toml)" >> $GITHUB_ENV
+        run: echo "LIB_VERSION=$(awk '/^\[tool.poetry\]/ {flag=1; next} /version/ && flag {print $3; flag=0}' pyproject.toml | tr -d '\"')" >> $GITHUB_ENV
 
       - name: Check Docker Version
         run: docker --version
