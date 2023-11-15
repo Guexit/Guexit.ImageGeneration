@@ -14,7 +14,8 @@ python = "^3.10"
 fastapi = "^0.100.0"
 uvicorn = "^0.23.0"
 transformers = "^4.30.2"
-diffusers = "^0.21.0"
+# This allows to use  segmind/SSD-1B model: https://huggingface.co/segmind/SSD-1B/discussions/27#654a28835cc8b44229f4d7ee
+diffusers = { git = "https://github.com/huggingface/diffusers" }
 ftfy = "^6.1.1"
 pydantic = "^1.10.2"
 accelerate = "^0.21.0"
