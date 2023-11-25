@@ -42,9 +42,34 @@ class TestModelComparisonExperiment(unittest.TestCase):
         }
 
         model = MockStableDiffusionHandler("model_path")
-        image = self.experiment.generate_image(prompt, model, "model_path")
+        image, time_taken = self.experiment.generate_image(prompt, model, "model_path")
 
         self.assertIsInstance(image, Image.Image)
+        self.assertIsInstance(time_taken, float)
+
+        # Check model params update
+        model_params = {"height": "512"}
+
+        # Expected prompt after update
+        expected_prompt = prompt.copy()
+        expected_prompt.update(model_params)
+
+        # Call the function with model parameters
+        self.experiment.generate_image(prompt, model, "model_path", model_params)
+
+        # Check if the internal prompt within the function gets updated correctly
+        actual_prompt = model.txt_to_img.call_args[0][0]
+        for key, value in expected_prompt.items():
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if k == "guidance_scale":
+                        v = float(v)
+                        av = float(actual_prompt.dict()[key][k])
+                        self.assertEqual(v, av)
+                    else:
+                        self.assertEqual(str(v), str(actual_prompt.dict()[key][k]))
+            else:
+                self.assertEqual(str(value), str(actual_prompt.dict()[key]))
 
     def test_create_comparison_image(self):
         image1 = Image.new("RGB", (100, 100), "red")
@@ -52,8 +77,20 @@ class TestModelComparisonExperiment(unittest.TestCase):
         prompt = {"prompt": {"positive": "test prompt"}, "seed": 1}
         model_name_1 = "model1"
         model_name_2 = "model2"
+        time1 = 1.0
+        time2 = 2.0
+        params1 = {"height": 512}
+        params2 = {"width": 512}
         comparison_image = self.experiment.create_comparison_image(
-            image1, image2, prompt, model_name_1, model_name_2
+            image1,
+            image2,
+            time1,
+            time2,
+            prompt,
+            model_name_1,
+            model_name_2,
+            params1,
+            params2,
         )
         self.assertIsInstance(comparison_image, Image.Image)
 

@@ -15,14 +15,12 @@ if __name__ == "__main__":
 
     # Text to image input args
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model_path", type=str, default="runwayml/stable-diffusion-v1-5"
-    )
-    parser.add_argument("--model_scheduler", type=str, default="dpmsolver_multistep")
+    parser.add_argument("--model_path", type=str, default="segmind/SSD-1B")
+    parser.add_argument("--model_scheduler", type=str, default="euler_a")
     parser.add_argument(
         "--positive_prompt",
         type=str,
-        default="Futurist style haunted limbo with teleportation gateway, android companion at the end of a rainbow close-up, 8k, high quality",
+        default="3d 32-bit isometric anime ice cream stand with an old woman",
     )
     parser.add_argument(
         "--negative_prompt",
@@ -32,8 +30,8 @@ if __name__ == "__main__":
     parser.add_argument("--guidance_scale", type=float, default=7)
     parser.add_argument("--height", type=int, default=688)
     parser.add_argument("--width", type=int, default=512)
-    parser.add_argument("--num_inference_steps", type=int, default=25)
-    parser.add_argument("--num_images", type=int, default=3)
+    parser.add_argument("--num_inference_steps", type=int, default=35)
+    parser.add_argument("--num_images", type=int, default=1)
     parser.add_argument("--seed", type=int, default=-1)
     args = parser.parse_args()
     # Call Image Generation API

@@ -5,13 +5,10 @@ from collections import Counter
 from typing import Dict, List, Optional
 
 from image_generation.core.styles import (
-    actions,
     adjectives,
     characters,
     contexts,
     creatures,
-    famous_characters,
-    nouns,
     objects,
     settings,
     themes,
@@ -38,10 +35,7 @@ class PromptCrafter:
             "creatures": creatures,
             "contexts": contexts,
             "adjectives": adjectives,
-            "nouns": nouns,
             "themes": themes,
-            "actions": actions,
-            "famous_characters": famous_characters,
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")

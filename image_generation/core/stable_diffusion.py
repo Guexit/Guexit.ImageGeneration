@@ -51,6 +51,7 @@ class StableDiffusionHandler:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_path,
             torch_dtype=torch_dtype,
+            variant="fp16",
             use_safetensors=True,
         )
         # Recommended if computer has < 16 GB of RAM

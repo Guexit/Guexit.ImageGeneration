@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Text to style input args
     parser = argparse.ArgumentParser()
     parser.add_argument("--style", type=str, default="general")
-    parser.add_argument("--num_images", type=int, default=1)
+    parser.add_argument("--num_images", type=int, default=3)
     args = parser.parse_args()
 
     # Call Image Generation API
