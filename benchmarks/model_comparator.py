@@ -54,7 +54,13 @@ class ModelComparisonExperiment:
         prompts = [{**prompt, "seed": random.randint(0, 1000)} for prompt in prompts]
         return prompts
 
-    def generate_image(self, prompt, model, model_path, model_params):
+    def generate_image(
+        self,
+        prompt: dict,
+        model: StableDiffusionHandler,
+        model_path: str,
+        model_params: dict = {},
+    ):
         """
         Generates an image for a given prompt and model.
 
@@ -80,15 +86,15 @@ class ModelComparisonExperiment:
 
     def create_comparison_image(
         self,
-        image1,
-        image2,
-        time1,
-        time2,
-        prompt,
-        model_name_1,
-        model_name_2,
-        params1,
-        params2,
+        image1: Image.Image,
+        image2: Image.Image,
+        time1: float,
+        time2: float,
+        prompt: dict,
+        model_name_1: str,
+        model_name_2: str,
+        params1: dict = {},
+        params2: dict = {},
     ):
         """
         Creates a comparison image for two given images and prompts.
@@ -180,14 +186,20 @@ class ModelComparisonExperiment:
         bg_color = (255, 255, 255, 128)
 
         # Prepare parameter and time information for image1
-        param_text_1 = ", ".join([f"{k}: {v}" for k, v in params1.items()])
-        time_text_1 = f"Time: {time1:.2f}s"
-        info_lines_1 = [param_text_1, time_text_1]
+        if params1 != {}:
+            param_text_1 = ", ".join([f"{k}: {v}" for k, v in params1.items()])
+            time_text_1 = f"Time: {time1:.2f}s"
+            info_lines_1 = [param_text_1, time_text_1]
+        else:
+            info_lines_1 = [time_text_1]
 
         # Prepare parameter and time information for image2
-        param_text_2 = ", ".join([f"{k}: {v}" for k, v in params2.items()])
-        time_text_2 = f"Time: {time2:.2f}s"
-        info_lines_2 = [param_text_2, time_text_2]
+        if params2 != {}:
+            param_text_2 = ", ".join([f"{k}: {v}" for k, v in params2.items()])
+            time_text_2 = f"Time: {time2:.2f}s"
+            info_lines_2 = [param_text_2, time_text_2]
+        else:
+            info_lines_2 = [time_text_2]
 
         # Draw parameter and time information for image1
         draw_text_with_background(
