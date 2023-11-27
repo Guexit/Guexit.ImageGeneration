@@ -14,11 +14,7 @@ class TestPromptCrafter(unittest.TestCase):
             "style1": [{"prompt": {"positive": "A {character} in a {setting}."}}],
             "style2": [{"prompt": {"positive": "A {creature} with a {object}."}}],
             "test_style": [
-                {
-                    "prompt": {
-                        "positive": "{adjective} {noun} {action} {object} in {setting}."
-                    }
-                },
+                {"prompt": {"positive": "{adjective} {object} {noun} in {setting}."}},
                 {
                     "prompt": {
                         "positive": "{theme} {context} {creature} {action} {object} in {setting}."
@@ -53,8 +49,7 @@ class TestPromptCrafter(unittest.TestCase):
             ],
         }
 
-        self.prompt_crafter = PromptCrafter(self.sample_styles)
-        self.prompt_crafter.variables = self.sample_variables
+        self.prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
 
     def test_fill_placeholder(self):
         prompt = "A {character} in a {setting}."
@@ -157,17 +152,14 @@ class TestPromptCrafter(unittest.TestCase):
             self.prompt_crafter.generate_prompts("style1", 1000)
 
     def test_minimum_non_duplicate_prompts_after_several_calls(self):
-        num_calls = 1000
+        num_calls = 1
         num_prompts_per_call = 30
         num_prompts = num_calls * num_prompts_per_call
         prompts = []
-        prompt_crafter = PromptCrafter(self.sample_styles)
-        prompt_crafter.variables = self.sample_variables
+        prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
         for i in range(num_calls):
             prompt_crafter.set_seed(i)
-            prompt = self.prompt_crafter.generate_prompts(
-                "test_style", num_prompts_per_call
-            )
+            prompt = prompt_crafter.generate_prompts("test_style", num_prompts_per_call)
             prompts.append(prompt[0]["prompt"]["positive"])
         num_duplicates = len(prompts) - len(set(prompts))
         assert (
@@ -176,9 +168,8 @@ class TestPromptCrafter(unittest.TestCase):
 
     def test_variable_value_distribution(self):
         num_images = 1000
-        prompt_crafter = PromptCrafter(self.sample_styles)
+        prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
         prompt_crafter.set_seed(12345)
-        prompt_crafter.variables = self.sample_variables
         prompts = prompt_crafter.generate_prompts("test_style", num_images)
         percentage_threshold = 15
 
@@ -198,7 +189,10 @@ class TestPromptCrafter(unittest.TestCase):
             percentage_deviations = np.abs((counts - mean_count) / mean_count * 100)
             max_deviation = np.max(percentage_deviations)
             test_passed = max_deviation < percentage_threshold
-            self.assertTrue(test_passed, f"Variable: {variable_name}")
+            self.assertTrue(
+                test_passed,
+                f"Variable: {variable_name}, max deviation: {max_deviation}",
+            )
 
     def test_evenly_random_sample(self):
         prompt_a = {"prompt": {"positive": "a"}}

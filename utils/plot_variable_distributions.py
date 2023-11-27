@@ -145,11 +145,9 @@ if __name__ == "__main__":
     from image_generation.core.prompt_crafter import PromptCrafter
     from image_generation.core.styles import (
         STYLES,
-        actions,
         characters,
         contexts,
         creatures,
-        famous_characters,
         objects,
         settings,
         themes,
@@ -166,23 +164,19 @@ if __name__ == "__main__":
     # Define a dictionary with all variable lists
     variable_dict = {
         "themes": themes,
-        "famous_characters": famous_characters,
         "characters": characters,
         "settings": settings,
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
-        "actions": actions,
     }
     variables_to_evaluate = {
         "themes": themes,
-        "famous_characters": famous_characters,
         "characters": characters,
         "settings": settings,
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
-        "actions": actions,
     }
 
     # Use the function to count occurrences for each variable

@@ -19,7 +19,7 @@ logger = set_logger("Prompt Crafter")
 
 
 class PromptCrafter:
-    def __init__(self, styles: Dict[str, List[str]]) -> None:
+    def __init__(self, styles: Dict[str, List[str]], variables: dict = None) -> None:
         """
         Constructor for the PromptCrafter class.
 
@@ -28,14 +28,21 @@ class PromptCrafter:
         """
         logger.info("Initializing PromptCrafter...")
         self.styles = styles
+        if variables is None:
+            self.original_variables = {
+                "characters": characters,
+                "settings": settings,
+                "objects": objects,
+                "creatures": creatures,
+                "contexts": contexts,
+                "adjectives": adjectives,
+                "themes": themes,
+            }
+        else:
+            self.original_variables = variables
         self.variables = {
-            "characters": characters,
-            "settings": settings,
-            "objects": objects,
-            "creatures": creatures,
-            "contexts": contexts,
-            "adjectives": adjectives,
-            "themes": themes,
+            key: random.sample(val, len(val))
+            for key, val in self.original_variables.items()
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
@@ -53,30 +60,32 @@ class PromptCrafter:
         random.seed(seed)
         logger.info(f"Set seed: {seed}")
 
+    def refill_and_shuffle(self, var: str):
+        """
+        Refill and shuffle the variable pool when it's empty.
+        """
+        self.variables[var] = random.sample(
+            self.original_variables[var], len(self.original_variables[var])
+        )
+        logger.debug(f"Refilled and shuffled variable pool for: {var}")
+
     def fill_placeholder(
         self, prompt: str, var: str, singular: str, plural: str
     ) -> str:
-        """
-        Replace placeholders in the prompt with actual values.
-
-        Args:
-            prompt (str): The initial prompt with placeholders.
-            var (str): The variable to be replaced in the prompt.
-            singular (str): The singular form of the variable.
-            plural (str): The plural form of the variable.
-
-        Returns:
-            str: The prompt with placeholders replaced with actual values.
-        """
         logger.debug(f"Filling placeholders for variable: {var}")
         if singular in prompt:
-            prompt = prompt.replace(singular, random.choice(self.variables[var]))
+            if len(self.variables[var]) == 0:
+                self.refill_and_shuffle(var)
+            choice = self.variables[var].pop()
+            prompt = prompt.replace(singular, choice)
         if plural in prompt:
-            sample_size = min(len(self.variables[var]), random.randint(2, 4))
-            prompt = prompt.replace(
-                plural,
-                ", ".join(random.sample(self.variables[var], sample_size)),
-            )
+            choices = []
+            sample_size = min(len(self.original_variables[var]), random.randint(2, 4))
+            for _ in range(sample_size):
+                if len(self.variables[var]) == 0:
+                    self.refill_and_shuffle(var)
+                choices.append(self.variables[var].pop())
+            prompt = prompt.replace(plural, ", ".join(choices))
         logger.debug(f"Filled prompt: {prompt}")
         return prompt
 
@@ -92,15 +101,15 @@ class PromptCrafter:
         """
         logger.info("Calculating unique combinations...")
         unique_combinations = 1
-        for var in self.variables.keys():
+        for var in self.original_variables.keys():
             count = prompt.count("{" + var[:-1] + "}")
-            unique_combinations *= len(self.variables[var]) ** count
+            unique_combinations *= len(self.original_variables[var]) ** count
         logger.info(f"Unique combinations: {unique_combinations}")
         return unique_combinations
 
     def evenly_random_sample(self, prompts: List[dict], num_images: int) -> List[dict]:
         """
-        Generates a random sample of prompts from a given list of prompts.
+        Generates a random sample of template prompts from a given list of template prompts given a number of images.
         """
         logger.info("Performing evenly random sampling...")
 
@@ -182,7 +191,7 @@ class PromptCrafter:
             num_images_prompt = len(prompts)
             if unique_combinations < num_images_prompt:
                 logger.warning(
-                    f"Warning: Not enough unique combinations for template '{positive_prompt}'. Duplicates will be allowed."
+                    f"Warning: Not enough unique combinations for template '{positive_prompt}': {unique_combinations}. Duplicates will be allowed."
                 )
             for prompt in prompts:
                 new_prompt = copy.deepcopy(prompt)
@@ -203,7 +212,6 @@ class PromptCrafter:
                 unique_prompts[positive_prompt].append(filled_prompt)
                 new_prompt["prompt"]["positive"] = copy.deepcopy(filled_prompt)
                 return_prompts.append(new_prompt)
-
         return return_prompts
 
 
@@ -217,6 +225,6 @@ if __name__ == "__main__":
 
     # Generate prompts
     style_key = "general"
-    num_images = 3
+    num_images = 7
     prompts = prompt_crafter.generate_prompts(style_key, num_images)
     print(prompts)
