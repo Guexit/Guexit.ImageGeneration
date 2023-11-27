@@ -9,10 +9,14 @@ coverage:
   status:
     project:
       default:
-        threshold: 5%  # Allow up to 5% decrease
+        target: auto
+        threshold: 5%
+        base: auto
     patch:
       default:
-        threshold: 5%  # Allow up to 5% decrease
+        target: auto
+        threshold: 5%
+        base: auto
   round: down
   precision: 2
 
