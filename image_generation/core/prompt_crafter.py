@@ -25,6 +25,7 @@ class PromptCrafter:
 
         Args:
             styles (Dict[str, List[str]]): A dictionary containing styles as keys and list of templates as values.
+            variables (dict, optional): A dictionary containing variables as keys and lists of values as values. Defaults to None and will use the default variables.
         """
         logger.info("Initializing PromptCrafter...")
         self.styles = styles
@@ -63,6 +64,9 @@ class PromptCrafter:
     def refill_and_shuffle(self, var: str):
         """
         Refill and shuffle the variable pool when it's empty.
+
+        Args:
+            var (str): The variable to refill and shuffle.
         """
         self.variables[var] = random.sample(
             self.original_variables[var], len(self.original_variables[var])
@@ -72,6 +76,18 @@ class PromptCrafter:
     def fill_placeholder(
         self, prompt: str, var: str, singular: str, plural: str
     ) -> str:
+        """
+        Fill a placeholder in a prompt string with a random value from a variable pool.
+
+        Args:
+            prompt (str): The prompt string containing variables enclosed in curly braces.
+            var (str): The variable to fill.
+            singular (str): The singular placeholder to replace.
+            plural (str): The plural placeholder to replace.
+
+        Returns:
+            str: The filled prompt string.
+        """
         logger.debug(f"Filling placeholders for variable: {var}")
         if singular in prompt:
             if len(self.variables[var]) == 0:
@@ -93,7 +109,7 @@ class PromptCrafter:
         """
         Calculate the number of unique combinations based on a given prompt string.
 
-        Parameters:
+        Args:
             prompt (str): The prompt string containing variables enclosed in curly braces.
 
         Returns:
@@ -110,6 +126,13 @@ class PromptCrafter:
     def evenly_random_sample(self, prompts: List[dict], num_images: int) -> List[dict]:
         """
         Generates a random sample of template prompts from a given list of template prompts given a number of images.
+
+        Args:
+            prompts (List[dict]): A list of template prompts.
+            num_images (int): The number of images to generate.
+
+        Returns:
+            List[dict]: A list of template prompts.
         """
         logger.info("Performing evenly random sampling...")
 
@@ -159,7 +182,6 @@ class PromptCrafter:
         Args:
             style_key (str): The style key.
             num_images (int): The number of images for each prompt.
-            seed (Optional[int]): The seed to use for the random number generator. Defaults to None and will use the current time.
 
         Returns:
             List[str]: A list of generated prompts.
