@@ -1,6 +1,7 @@
 import copy
 import datetime
 import random
+import re
 from collections import Counter
 from typing import Dict, List, Optional
 
@@ -42,8 +43,8 @@ class PromptCrafter:
         else:
             self.original_variables = variables
         self.variables = {
-            key: random.sample(val, len(val))
-            for key, val in self.original_variables.items()
+            var: self.variable_random_sampling(var)
+            for var in self.original_variables.keys()
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
@@ -61,16 +62,46 @@ class PromptCrafter:
         random.seed(seed)
         logger.info(f"Set seed: {seed}")
 
-    def refill_and_shuffle(self, var: str):
+    def variable_random_sampling(self, var: str) -> None:
+        probability_sampled = self.variable_probability_sampling(var)
+        return random.sample(probability_sampled, len(probability_sampled))
+
+    def variable_probability_sampling(self, var: str) -> None:
+        """
+        If the variable value has a ':p' suffix, sample the variable with the given 'probability'.
+        Valid values for 'probability' are 1, 2, 3, 4, 5, etc.
+        For simplicity, we will just copy-paste that variable value that many times.
+
+        Args:
+            var (str): The variable to sample.
+        """
+        logger.debug(f"Performing variable probability sampling for: {var}")
+        if var not in self.original_variables:
+            logger.error(f"'{var}' is not a valid variable.")
+            raise ValueError(f"'{var}' is not a valid variable.")
+        new_values = []
+        for value in self.original_variables[var]:
+            match = re.search(r":(\d+)$", value)
+            if match:
+                probability = int(match.group(1))
+                for _ in range(probability):
+                    new_values.append(value[: -len(match.group(0))])
+            else:
+                new_values.append(value)
+        logger.debug(f"Performed variable probability sampling for: {var}")
+        return new_values
+
+    def refill_and_shuffle(self, var: str) -> None:
         """
         Refill and shuffle the variable pool when it's empty.
 
         Args:
             var (str): The variable to refill and shuffle.
         """
-        self.variables[var] = random.sample(
-            self.original_variables[var], len(self.original_variables[var])
-        )
+        if var not in self.original_variables:
+            logger.error(f"'{var}' is not a valid variable.")
+            raise ValueError(f"'{var}' is not a valid variable.")
+        self.variables[var] = self.variable_random_sampling(var)
         logger.debug(f"Refilled and shuffled variable pool for: {var}")
 
     def fill_placeholder(
