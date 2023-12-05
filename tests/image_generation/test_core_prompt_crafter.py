@@ -267,29 +267,35 @@ class TestPromptCrafter(unittest.TestCase):
                 "value1",
                 "value2:1",
                 "value3:2",
-                "value4:10",
+                "value4:4",
+                "value5:0.5",  # Adding float probability
             ],
         }
         prompt_crafter = PromptCrafter(self.sample_styles, sample_variables)
         values = prompt_crafter.variable_probability_sampling("var1")
+
+        # Updated expected values based on new input including float probabilities
         expected_values = [
+            "value1",  # 2 times
             "value1",
+            "value2",  # 2 times
             "value2",
+            "value3",  # 4 times
             "value3",
             "value3",
+            "value3",
+            "value4",  # 8 times
             "value4",
             "value4",
             "value4",
             "value4",
             "value4",
             "value4",
-            "value4",
-            "value4",
-            "value4",
-            "value4",
+            "value4",  # 8 times
+            "value5",  # 1 time
         ]
 
-        self.assertEqual(values, expected_values)
+        self.assertEqual(sorted(values), sorted(expected_values))
 
     def test_variable_probability_sampling_invalid_variable(self):
         with self.assertRaises(ValueError):

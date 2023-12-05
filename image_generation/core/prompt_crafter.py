@@ -3,7 +3,10 @@ import datetime
 import random
 import re
 from collections import Counter
+from fractions import Fraction
 from typing import Dict, List, Optional
+
+import numpy as np
 
 from image_generation.core.styles import (
     adjectives,
@@ -17,6 +20,10 @@ from image_generation.core.styles import (
 from image_generation.custom_logging import set_logger
 
 logger = set_logger("Prompt Crafter")
+
+
+def lcm(denominators):
+    return np.lcm.reduce(denominators)
 
 
 class PromptCrafter:
@@ -62,11 +69,20 @@ class PromptCrafter:
         random.seed(seed)
         logger.info(f"Set seed: {seed}")
 
-    def variable_random_sampling(self, var: str) -> None:
+    def variable_random_sampling(self, var: str) -> List[str]:
+        """
+        Sample the variable randomly.
+
+        Args:
+            var (str): The variable to sample.
+
+        Returns:
+            List[str]: A list of sampled values.
+        """
         probability_sampled = self.variable_probability_sampling(var)
         return random.sample(probability_sampled, len(probability_sampled))
 
-    def variable_probability_sampling(self, var: str) -> None:
+    def variable_probability_sampling(self, var: str) -> List[str]:
         """
         If the variable value has a ':p' suffix, sample the variable with the given 'probability'.
         Valid values for 'probability' are 1, 2, 3, 4, 5, etc.
@@ -74,20 +90,39 @@ class PromptCrafter:
 
         Args:
             var (str): The variable to sample.
+
+        Returns:
+            List[str]: A list of sampled values.
         """
         logger.debug(f"Performing variable probability sampling for: {var}")
+
         if var not in self.original_variables:
             logger.error(f"'{var}' is not a valid variable.")
             raise ValueError(f"'{var}' is not a valid variable.")
-        new_values = []
+
+        # Parse probabilities and convert them to fractions
+        probabilities = []
         for value in self.original_variables[var]:
-            match = re.search(r":(\d+)$", value)
+            match = re.search(r":([\d\.]+)$", value)
             if match:
-                probability = int(match.group(1))
-                for _ in range(probability):
-                    new_values.append(value[: -len(match.group(0))])
+                prob = Fraction(match.group(1))
+                probabilities.append(prob)
             else:
-                new_values.append(value)
+                probabilities.append(Fraction(1))
+
+        # Calculate LCM of denominators
+        lcm_denominator = lcm([prob.denominator for prob in probabilities])
+
+        # Scale probabilities
+        scaled_probs = [int(prob * lcm_denominator) for prob in probabilities]
+
+        # Sampling
+        new_values = []
+        for idx, value in enumerate(self.original_variables[var]):
+            scaled_prob = scaled_probs[idx]
+            base_value = value.split(":")[0]
+            new_values.extend([base_value] * scaled_prob)
+
         logger.debug(f"Performed variable probability sampling for: {var}")
         return new_values
 
