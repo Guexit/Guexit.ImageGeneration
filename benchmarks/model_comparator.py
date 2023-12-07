@@ -76,9 +76,9 @@ class ModelComparisonExperiment:
         model_prompt = prompt.copy()
         model_prompt["model_path"] = model_path
         model_params_copy = model_params.copy()
-        if 'prompt' in model_params:
-            model_prompt['prompt'].update(model_params_copy['prompt'])
-            del model_params_copy['prompt']
+        if "prompt" in model_params:
+            model_prompt["prompt"].update(model_params_copy["prompt"])
+            del model_params_copy["prompt"]
         model_prompt.update(model_params_copy)
 
         start_time = time.time()
