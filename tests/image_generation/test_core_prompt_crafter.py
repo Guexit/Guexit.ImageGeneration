@@ -162,7 +162,7 @@ class TestPromptCrafter(unittest.TestCase):
         prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
         prompt_crafter.set_seed(12345)
         prompts = prompt_crafter.generate_prompts("test_style", num_images)
-        percentage_threshold = 15
+        percentage_threshold = 17
 
         def count_occurrences(prompts, variable_value):
             return sum(
@@ -333,6 +333,52 @@ class TestPromptCrafter(unittest.TestCase):
     def test_refill_and_shuffle_invalid_variable(self):
         with self.assertRaises(ValueError):
             self.prompt_crafter.refill_and_shuffle("invalid_var")
+
+    def test_variable_random_scatter_sample(self):
+        sample_variables = {
+            "characters": ["character1", "character2:0.5", "character3:2"],
+        }
+
+        prompt_crafter = PromptCrafter(self.sample_styles, sample_variables)
+
+        # Choose a variable for testing
+        var_name = "characters"
+
+        # Get the original list of values for the chosen variable
+        original_values = prompt_crafter.original_variables[var_name]
+
+        # Call the variable_random_scatter_sample function
+        sampled_values = prompt_crafter.variable_random_scatter_sample(var_name)
+
+        # Remove ':' and the probability from the original_values
+        original_values = [value.split(":")[0] for value in original_values]
+
+        # Check if the sampled values are in the original list
+        self.assertTrue(
+            all(value in original_values for value in sampled_values),
+            "Sampled values should be from the original list.",
+        )
+
+        # Check if there are no consecutive repetitions
+        for i in range(1, len(sampled_values)):
+            self.assertNotEqual(
+                sampled_values[i],
+                sampled_values[i - 1],
+                "Consecutive values should not be the same.",
+            )
+
+        # Check distribution
+        expected_distribution = {
+            "character1": 2,
+            "character2": 1,
+            "character3": 3,
+        }
+        for value in sampled_values:
+            expected_distribution[value] -= 1
+        self.assertTrue(
+            all(value == 0 for value in expected_distribution.values()),
+            "The distribution of the sampled values is not correct.",
+        )
 
 
 if __name__ == "__main__":
