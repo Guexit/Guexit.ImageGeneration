@@ -21,6 +21,16 @@ def extract_and_count_variables(prompts, variable_dict, variables_to_evaluate):
         dict: A dictionary where each key is a variable name and each value is a Counter object
             containing the counts of each value for that variable.
     """
+    # Remove ':' and what's after it from the variable values in variable_dict and variables_to_evaluate
+    variable_dict = {
+        var_name: [value.split(":")[0] for value in values]
+        for var_name, values in variable_dict.items()
+    }
+    variables_to_evaluate = {
+        var_name: [value.split(":")[0] for value in values]
+        for var_name, values in variables_to_evaluate.items()
+    }
+
     # Initialize a dictionary to hold counters for each variable
     counters = {var_name: Counter() for var_name in variable_dict}
 
@@ -140,8 +150,6 @@ def plotly_distributions_with_separate_test_results(counters, percentage_thresho
 
 
 if __name__ == "__main__":
-    from collections import Counter
-
     from image_generation.core.prompt_crafter import PromptCrafter
     from image_generation.core.styles import (
         STYLES,
@@ -158,7 +166,7 @@ if __name__ == "__main__":
 
     # Generate prompts using the "general" style key
     style_key = "general"
-    num_images = 500000  # Adjust the number as needed for your analysis
+    num_images = 100000  # Adjust the number as needed for your analysis
     generated_prompts = prompt_crafter.generate_prompts(style_key, num_images)
 
     # Define a dictionary with all variable lists

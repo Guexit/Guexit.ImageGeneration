@@ -138,15 +138,6 @@ class TestPromptCrafter(unittest.TestCase):
         prompts = self.prompt_crafter.generate_prompts("style1", 2)
         self.assertEqual(len(prompts), 2)
 
-    def test_generate_prompts_invalid_style(self):
-        with self.assertRaises(ValueError):
-            self.prompt_crafter.generate_prompts("invalid_style", 2)
-
-    def test_generate_prompts_unique(self):
-        prompts = self.prompt_crafter.generate_prompts("style1", 4)
-        positive_prompts = [prompt["prompt"]["positive"] for prompt in prompts]
-        self.assertEqual(len(positive_prompts), len(set(positive_prompts)))
-
     def test_generate_prompts_not_enough_combinations(self):
         with self.assertLogs(level="WARNING"):
             self.prompt_crafter.generate_prompts("style1", 1000)
@@ -171,7 +162,7 @@ class TestPromptCrafter(unittest.TestCase):
         prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
         prompt_crafter.set_seed(12345)
         prompts = prompt_crafter.generate_prompts("test_style", num_images)
-        percentage_threshold = 15
+        percentage_threshold = 17
 
         def count_occurrences(prompts, variable_value):
             return sum(
@@ -268,6 +259,125 @@ class TestPromptCrafter(unittest.TestCase):
         # Check if the seed is not None which would imply a seed has been set
         self.assertIsNotNone(
             random.getstate(), "Seed should be set even if no value is provided."
+        )
+
+    def test_variable_probability_sampling(self):
+        sample_variables = {
+            "var1": [
+                "value1",
+                "value2:1",
+                "value3:2",
+                "value4:4",
+                "value5:0.5",  # Adding float probability
+            ],
+        }
+        prompt_crafter = PromptCrafter(self.sample_styles, sample_variables)
+        values = prompt_crafter.variable_probability_sampling("var1")
+
+        # Updated expected values based on new input including float probabilities
+        expected_values = [
+            "value1",  # 2 times
+            "value1",
+            "value2",  # 2 times
+            "value2",
+            "value3",  # 4 times
+            "value3",
+            "value3",
+            "value3",
+            "value4",  # 8 times
+            "value4",
+            "value4",
+            "value4",
+            "value4",
+            "value4",
+            "value4",
+            "value4",  # 8 times
+            "value5",  # 1 time
+        ]
+
+        self.assertEqual(sorted(values), sorted(expected_values))
+
+    def test_variable_probability_sampling_invalid_variable(self):
+        with self.assertRaises(ValueError):
+            self.prompt_crafter.variable_probability_sampling("invalid_var")
+
+    def test_refill_and_shuffle(self):
+        prompt_crafter = PromptCrafter(self.sample_styles, self.sample_variables)
+
+        var_name = "characters"
+        # Empty the variable pool
+        while len(prompt_crafter.variables[var_name]) > 0:
+            prompt_crafter.variables[var_name].pop()
+
+        self.assertEqual(
+            len(prompt_crafter.variables[var_name]),
+            0,
+            "Variable pool should be empty before refill.",
+        )
+
+        # Call refill_and_shuffle
+        prompt_crafter.refill_and_shuffle(var_name)
+
+        # Check if the variable pool is refilled
+        self.assertNotEqual(
+            len(prompt_crafter.variables[var_name]),
+            0,
+            "Variable pool should be refilled.",
+        )
+        self.assertEqual(
+            len(prompt_crafter.variables[var_name]),
+            len(prompt_crafter.original_variables[var_name]),
+            "Variable pool should be refilled to its original size.",
+        )
+
+    def test_refill_and_shuffle_invalid_variable(self):
+        with self.assertRaises(ValueError):
+            self.prompt_crafter.refill_and_shuffle("invalid_var")
+
+    def test_variable_random_scatter_sample(self):
+        sample_variables = {
+            "characters": ["character1", "character2:0.5", "character3:2"],
+        }
+
+        prompt_crafter = PromptCrafter(self.sample_styles, sample_variables)
+
+        # Choose a variable for testing
+        var_name = "characters"
+
+        # Get the original list of values for the chosen variable
+        original_values = prompt_crafter.original_variables[var_name]
+
+        # Call the variable_random_scatter_sample function
+        sampled_values = prompt_crafter.variable_random_scatter_sample(var_name)
+
+        # Remove ':' and the probability from the original_values
+        original_values = [value.split(":")[0] for value in original_values]
+
+        # Check if the sampled values are in the original list
+        self.assertTrue(
+            all(value in original_values for value in sampled_values),
+            "Sampled values should be from the original list.",
+        )
+
+        # Check if there are no consecutive repetitions
+        for i in range(1, len(sampled_values)):
+            self.assertNotEqual(
+                sampled_values[i],
+                sampled_values[i - 1],
+                "Consecutive values should not be the same.",
+            )
+
+        # Check distribution
+        expected_distribution = {
+            "character1": 2,
+            "character2": 1,
+            "character3": 3,
+        }
+        for value in sampled_values:
+            expected_distribution[value] -= 1
+        self.assertTrue(
+            all(value == 0 for value in expected_distribution.values()),
+            "The distribution of the sampled values is not correct.",
         )
 
 

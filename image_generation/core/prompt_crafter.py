@@ -1,8 +1,12 @@
 import copy
 import datetime
 import random
+import re
 from collections import Counter
+from fractions import Fraction
 from typing import Dict, List, Optional
+
+import numpy as np
 
 from image_generation.core.styles import (
     adjectives,
@@ -18,6 +22,10 @@ from image_generation.custom_logging import set_logger
 logger = set_logger("Prompt Crafter")
 
 
+def lcm(denominators):
+    return np.lcm.reduce(denominators)
+
+
 class PromptCrafter:
     def __init__(self, styles: Dict[str, List[str]], variables: dict = None) -> None:
         """
@@ -25,6 +33,7 @@ class PromptCrafter:
 
         Args:
             styles (Dict[str, List[str]]): A dictionary containing styles as keys and list of templates as values.
+            variables (dict, optional): A dictionary containing variables as keys and lists of values as values. Defaults to None and will use the default variables.
         """
         logger.info("Initializing PromptCrafter...")
         self.styles = styles
@@ -41,8 +50,8 @@ class PromptCrafter:
         else:
             self.original_variables = variables
         self.variables = {
-            key: random.sample(val, len(val))
-            for key, val in self.original_variables.items()
+            var: self.variable_random_scatter_sample(var)
+            for var in self.original_variables.keys()
         }
         logger.debug(f"Loaded styles: {self.styles.keys()}")
         logger.debug(f"Loaded variables: {self.variables.keys()}")
@@ -60,18 +69,106 @@ class PromptCrafter:
         random.seed(seed)
         logger.info(f"Set seed: {seed}")
 
-    def refill_and_shuffle(self, var: str):
+    def variable_random_scatter_sample(self, var: str) -> List[str]:
+        """
+        Sample the variable randomly and scatterly using probabilities.
+
+        Args:
+            var (str): The variable to sample.
+
+        Returns:
+            List[str]: A list of sampled values.
+        """
+        # Sample the variable with the given probability
+        probability_sampled = self.variable_probability_sampling(var)
+
+        # Sample randomly and scatterly, avoiding consecutive repetitions
+        sample_size = len(probability_sampled)
+        shuffled_lst = probability_sampled[:]
+        random.shuffle(shuffled_lst)
+
+        scattered_sample = []
+        for value in shuffled_lst:
+            if not scattered_sample or value != scattered_sample[-1]:
+                scattered_sample.append(value)
+                if len(scattered_sample) == sample_size:
+                    break
+
+        return scattered_sample
+
+    def variable_probability_sampling(self, var: str) -> List[str]:
+        """
+        If the variable value has a ':p' suffix, sample the variable with the given 'probability'.
+        Valid values for 'probability' are 0.25, 0.5, 1, 2, 3, 4, 5, etc.
+        Setting float values less than 1 will result in the rest of the values being present at least more than once.
+        For simplicity, we will just copy-paste that variable value that many times.
+
+        Args:
+            var (str): The variable to sample.
+
+        Returns:
+            List[str]: A list of sampled values.
+        """
+        logger.debug(f"Performing variable probability sampling for: {var}")
+
+        if var not in self.original_variables:
+            logger.error(f"'{var}' is not a valid variable.")
+            raise ValueError(f"'{var}' is not a valid variable.")
+
+        # Parse probabilities and convert them to fractions
+        probabilities = []
+        for value in self.original_variables[var]:
+            match = re.search(r":([\d\.]+)$", value)
+            if match:
+                prob = Fraction(match.group(1))
+                probabilities.append(prob)
+            else:
+                probabilities.append(Fraction(1))
+
+        # Calculate LCM of denominators
+        lcm_denominator = lcm([prob.denominator for prob in probabilities])
+
+        # Scale probabilities
+        scaled_probs = [int(prob * lcm_denominator) for prob in probabilities]
+
+        # Sampling
+        new_values = []
+        for idx, value in enumerate(self.original_variables[var]):
+            scaled_prob = scaled_probs[idx]
+            base_value = value.split(":")[0]
+            new_values.extend([base_value] * scaled_prob)
+
+        logger.debug(f"Performed variable probability sampling for: {var}")
+        return new_values
+
+    def refill_and_shuffle(self, var: str) -> None:
         """
         Refill and shuffle the variable pool when it's empty.
+
+        Args:
+            var (str): The variable to refill and shuffle.
         """
-        self.variables[var] = random.sample(
-            self.original_variables[var], len(self.original_variables[var])
-        )
+        if var not in self.original_variables:
+            logger.error(f"'{var}' is not a valid variable.")
+            raise ValueError(f"'{var}' is not a valid variable.")
+        self.variables[var] = self.variable_random_scatter_sample(var)
         logger.debug(f"Refilled and shuffled variable pool for: {var}")
 
     def fill_placeholder(
         self, prompt: str, var: str, singular: str, plural: str
     ) -> str:
+        """
+        Fill a placeholder in a prompt string with a random value from a variable pool.
+
+        Args:
+            prompt (str): The prompt string containing variables enclosed in curly braces.
+            var (str): The variable to fill.
+            singular (str): The singular placeholder to replace.
+            plural (str): The plural placeholder to replace.
+
+        Returns:
+            str: The filled prompt string.
+        """
         logger.debug(f"Filling placeholders for variable: {var}")
         if singular in prompt:
             if len(self.variables[var]) == 0:
@@ -93,7 +190,7 @@ class PromptCrafter:
         """
         Calculate the number of unique combinations based on a given prompt string.
 
-        Parameters:
+        Args:
             prompt (str): The prompt string containing variables enclosed in curly braces.
 
         Returns:
@@ -110,6 +207,13 @@ class PromptCrafter:
     def evenly_random_sample(self, prompts: List[dict], num_images: int) -> List[dict]:
         """
         Generates a random sample of template prompts from a given list of template prompts given a number of images.
+
+        Args:
+            prompts (List[dict]): A list of template prompts.
+            num_images (int): The number of images to generate.
+
+        Returns:
+            List[dict]: A list of template prompts.
         """
         logger.info("Performing evenly random sampling...")
 
@@ -159,7 +263,6 @@ class PromptCrafter:
         Args:
             style_key (str): The style key.
             num_images (int): The number of images for each prompt.
-            seed (Optional[int]): The seed to use for the random number generator. Defaults to None and will use the current time.
 
         Returns:
             List[str]: A list of generated prompts.
@@ -209,6 +312,10 @@ class PromptCrafter:
                         or len(unique_prompts[positive_prompt]) == unique_combinations
                     ):
                         break
+                    else:
+                        logger.debug(
+                            f"Duplicate prompt: {filled_prompt} for template: {positive_prompt}"
+                        )
                 unique_prompts[positive_prompt].append(filled_prompt)
                 new_prompt["prompt"]["positive"] = copy.deepcopy(filled_prompt)
                 return_prompts.append(new_prompt)
@@ -224,7 +331,8 @@ if __name__ == "__main__":
     prompt_crafter.set_seed(42)
 
     # Generate prompts
+    print(prompt_crafter.variables)
     style_key = "general"
-    num_images = 7
+    num_images = 120
     prompts = prompt_crafter.generate_prompts(style_key, num_images)
-    print(prompts)
+    # print([p["prompt"]["positive"] for p in prompts])

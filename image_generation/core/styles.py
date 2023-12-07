@@ -1102,9 +1102,9 @@ themes = [
     "Blueprint style",
     "Sketch style",
     "Doodle style",
-    "Zentangle style",
+    "Zentangle style:0.25",
     "Mosaic style",
-    "Stained Glass style",
+    "Stained Glass style:0.25",
     "Neon style",
     "Glitch Art style",
     "X-Ray style",
@@ -1128,7 +1128,7 @@ themes = [
     "Dieselpunk style",
     "Retro anime style",
     "Beksinski style",
-    "Van Gogh style",
+    "Van Gogh style:0.5",
 ]
 
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.0] - 05/12/2023
+
+- Adds probability to variables in styles
+
 ## [0.3.0] - 11/11/2023
 
 ### Added
