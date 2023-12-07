@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # Text to image input args
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str, default="segmind/SSD-1B")
+    parser.add_argument("--model_path", type=str, default="stabilityai/sdxl-turbo")
     parser.add_argument("--model_scheduler", type=str, default="euler_a")
     parser.add_argument(
         "--positive_prompt",
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--negative_prompt",
         type=str,
-        default="bad quality, text",
+        default="",
     )
     parser.add_argument("--guidance_scale", type=float, default=7)
     parser.add_argument("--height", type=int, default=688)
