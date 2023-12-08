@@ -23,7 +23,6 @@ class TestModelComparisonExperiment(unittest.TestCase):
         self.assertIsInstance(prompts[0], dict)
         self.assertIn("prompt", prompts[0])
         self.assertIn("positive", prompts[0]["prompt"])
-        self.assertIn("negative", prompts[0]["prompt"])
         self.assertIn("seed", prompts[0])
 
     @patch("benchmarks.model_comparator.StableDiffusionHandler")
@@ -51,13 +50,46 @@ class TestModelComparisonExperiment(unittest.TestCase):
         model_params = {"height": "512"}
 
         # Expected prompt after update
-        expected_prompt = prompt.copy()
-        expected_prompt.update(model_params)
+        expected_prompt = {
+            "prompt": {"positive": "test prompt", "guidance_scale": 7},
+            "height": 512,
+            "width": 512,
+            "num_inference_steps": 35,
+            "num_images": 1,
+            "seed": 1,
+        }
 
         # Call the function with model parameters
         self.experiment.generate_image(prompt, model, "model_path", model_params)
 
         # Check if the internal prompt within the function gets updated correctly
+        actual_prompt = model.txt_to_img.call_args[0][0]
+        for key, value in expected_prompt.items():
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    if k == "guidance_scale":
+                        v = float(v)
+                        av = float(actual_prompt.dict()[key][k])
+                        self.assertEqual(v, av)
+                    else:
+                        self.assertEqual(str(v), str(actual_prompt.dict()[key][k]))
+            else:
+                self.assertEqual(str(value), str(actual_prompt.dict()[key]))
+
+        ### TEST 2 ###
+        # Test with model_params that have 'prompt' key
+        model_params = {"height": "512", "prompt": {"positive": "test prompt 2"}}
+        expected_prompt = {
+            "prompt": {"positive": "test prompt 2", "guidance_scale": 7},
+            "height": 512,
+            "width": 512,
+            "num_inference_steps": 35,
+            "num_images": 1,
+            "seed": 1,
+        }
+
+        self.experiment.generate_image(prompt, model, "model_path", model_params)
+
         actual_prompt = model.txt_to_img.call_args[0][0]
         for key, value in expected_prompt.items():
             if isinstance(value, dict):

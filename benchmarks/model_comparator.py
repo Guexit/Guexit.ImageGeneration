@@ -75,7 +75,12 @@ class ModelComparisonExperiment:
         """
         model_prompt = prompt.copy()
         model_prompt["model_path"] = model_path
-        model_prompt.update(model_params)
+        model_params_copy = model_params.copy()
+        if "prompt" in model_params:
+            print("HOLA HOLA")
+            model_prompt["prompt"].update(model_params_copy["prompt"])
+            del model_params_copy["prompt"]
+        model_prompt.update(model_params_copy)
 
         start_time = time.time()
         image = model.txt_to_img(TextToImage(**model_prompt))[0]

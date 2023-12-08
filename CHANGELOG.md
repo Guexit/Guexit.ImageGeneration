@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0] - 07/12/2023
+
+- [Added] [stabilityai/sdxl-turbo](https://huggingface.co/stabilityai/sdxl-turbo) model which is x10 faster than [segmind/SSD-1B](https://huggingface.co/segmind/SSD-1B)
+- [Changed] Pytorch version from `==2.0.0` to `>=2.1.1`
+
 ## [0.4.0] - 05/12/2023
 
 - Adds probability to variables in styles
