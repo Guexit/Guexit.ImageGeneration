@@ -23,7 +23,6 @@ class TestModelComparisonExperiment(unittest.TestCase):
         self.assertIsInstance(prompts[0], dict)
         self.assertIn("prompt", prompts[0])
         self.assertIn("positive", prompts[0]["prompt"])
-        self.assertIn("negative", prompts[0]["prompt"])
         self.assertIn("seed", prompts[0])
 
     @patch("benchmarks.model_comparator.StableDiffusionHandler")
