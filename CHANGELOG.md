@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.0] - 24/12/2023
+
+- [Added] Incorporating `cloud_manager` module while removing the existing repository
+
 ## [0.5.0] - 07/12/2023
 
 - [Added] [stabilityai/sdxl-turbo](https://huggingface.co/stabilityai/sdxl-turbo) model which is x10 faster than [segmind/SSD-1B](https://huggingface.co/segmind/SSD-1B)
