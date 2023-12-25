@@ -46,7 +46,7 @@ jobs:
         run: |
           gh release create \
             --draft \
-            --notes-file "RELEASE_HEAD.md" \
+            --notes-file RELEASE.md \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             ${{ env.LIB_VERSION }}
         env:
