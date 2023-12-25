@@ -7,7 +7,6 @@ from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
 from cloud_manager.interfaces.blob_storage import BlobStorageInterface
 from cloud_manager.interfaces.service_bus import ServiceBusInterface
-
 from image_generation.custom_logging import set_logger
 from image_generation.utils import store_zip_images_temporarily, wait_for_service
 from services import config
