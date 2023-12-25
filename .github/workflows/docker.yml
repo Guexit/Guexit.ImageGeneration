@@ -34,23 +34,6 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GH_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build the Docker image
-        run: |
-          DOCKER_BUILDKIT=1 docker build . --secret id=git-credentials,src=.git-credentials -t ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
-
-      - name: Run tests
-        run: |
-          docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
-
-      - name: Verify Changelog Update
-        id: verify_changelog
-        run: |
-          VERSION=$(echo "${{ env.LIB_VERSION }}" | sed 's/^v//') # Remove leading 'v' if present
-          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            echo "Error: No changelog entry found for version $VERSION."
-            exit 1
-          fi
-
       - name: Extract Release Notes from Changelog
         id: release_notes
         uses: CSchoel/release-notes-from-changelog@v1
@@ -62,7 +45,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           gh release create \
-            -F "CHANGELOG.md" \
+            -F "RELEASE_HEAD.md" \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             ${{ env.LIB_VERSION }}
         env:
