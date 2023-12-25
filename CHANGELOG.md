@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- GitHub action to make a release.
+- GitHub action to make a release, with a changelog and a tag.
 
 ## [0.6.0] - 2023-12-24
 

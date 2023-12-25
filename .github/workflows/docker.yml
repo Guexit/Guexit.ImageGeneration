@@ -42,6 +42,15 @@ jobs:
         run: |
           docker run -p 5000:5000 ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }} sh -c "poetry run tox"
 
+      - name: Verify Changelog Update
+        id: verify_changelog
+        run: |
+          VERSION=$(echo "${{ env.LIB_VERSION }}" | sed 's/^v//') # Remove leading 'v' if present
+          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            echo "Error: No changelog entry found for version $VERSION."
+            exit 1
+          fi
+
       - name: Push to GitHub Container Registry
         if: github.ref == 'refs/heads/main'
         run: |
@@ -54,13 +63,19 @@ jobs:
           version: ${{ env.LIB_VERSION }}
           working-directory: .
 
-      - name: Create GitHub Release using GitHub CLI
+      - name: Create Git Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "unaigaraymaestre@gmail.com"
+          git config --local user.name "ugm2"
+          git tag -a "v${{ env.LIB_VERSION }}" -m "Release v${{ env.LIB_VERSION }}"
+          git push origin "v${{ env.LIB_VERSION }}"
+
+      - name: Create GitHub Release
         if: github.ref == 'refs/heads/main'
         run: |
           gh release create \
-            --draft \
-            --title "v${{ env.LIB_VERSION }}" \
-            --notes-file RELEASE.md \
+            --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             ${{ env.LIB_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
