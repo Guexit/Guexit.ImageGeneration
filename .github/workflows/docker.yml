@@ -46,3 +46,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ghcr.io/guexit/guexit-image-generation:${{ env.LIB_VERSION }}
+
+      - name: Extract Release Notes from Changelog
+        id: release_notes
+        uses: CSchoel/release-notes-from-changelog@v1
+        with:
+          version: ${{ env.LIB_VERSION }}
+          working-directory: .
+
+      - name: Create GitHub Release using GitHub CLI
+        if: github.ref == 'refs/heads/main'
+        run: |
+          gh release create \
+            --draft \
+            --title "v${{ env.LIB_VERSION }}" \
+            --notes-file RELEASE.md \
+            ${{ env.LIB_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

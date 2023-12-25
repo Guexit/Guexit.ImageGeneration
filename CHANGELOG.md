@@ -1,19 +1,39 @@
 # Changelog
 
-## [0.6.0] - 24/12/2023
+All notable changes to this project will be documented in this file.
 
-- [Added] Incorporating `cloud_manager` module while removing the existing repository
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 07/12/2023
+## [0.6.1] - 2023-12-25
 
-- [Added] [stabilityai/sdxl-turbo](https://huggingface.co/stabilityai/sdxl-turbo) model which is x10 faster than [segmind/SSD-1B](https://huggingface.co/segmind/SSD-1B)
-- [Changed] Pytorch version from `==2.0.0` to `>=2.1.1`
+### Added
 
-## [0.4.0] - 05/12/2023
+- GitHub action to make a release.
 
-- Adds probability to variables in styles
+## [0.6.0] - 2023-12-24
 
-## [0.3.0] - 11/11/2023
+### Added
+
+- `cloud_manager` module while removing the existing repository.
+
+## [0.5.0] - 2023-12-07
+
+### Added
+
+- [stabilityai/sdxl-turbo](https://huggingface.co/stabilityai/sdxl-turbo) model which is x10 faster than [segmind/SSD-1B](https://huggingface.co/segmind/SSD-1B).
+
+### Changed
+
+- Pytorch version from `==2.0.0` to `>=2.1.1`.
+
+## [0.4.0] - 2023-12-05
+
+### Added
+
+- Probability to variables in styles.
+
+## [0.3.0] - 2023-11-11
 
 ### Added
 
@@ -29,18 +49,18 @@
 
 - Updated Docker GitHub action and codecov settings.
 
-## [0.2.0] - 24/10/2023
+## [0.2.0] - 2023-10-24
 
 ### Added
 
-- Introduced safety checker with retry mechanism for NSFW content detection.
-- Added tests for the new safety checker.
+- Safety checker with retry mechanism for NSFW content detection.
+- Tests for the new safety checker.
 
 ### Fixed
 
 - Fixed seed on general style.
 
-## [0.1.3] - 23/10/2023
+## [0.1.3] - 2023-10-23
 
 ### Added
 
