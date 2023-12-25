@@ -1,17 +1,16 @@
-name: Linting
+name: Run Linting
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  workflow_call:
+    outputs:
+      commit-hash:
+        description: 'Commit hash that passed the tests'
+        value: ${{ jobs.build-and-run-tests.outputs.commit-hash }}
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-run-linting:
     runs-on: ubuntu-latest
 
     steps:
