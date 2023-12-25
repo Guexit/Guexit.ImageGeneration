@@ -45,7 +45,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           gh release create \
-            -F "RELEASE_HEAD.md" \
+            --notes-file "RELEASE_HEAD.md" \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             ${{ env.LIB_VERSION }}
         env:
