@@ -62,7 +62,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           gh release create \
-            --F "CHANGELOG.md" \
+            -F "CHANGELOG.md" \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             ${{ env.LIB_VERSION }}
         env:
