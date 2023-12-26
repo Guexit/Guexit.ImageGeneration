@@ -15,6 +15,8 @@ on:
 jobs:
   build-and-run-tests:
     runs-on: ubuntu-latest
+    outputs:
+      commit-hash: ${{ steps.output-commit-hash.outputs.commit-hash }}
 
     steps:
     - uses: actions/checkout@v2

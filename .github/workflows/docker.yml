@@ -29,6 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.build-and-run-tests.outputs.commit-hash }}
+          fetch-depth: 0
 
       - name: Remove unnecessary files
         run: |
@@ -103,6 +104,7 @@ jobs:
             --notes-file RELEASE.md \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
             --target ${{ needs.build-and-run-tests.outputs.commit-hash }} \
+            --generate-notes \
             ${{ env.LIB_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
