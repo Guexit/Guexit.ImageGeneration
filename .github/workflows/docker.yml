@@ -88,6 +88,14 @@ jobs:
           version: ${{ env.LIB_VERSION }}
           working-directory: .
 
+      - name: Create Git Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "v${{ env.LIB_VERSION }}" -m "Release v${{ env.LIB_VERSION }}"
+          git push origin "v${{ env.LIB_VERSION }}"
+
       - name: Create GitHub Release
         if: github.ref == 'refs/heads/main'
         run: |
