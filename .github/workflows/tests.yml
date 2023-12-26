@@ -2,14 +2,13 @@ name: Run Tests
 
 on:
   workflow_call:
+    secrets:
+      codecov_token:
+        required: false
     outputs:
       commit-hash:
         description: 'Commit hash that passed the tests'
         value: ${{ jobs.build-and-run-tests.outputs.commit-hash }}
-    inputs:
-      codecov_token:
-        required: false
-        type: string
   pull_request:
     branches: [ main ]
 
