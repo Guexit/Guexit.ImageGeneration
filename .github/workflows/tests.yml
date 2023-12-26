@@ -6,6 +6,10 @@ on:
       commit-hash:
         description: 'Commit hash that passed the tests'
         value: ${{ jobs.build-and-run-tests.outputs.commit-hash }}
+    inputs:
+      codecov_token:
+        required: false
+        type: string
   pull_request:
     branches: [ main ]
 
@@ -43,5 +47,11 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ inputs.codecov_token != '' && inputs.codecov_token || secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
+
+    - name: Output commit hash
+      id: output-commit-hash
+      run: |
+        echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        echo "All tests passed for commit '$(git rev-parse HEAD)'"

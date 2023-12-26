@@ -17,13 +17,18 @@ jobs:
   build-and-run-tests:
     name: Run tests
     uses: ./.github/workflows/tests.yml
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   build-test-and-publish:
+    needs: [build-and-run-linting, build-and-run-tests]
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-and-run-tests.outputs.commit-hash }}
 
       - name: Remove unnecessary files
         run: |
@@ -89,6 +94,7 @@ jobs:
           gh release create \
             --notes-file RELEASE.md \
             --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
+            --target ${{ needs.build-and-run-tests.outputs.commit-hash }} \
             ${{ env.LIB_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
