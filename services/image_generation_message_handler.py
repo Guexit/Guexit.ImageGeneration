@@ -16,11 +16,6 @@ from services.message_service_bus import MessageServiceBusClass
 logger = set_logger("Image Generation Message Handler")
 
 
-def create_message_to_send(file_blob_url: List[dict], metadata: dict) -> str:
-    message = {"url": file_blob_url, "metadata": metadata}
-    return json.dumps(message)
-
-
 class ImageGenerationMessageHandler:
     """
     A message handler that processes incoming messages to generate images

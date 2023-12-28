@@ -2,15 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from services import config
-from services.image_generation_message_handler import (
-    ImageGenerationMessageHandler,
-    create_message_to_send,
-)
-from services.message_handlers import (
-    MessageFactory,
-    TextToImageMessage,
-    TextToStyleMessage,
-)
+from services.image_generation_message_handler import ImageGenerationMessageHandler
 
 
 class TestImageGenerationMessageHandler(unittest.TestCase):
@@ -53,7 +45,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             "services.image_generation_message_handler.MessageFactory"
         )
         self.patcher_message_interface = patch(
-            "services.image_generation_message_handler.MessageInterface"
+            "services.image_generation_message_handler.MessageTypeInterface"
         )
 
     def setUpMocks(
@@ -72,7 +64,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         mock_service_bus_client = MagicMock()
         mock_from_connection_string.return_value = mock_service_bus_client
 
-        # Create a mock MessageInterface object and set the return value of its process method
+        # Create a mock MessageTypeInterface object and set the return value of its process method
         mock_message = MagicMock()
         mock_message.process.return_value = MagicMock()
         mock_message_factory.create_message.return_value = mock_message
@@ -232,15 +224,6 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self.assertEqual(metadata_list[0], {"value": 1})
 
         self.assertIsInstance(temp_dir, MagicMock)
-
-    def test_create_message_to_send(self):
-        file_object = "http://example.com/image_0.png"
-        metadata = {"prompt": {"positive": "test prompt"}, "seed": 1}
-        message = create_message_to_send(file_object, metadata)
-
-        self.assertIsInstance(message, str)
-        self.assertIn('"url":', message)
-        self.assertIn('"metadata"', message)
 
 
 if __name__ == "__main__":
