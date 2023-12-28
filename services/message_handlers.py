@@ -6,14 +6,14 @@ from image_generation.utils import call_image_generation_api
 from services import config
 
 
-class MessageInterface(ABC):
+class MessageTypeInterface(ABC):
     """
     Abstract base class for different types of messages.
     """
 
     def __init__(self, message_json: Dict[str, Any], key: str):
         """
-        Initialize a MessageInterface instance.
+        Initialize a MessageTypeInterface instance.
 
         Args:
             message_json (Dict[str, Any]): The JSON message to process.
@@ -47,7 +47,7 @@ class MessageInterface(ABC):
         return name.split("/")[-1]
 
 
-class TextToStyleMessage(MessageInterface):
+class TextToStyleMessage(MessageTypeInterface):
     """
     Class to process "text to style" messages.
     """
@@ -85,7 +85,7 @@ class TextToStyleMessage(MessageInterface):
         return super().get_file_name(file_path)
 
 
-class TextToImageMessage(MessageInterface):
+class TextToImageMessage(MessageTypeInterface):
     """
     Class to process "text to image" messages.
     """
@@ -125,7 +125,7 @@ class TextToImageMessage(MessageInterface):
 
 class MessageFactory:
     """
-    Factory class to create MessageInterface instances.
+    Factory class to create MessageTypeInterface instances.
     """
 
     message_classes = {
@@ -134,16 +134,16 @@ class MessageFactory:
     }
 
     @classmethod
-    def create_message(cls, message_json: Dict[str, Any]) -> MessageInterface:
+    def create_message(cls, message_json: Dict[str, Any]) -> MessageTypeInterface:
         """
-        Create and return an appropriate MessageInterface instance based on the contents of message_json.
+        Create and return an appropriate MessageTypeInterface instance based on the contents of message_json.
         Raise an Exception if an appropriate class can't be found.
 
         Args:
             message_json (Dict[str, Any]): A dictionary containing the JSON message.
 
         Returns:
-            MessageInterface: An instance of a class that implements the MessageInterface.
+            MessageTypeInterface: An instance of a class that implements the MessageTypeInterface.
 
         Raises:
             Exception: If an action in the message_json is not supported.

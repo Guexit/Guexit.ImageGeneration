@@ -10,14 +10,10 @@ from cloud_manager.interfaces.service_bus import ServiceBusInterface
 from image_generation.custom_logging import set_logger
 from image_generation.utils import store_zip_images_temporarily, wait_for_service
 from services import config
-from services.message_handlers import MessageFactory, MessageInterface
+from services.message_handlers import MessageFactory, MessageTypeInterface
+from services.message_service_bus import MessageServiceBusClass
 
 logger = set_logger("Image Generation Message Handler")
-
-
-def create_message_to_send(file_blob_url: List[dict]) -> str:
-    message = {"url": file_blob_url}
-    return json.dumps(message)
 
 
 class ImageGenerationMessageHandler:
@@ -27,7 +23,7 @@ class ImageGenerationMessageHandler:
     generated image URLs to an Azure Service Bus topic.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, tags_to_add: dict = None) -> None:
         """
         Initialize the ImageGenerationMessageHandler instance.
         """
@@ -41,6 +37,13 @@ class ImageGenerationMessageHandler:
         self.service_bus: ServiceBusInterface = AzureServiceBus(
             config.AZURE_SERVICE_BUS_CONNECTION_STRING,
             config.AZURE_SERVICE_BUS_MAX_LOCK_RENEWAL_DURATION,
+        )
+        metadata_fields_to_keep = [
+            "model_path",
+            "style",
+        ]
+        self.message_service_bus = MessageServiceBusClass(
+            metadata_fields_to_keep=metadata_fields_to_keep, tags_to_add=tags_to_add
         )
 
     def __call__(self, message: str) -> None:
@@ -67,11 +70,16 @@ class ImageGenerationMessageHandler:
             logger.info(f"Message content: {message_json}")
 
             processed_message, message = self.process_incoming_message(message_json)
-            files_blob_urls, temp_dir = self.upload_images_to_blob_storage(
-                processed_message, message
-            )
-            for file_blob_url in files_blob_urls:
-                message_to_send = create_message_to_send(file_blob_url)
+            (
+                files_blob_urls,
+                metadata_list,
+                temp_dir,
+            ) = self.upload_images_to_blob_storage(processed_message, message)
+            for file_blob_url, metadata in zip(files_blob_urls, metadata_list):
+                metadata.update(message.message_json)
+                message_to_send = self.message_service_bus.create_message_to_send(
+                    file_blob_url, metadata
+                )
 
                 logger.info(f"Sending message ImageGenerated: {message_to_send}")
                 self.service_bus.publish(
@@ -86,7 +94,7 @@ class ImageGenerationMessageHandler:
 
     def process_incoming_message(
         self, message_json: Dict[str, Any]
-    ) -> Tuple[Dict[str, Any], MessageInterface]:
+    ) -> Tuple[Dict[str, Any], MessageTypeInterface]:
         """
         Process the incoming message JSON to determine the appropriate endpoint
         and pass the message to the image generation API.
@@ -107,7 +115,7 @@ class ImageGenerationMessageHandler:
             raise
 
     def upload_images_to_blob_storage(
-        self, response: Dict[str, Any], message: MessageInterface
+        self, response: Dict[str, Any], message: MessageTypeInterface
     ) -> Tuple[List[Dict[str, str]], TemporaryDirectory]:
         """
         Extract image files from the API response, store them temporarily,
@@ -142,21 +150,31 @@ class ImageGenerationMessageHandler:
                 config.AZURE_STORAGE_CONTAINER_NAME, file_objects, overwrite=True
             )
             logger.info(f"Uploaded files to blob storage: {files_blob_urls}")
-            return files_blob_urls, temp_dir
+            return files_blob_urls, metadata_list, temp_dir
         except Exception as e:
             logger.error(f"Error uploading images to blob storage: {e}")
             raise
 
 
-def main():
+def main(tags_to_add=None):
     wait_for_service(config.IMAGE_GENERATION_API, timeout=2260)
     service_bus: ServiceBusInterface = AzureServiceBus(
         config.AZURE_SERVICE_BUS_CONNECTION_STRING
     )
     service_bus.consume_indefinitely(
-        config.AZURE_SERVICE_BUS_QUEUE_NAME, ImageGenerationMessageHandler()
+        config.AZURE_SERVICE_BUS_QUEUE_NAME,
+        ImageGenerationMessageHandler(tags_to_add=tags_to_add),
     )
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    # Parse command line arguments for tags_to_add
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tags_to_add", type=json.loads, default=None)
+    args = parser.parse_args()
+    tags_to_add = args.tags_to_add
+    main(tags_to_add=tags_to_add)
+    # Example usage:
+    # python services/image_generation_message_handler.py --tags_to_add '{"test":"test"}'

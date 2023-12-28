@@ -2,15 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from services import config
-from services.image_generation_message_handler import (
-    ImageGenerationMessageHandler,
-    create_message_to_send,
-)
-from services.message_handlers import (
-    MessageFactory,
-    TextToImageMessage,
-    TextToStyleMessage,
-)
+from services.image_generation_message_handler import ImageGenerationMessageHandler
 
 
 class TestImageGenerationMessageHandler(unittest.TestCase):
@@ -53,7 +45,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             "services.image_generation_message_handler.MessageFactory"
         )
         self.patcher_message_interface = patch(
-            "services.image_generation_message_handler.MessageInterface"
+            "services.image_generation_message_handler.MessageTypeInterface"
         )
 
     def setUpMocks(
@@ -72,7 +64,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         mock_service_bus_client = MagicMock()
         mock_from_connection_string.return_value = mock_service_bus_client
 
-        # Create a mock MessageInterface object and set the return value of its process method
+        # Create a mock MessageTypeInterface object and set the return value of its process method
         mock_message = MagicMock()
         mock_message.process.return_value = MagicMock()
         mock_message_factory.create_message.return_value = mock_message
@@ -111,7 +103,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             image_generation_handler = ImageGenerationMessageHandler()
 
             # Configure mock return values to handle multiple images
-            mock_message.process.return_value = MagicMock()
+            mock_message.process.return_value = (MagicMock(), MagicMock())
             mock_store_images.return_value = (
                 ["path/to/image_0.png", "path/to/image_1.png"],
                 [MagicMock(), MagicMock()],
@@ -197,7 +189,11 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         mock_message_interface = MagicMock()
         mock_message_interface.get_file_name.return_value = "test_file_0.png"
         mock_store_images = self.patcher_store_zip_images_temporarily.start()
-        mock_store_images.return_value = (["path/to/image_0.png"], [{}], MagicMock())
+        mock_store_images.return_value = (
+            ["path/to/image_0.png"],
+            [{"value": 1}],
+            MagicMock(),
+        )
         mock_blob_storage = self.patcher_azure_blob_storage.start().return_value
         mock_blob_storage.push_objects.return_value = [
             "https://example.com/image_0.png"
@@ -207,7 +203,11 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         image_generation_handler = ImageGenerationMessageHandler()
 
         # Execute
-        file_objects, temp_dir = image_generation_handler.upload_images_to_blob_storage(
+        (
+            file_objects,
+            metadata_list,
+            temp_dir,
+        ) = image_generation_handler.upload_images_to_blob_storage(
             {"status": "success"}, mock_message_interface
         )
 
@@ -219,16 +219,11 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self.assertEqual(len(file_objects), 1)
         self.assertEqual(file_objects[0], "https://example.com/image_0.png")
 
+        self.assertIsInstance(metadata_list, list)
+        self.assertEqual(len(metadata_list), 1)
+        self.assertEqual(metadata_list[0], {"value": 1})
+
         self.assertIsInstance(temp_dir, MagicMock)
-
-    def test_create_message_to_send(self):
-        file_objects = [
-            {"name": "test_file_0.png", "url": "http://example.com/image_0.png"}
-        ]
-        message = create_message_to_send(file_objects)
-
-        self.assertIsInstance(message, str)
-        self.assertIn('"url":', message)
 
 
 if __name__ == "__main__":
