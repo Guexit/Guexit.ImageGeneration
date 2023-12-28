@@ -37,7 +37,7 @@ jobs:
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
       - name: Extract version from pyproject.toml
-        run: echo "LIB_VERSION=$(awk '/^\[tool.poetry\]/ {flag=1; next} /version/ && flag {print $3; flag=0}' pyproject.toml | tr -d '\"')" >> $GITHUB_ENV
+        run: echo "LIB_VERSION=v$(awk '/^\[tool.poetry\]/ {flag=1; next} /version/ && flag {print $3; flag=0}' pyproject.toml | tr -d '\"')" >> $GITHUB_ENV
 
       - name: Check Docker Version
         run: docker --version
@@ -48,15 +48,6 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GH_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Verify Changelog Update
-        id: verify_changelog
-        run: |
-          VERSION=$(echo "${{ env.LIB_VERSION }}" | sed 's/^v//') # Remove leading 'v' if present
-          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            echo "Error: No changelog entry found for version $VERSION."
-            exit 1
-          fi
 
       - name: Log in to the Docker registry
         uses: docker/login-action@v1
@@ -82,27 +73,11 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/guexit/guexit-image-generation:cache
           cache-to: type=registry,ref=ghcr.io/guexit/guexit-image-generation:cache,mode=max
 
-      - name: Extract Release Notes from Changelog
-        id: release_notes
-        uses: CSchoel/release-notes-from-changelog@v1
-        with:
-          version: ${{ env.LIB_VERSION }}
-          working-directory: .
-
-      - name: Create Git Tag
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git tag -a "v${{ env.LIB_VERSION }}" -m "Release v${{ env.LIB_VERSION }}"
-          git push origin "v${{ env.LIB_VERSION }}"
-
-      - name: Create GitHub Release
+      - name: Create GitHub Release ${{ env.LIB_VERSION }}
         if: github.ref == 'refs/heads/main'
         run: |
           gh release create \
-            --notes-file RELEASE.md \
-            --title "Guexit.ImageGeneration v${{ env.LIB_VERSION }}" \
+            --title "Guexit.ImageGeneration ${{ env.LIB_VERSION }}" \
             --target ${{ needs.build-and-run-tests.outputs.commit-hash }} \
             --generate-notes \
             ${{ env.LIB_VERSION }}
