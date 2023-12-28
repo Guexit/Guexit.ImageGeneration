@@ -76,6 +76,7 @@ class ImageGenerationMessageHandler:
                 temp_dir,
             ) = self.upload_images_to_blob_storage(processed_message, message)
             for file_blob_url, metadata in zip(files_blob_urls, metadata_list):
+                metadata.update(message.message_json)
                 message_to_send = self.message_service_bus.create_message_to_send(
                     file_blob_url, metadata
                 )
@@ -173,3 +174,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--tags_to_add", type=json.loads, default=None)
     main(**vars(parser.parse_args()))
+    # Example usage:
+    # python services/image_generation_message_handler.py --tags_to_add '{"test": "test"}'
