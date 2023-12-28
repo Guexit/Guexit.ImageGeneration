@@ -173,6 +173,8 @@ if __name__ == "__main__":
     # Parse command line arguments for tags_to_add
     parser = argparse.ArgumentParser()
     parser.add_argument("--tags_to_add", type=json.loads, default=None)
-    main(**vars(parser.parse_args()))
+    args = parser.parse_args()
+    tags_to_add = args.tags_to_add
+    main(tags_to_add=tags_to_add)
     # Example usage:
-    # python services/image_generation_message_handler.py --tags_to_add '{"test": "test"}'
+    # python services/image_generation_message_handler.py --tags_to_add '{"test":"test"}'
