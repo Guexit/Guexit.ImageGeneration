@@ -128,7 +128,7 @@ sh start_server.sh
 Then you can start consuming messages from Azure Service Bus with:
 
 ```shell
-sh start_consuming.sh
+sh start_generating.sh
 ```
 
 This will start the ImageGenerationMessageHandler and begin processing messages from the specified Azure Service Bus queue. The generated images will be uploaded to the specified Azure Storage container, and the resulting image URLs will be sent as a message to the specified Azure Service Bus topic.
