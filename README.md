@@ -151,7 +151,7 @@ To run the service and the handler in Docker:
     cp env_samples.env .env
     ```
 
-    Make sure to change the env variables accordingly.
+    MAKE SURE TO CHANGE THE ENV VARIABLES ACCORDINGLY.
 
 4. Use Docker Compose to build the image and run the container:
 

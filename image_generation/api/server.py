@@ -13,7 +13,7 @@ logger.info("--- Image Generation API ---")
 
 app = FastAPI()
 _model = None
-_model_init_path = os.environ.get("DEFAULT_MODEL_NAME", "digiplay/Juggernaut_final")
+_model_init_path = os.environ.get("DEFAULT_MODEL_NAME", "stabilityai/sdxl-turbo")
 
 
 def get_model(model_init_path: str = _model_init_path) -> StableDiffusionHandler:
