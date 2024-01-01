@@ -7,7 +7,9 @@ from services.image_generation_message_handler import ImageGenerationMessageHand
 
 class TestImageGenerationMessageHandler(unittest.TestCase):
     def setUp(self):
-        self.mock_message = '{"message": {"text_to_style": {"style": "general", "seed": 1, "num_images": 2}}}'
+        self.mock_message = {
+            "text_to_style": {"style": "general", "seed": 1, "num_images": 2}
+        }
         self.patcher_azure_service_bus_connection_string = patch.object(
             config, "AZURE_SERVICE_BUS_CONNECTION_STRING", "mock_connection_string"
         )
