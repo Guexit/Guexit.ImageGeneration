@@ -73,8 +73,12 @@ class ImageGenerationMessageHandler:
             message (str): The message to be processed.
         """
         logger.info(f"Received message: {message}")
-        message_json = json.loads(message)["message"]
-        self.handle_message(message_json)
+        try:
+            message_json = json.loads(message)["message"]
+            self.handle_message(message_json)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON: {e}")
+            raise
 
     def get_num_images_from_message(self, message_json: dict) -> int:
         """
@@ -179,8 +183,6 @@ class ImageGenerationMessageHandler:
                         ),
                     )
                     temp_dir.cleanup()
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON: {e}")
         except Exception as e:
             logger.error(f"Error handling message: {e}")
             raise
