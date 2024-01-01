@@ -5,6 +5,10 @@ FROM nvidia/cuda:11.7.1-devel-ubuntu20.04
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TAGS_TO_ADD='{}'
+ENV GENERATE_ON_COMMAND=false
+ENV TOTAL_IMAGES=0
+ENV BATCH_SIZE=50
 
 # Install system dependencies
 RUN apt-get update && \
@@ -54,5 +58,8 @@ RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
     git config --global credential.helper store && \
     poetry install --with dev --sync
 
+# Ensure the scripts are executable
+RUN chmod +x start_server.sh start_generating.sh
+
 # Start the server and consumer
-CMD ["sh", "-c", "poetry run python3 -m uvicorn image_generation.api.server:app --host 0.0.0.0 --port 5000 --timeout-keep-alive 600 & poetry run python services/image_generation_message_handler.py"]
+CMD ["/bin/sh", "-c", "start_server.sh & start_generating.sh"]

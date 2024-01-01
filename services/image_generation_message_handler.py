@@ -3,7 +3,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
 
-from rich.progress import BarColumn, Progress, TextColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
@@ -67,8 +73,12 @@ class ImageGenerationMessageHandler:
             message (str): The message to be processed.
         """
         logger.info(f"Received message: {message}")
-        message_json = json.loads(message)["message"]
-        self.handle_message(message_json)
+        try:
+            message_json = json.loads(message)["message"]
+            self.handle_message(message_json)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON: {e}")
+            raise
 
     def get_num_images_from_message(self, message_json: dict) -> int:
         """
@@ -127,12 +137,10 @@ class ImageGenerationMessageHandler:
             )
             with Progress(
                 "[progress.description]{task.description}",
-                BarColumn(
-                    bar_color="green",
-                    complete_style="bright_green on black",
-                    finished_style="bright_green on black",
-                ),
+                BarColumn(complete_style="green", finished_style="bright_green"),
                 "[progress.percentage]{task.percentage:>3.0f}%",
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
                 TextColumn("[bold green]{task.fields[batch_info]}"),
             ) as progress:
                 task = progress.add_task(
@@ -175,8 +183,6 @@ class ImageGenerationMessageHandler:
                         ),
                     )
                     temp_dir.cleanup()
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON: {e}")
         except Exception as e:
             logger.error(f"Error handling message: {e}")
             raise
