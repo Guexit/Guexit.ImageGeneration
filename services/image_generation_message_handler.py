@@ -3,7 +3,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
 
-from rich.progress import BarColumn, Progress, TextColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 
 from cloud_manager.azure_blob_storage import AzureBlobStorage
 from cloud_manager.azure_service_bus import AzureServiceBus
@@ -127,12 +133,10 @@ class ImageGenerationMessageHandler:
             )
             with Progress(
                 "[progress.description]{task.description}",
-                BarColumn(
-                    bar_color="green",
-                    complete_style="bright_green on black",
-                    finished_style="bright_green on black",
-                ),
+                BarColumn(complete_style="green", finished_style="bright_green"),
                 "[progress.percentage]{task.percentage:>3.0f}%",
+                TimeElapsedColumn(),
+                TimeRemainingColumn(),
                 TextColumn("[bold green]{task.fields[batch_info]}"),
             ) as progress:
                 task = progress.add_task(
