@@ -17,9 +17,3 @@ coverage:
         informational: true
   round: down
   precision: 2
-
-codecov:
-  notify:
-    threshold: 1%
-    after_n_builds: 1
-  require_ci_to_pass: yes
