@@ -127,7 +127,11 @@ class ImageGenerationMessageHandler:
             )
             with Progress(
                 "[progress.description]{task.description}",
-                BarColumn(),
+                BarColumn(
+                    bar_color="green",
+                    complete_style="bright_green on black",
+                    finished_style="bright_green on black",
+                ),
                 "[progress.percentage]{task.percentage:>3.0f}%",
                 TextColumn("[bold green]{task.fields[batch_info]}"),
             ) as progress:
