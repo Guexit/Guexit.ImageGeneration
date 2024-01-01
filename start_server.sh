@@ -7,7 +7,7 @@ is_var_set() {
 
 # Load environment variables from .env file if it exists and the variable is not already set
 if [ -f .env ]; then
-    while IFS='=' read -r key value
+    while IFS='=' read -r key value || [ -n "$key" ]
     do
         # Remove leading and trailing spaces from key and value
         key=$(echo $key | xargs)
