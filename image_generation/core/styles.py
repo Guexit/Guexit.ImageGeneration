@@ -898,6 +898,9 @@ characters = [
     "Black Beauty",
     "Sara Crewe (from 'A Little Princess')",
     "The Nutcracker",
+    "Mickey Mouse",
+    "Peter Pan",
+    "Tigger (from 'Winnie-the-Pooh')",
 ]
 
 
@@ -1160,44 +1163,44 @@ STYLES = {
             "num_images": 1,
             "seed": -1,
         },
-        {
-            "model_path": "stabilityai/sdxl-turbo",
-            "model_scheduler": "euler_a",
-            "prompt": {
-                "positive": "{theme} {creature} {context} close-up, 8k, high quality",
-                "guidance_scale": 0.0,
-            },
-            "height": 688,
-            "width": 512,
-            "num_inference_steps": 2,
-            "num_images": 1,
-            "seed": -1,
-        },
-        {
-            "model_path": "stabilityai/sdxl-turbo",
-            "model_scheduler": "euler_a",
-            "prompt": {
-                "positive": "{theme} {adjective} {creature} on {setting} close-up, 8k, high quality",
-                "guidance_scale": 0.0,
-            },
-            "height": 688,
-            "width": 512,
-            "num_inference_steps": 2,
-            "num_images": 1,
-            "seed": -1,
-        },
-        {
-            "model_path": "stabilityai/sdxl-turbo",
-            "model_scheduler": "euler_a",
-            "prompt": {
-                "positive": "{theme} {adjective} {object} on {setting} close-up, 8k, high quality",
-                "guidance_scale": 0.0,
-            },
-            "height": 688,
-            "width": 512,
-            "num_inference_steps": 2,
-            "num_images": 1,
-            "seed": -1,
-        },
+        # {
+        #     "model_path": "stabilityai/sdxl-turbo",
+        #     "model_scheduler": "euler_a",
+        #     "prompt": {
+        #         "positive": "{theme} {creature} {context} close-up, 8k, high quality",
+        #         "guidance_scale": 0.0,
+        #     },
+        #     "height": 688,
+        #     "width": 512,
+        #     "num_inference_steps": 2,
+        #     "num_images": 1,
+        #     "seed": -1,
+        # },
+        # {
+        #     "model_path": "stabilityai/sdxl-turbo",
+        #     "model_scheduler": "euler_a",
+        #     "prompt": {
+        #         "positive": "{theme} {adjective} {creature} on {setting} close-up, 8k, high quality",
+        #         "guidance_scale": 0.0,
+        #     },
+        #     "height": 688,
+        #     "width": 512,
+        #     "num_inference_steps": 2,
+        #     "num_images": 1,
+        #     "seed": -1,
+        # },
+        # {
+        #     "model_path": "stabilityai/sdxl-turbo",
+        #     "model_scheduler": "euler_a",
+        #     "prompt": {
+        #         "positive": "{theme} {adjective} {object} on {setting} close-up, 8k, high quality",
+        #         "guidance_scale": 0.0,
+        #     },
+        #     "height": 688,
+        #     "width": 512,
+        #     "num_inference_steps": 2,
+        #     "num_images": 1,
+        #     "seed": -1,
+        # },
     ],
 }
