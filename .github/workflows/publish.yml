@@ -103,5 +103,6 @@ jobs:
               '{content: ($version + "\n" + $notes)}'
           )" \
           ${{ secrets.DISCORD_WEBHOOK }}
+          EOF
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
