@@ -95,11 +95,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Notify Discord with Release Notes
-        if: github.ref == 'refs/heads/main'
         run: |
+          JSON_PAYLOAD=$(jq -n --arg content "**${{ env.LIB_VERSION }}**\n${{ env.RELEASE_NOTES }}" '{"content": $content}')
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"**${{ env.LIB_VERSION }}** \n${{ env.RELEASE_NOTES }}\"}" \
+          -d "$JSON_PAYLOAD" \
           ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
