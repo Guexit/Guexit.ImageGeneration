@@ -83,3 +83,25 @@ jobs:
             ${{ env.LIB_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch Release Notes
+        id: get_release_notes
+        run: |
+          RELEASE_NOTES=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://github.com/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }} | jq -r ".body")
+          echo "::set-output name=notes::$RELEASE_NOTES"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Release Notes Env
+        run: echo "RELEASE_NOTES=${{ steps.get_release_notes.outputs.notes }}" >> $GITHUB_ENV
+
+      - name: Notify Discord with Release Notes
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{\"content\": \"**${{ env.LIB_VERSION }}** \n${{ env.RELEASE_NOTES }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
