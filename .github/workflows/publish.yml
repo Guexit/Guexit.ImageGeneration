@@ -88,7 +88,7 @@ jobs:
         id: get_release_notes
         run: |
           RELEASE_NOTES=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          https://github.com/Guexit/Guexit.ImageGeneration/releases/tag/${{ env.LIB_VERSION }} | jq -r ".body")
+          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body")
           echo "::set-output name=notes::$RELEASE_NOTES"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
