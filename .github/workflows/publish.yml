@@ -94,15 +94,10 @@ jobs:
 
       - name: Notify Discord with Release Notes
         run: |
+          RELEASE_NOTES_ESCAPED=$(jq -aRs . <<< "${{ env.RELEASE_NOTES_JSON }}")
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "$(
-            jq -nc \
-              --arg version "**Image Generation ${{ env.LIB_VERSION }}**" \
-              --arg notes "${{ env.RELEASE_NOTES_JSON }}" \
-              '{content: ($version + "\n" + $notes)}'
-          )" \
+          -d "{\"content\": \"**Image Generation ${{ env.LIB_VERSION }}**\n${RELEASE_NOTES_ESCAPED}\"}" \
           ${{ secrets.DISCORD_WEBHOOK }}
-          EOF
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
