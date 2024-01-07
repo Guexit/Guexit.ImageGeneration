@@ -85,11 +85,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Fetch Release Notes
-        id: get_release_notes
         run: |
           RELEASE_NOTES=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body") >> release_notes.txt
-          echo "RELEASE_NOTES=$(<release_notes.txt)" >> $GITHUB_ENV
+          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body")
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
