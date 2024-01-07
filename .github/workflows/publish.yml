@@ -96,7 +96,12 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"**${{ env.LIB_VERSION }}**\n${{ env.RELEASE_NOTES_JSON }}\"}" \
+          -d "$(
+            jq -nc \
+              --arg version "**Image Generation ${{ env.LIB_VERSION }}**" \
+              --arg notes "${{ env.RELEASE_NOTES_JSON }}" \
+              '{content: ($version + "\n" + $notes)}'
+          )" \
           ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
