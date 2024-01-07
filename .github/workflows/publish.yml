@@ -88,13 +88,10 @@ jobs:
         id: get_release_notes
         run: |
           RELEASE_NOTES=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body")
-          echo "::set-output name=notes::$RELEASE_NOTES"
+          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body") >> release_notes.txt
+          echo "RELEASE_NOTES=$(<release_notes.txt)" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Set Release Notes Env
-        run: echo "RELEASE_NOTES=${{ steps.get_release_notes.outputs.notes }}" >> $GITHUB_ENV
 
       - name: Notify Discord with Release Notes
         if: github.ref == 'refs/heads/main'
