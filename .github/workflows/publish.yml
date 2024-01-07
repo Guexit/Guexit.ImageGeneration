@@ -96,10 +96,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d @- ${{ secrets.DISCORD_WEBHOOK }} <<EOF
-          {
-            "content": "**${{ env.LIB_VERSION }}**\n${{ env.RELEASE_NOTES_JSON }}"
-          }
-          EOF
+          -d "{\"content\": \"**${{ env.LIB_VERSION }}**\n${{ env.RELEASE_NOTES_JSON }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
