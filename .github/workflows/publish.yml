@@ -99,11 +99,16 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
-      - name: Notify Discord with Release Notes
+      - name: Get Release Notes
         run: |
           RELEASE_NOTES_JSON=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body")
-          FINAL_PAYLOAD=$(jq -n --arg rn "$RELEASE_NOTES_JSON" \
+          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body" | base64)
+          echo "RELEASE_NOTES_BASE64=$RELEASE_NOTES_JSON" >> $GITHUB_ENV
+
+      - name: Send Notification to Discord Release Channel
+        run: |
+          RELEASE_NOTES=$(echo $RELEASE_NOTES_BASE64 | base64 --decode)
+          FINAL_PAYLOAD=$(jq -n --arg rn "$RELEASE_NOTES" \
           '{content: ("**Image Generation ${{ env.LIB_VERSION }}**\n" + $rn)}')
           echo "Final Payload: $FINAL_PAYLOAD"
           curl -H "Content-Type: application/json" \
@@ -112,3 +117,4 @@ jobs:
           ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RELEASE_NOTES_BASE64: ${{ env.RELEASE_NOTES_BASE64 }}
