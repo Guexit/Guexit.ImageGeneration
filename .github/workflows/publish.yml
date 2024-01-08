@@ -84,22 +84,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Fetch Release Notes
-        run: |
-          RELEASE_NOTES_JSON=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body" | jq -Rs .)
-          echo "RELEASE_NOTES_JSON=$RELEASE_NOTES_JSON" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - name: Notify Discord with Release Notes
         run: |
           RELEASE_NOTES_JSON=$(curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body" | jq -Rs .)
-          RELEASE_NOTES_ESCAPED=$(printf '%s' "$RELEASE_NOTES_JSON" | jq -aRs .)
+          "https://api.github.com/repos/Guexit/Guexit.ImageGeneration/releases/tags/${{ env.LIB_VERSION }}" | jq -r ".body")
+          echo "RELEASE_NOTES_JSON=$RELEASE_NOTES_JSON" >> $GITHUB_ENV
+          FINAL_PAYLOAD=$(jq -n --arg rn "$RELEASE_NOTES_JSON" \
+          '{content: ("**Image Generation ${{ env.LIB_VERSION }}**\n" + $rn)}')
+          echo "Final Payload: $FINAL_PAYLOAD"
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"**Image Generation ${{ env.LIB_VERSION }}**\n${RELEASE_NOTES_ESCAPED}\"}" \
+          -d "$FINAL_PAYLOAD" \
           ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
