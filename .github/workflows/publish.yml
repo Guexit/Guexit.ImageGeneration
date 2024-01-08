@@ -117,4 +117,3 @@ jobs:
           ${{ secrets.DISCORD_WEBHOOK }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          RELEASE_NOTES_BASE64: ${{ env.RELEASE_NOTES_BASE64 }}
