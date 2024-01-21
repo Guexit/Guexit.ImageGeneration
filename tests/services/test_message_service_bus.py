@@ -11,7 +11,9 @@ class TestMessageServiceBus(unittest.TestCase):
     """
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_without_metadata_or_tags_to_keep(self) -> None:
+    def test_create_message_to_send_without_metadata_or_tags_to_keep(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method.
         """
@@ -37,7 +39,9 @@ class TestMessageServiceBus(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_with_metadata_to_keep(self) -> None:
+    def test_create_message_to_send_with_metadata_to_keep(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method.
         """
@@ -67,7 +71,9 @@ class TestMessageServiceBus(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_with_metadata_to_keep_and_tags_to_add(self) -> None:
+    def test_create_message_to_send_with_metadata_to_keep_and_tags_to_add(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method.
         """
@@ -100,7 +106,9 @@ class TestMessageServiceBus(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_with_tags_to_add(self) -> None:
+    def test_create_message_to_send_with_tags_to_add(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method.
         """
@@ -131,7 +139,9 @@ class TestMessageServiceBus(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_with_tags_to_add_and_no_metadata(self) -> None:
+    def test_create_message_to_send_with_tags_to_add_and_no_metadata(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method.
         """
@@ -157,7 +167,9 @@ class TestMessageServiceBus(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     @patch.object(MessageServiceBusClass, "get_package_version", return_value="0.7.2")
-    def test_create_message_to_send_with_version(self, mock_get_package_version):
+    def test_create_message_to_send_with_version(
+        self, mock_get_package_version
+    ) -> None:
         """
         Test the create_message_to_send method with package version included.
         """
