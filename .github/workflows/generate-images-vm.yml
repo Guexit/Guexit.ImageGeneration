@@ -1,10 +1,10 @@
 name: Create Test VM (Ubuntu 22.04)
 
-on: 
-    workflow_dispatch:
-    push:
-      branches: 
-        - deploy-image-generator-vm
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - deploy-image-generator-vm
 
 jobs:
     create-vm:
