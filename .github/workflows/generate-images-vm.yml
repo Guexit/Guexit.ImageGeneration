@@ -1,7 +1,7 @@
 name: Create Test VM (Ubuntu 22.04)
 
-on:  # Adjust your trigger as needed
-    workflow_dispatch:  # For manual triggering
+on: 
+    workflow_dispatch:
 
 jobs:
     create-vm:
