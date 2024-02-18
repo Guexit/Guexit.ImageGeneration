@@ -12,4 +12,10 @@ services:
     environment:
       - CUDA_VERSION=11.7.1
     env_file: .env
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
