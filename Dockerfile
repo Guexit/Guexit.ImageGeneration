@@ -54,9 +54,7 @@ ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 COPY . .
 
 # Install dependencies
-RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
-    git config --global credential.helper store && \
-    poetry install --with dev --sync
+RUN poetry install --with dev --sync
 
 # Ensure the scripts are executable
 RUN chmod +x start_server.sh start_generating.sh
