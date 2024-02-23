@@ -139,7 +139,13 @@ To run the service and the handler in Docker:
 
 1. Have Docker installed.
 
-2. Make sure you've copied the `env_samples.env` into `.env` with the following command:
+2. Git credentials must be stored in `~/.git-credentials`. To do so please execute:
+
+    ```shell
+    git config --global credential.helper "store --file ~/.git-credentials"
+    ```
+
+3. Make sure you've copied the `env_samples.env` into `.env` with the following command:
 
     ```shell
     cp env_samples.env .env
@@ -147,7 +153,7 @@ To run the service and the handler in Docker:
 
     MAKE SURE TO CHANGE THE ENV VARIABLES ACCORDINGLY.
 
-3. Use Docker Compose to build the image and run the container:
+4. Use Docker Compose to build the image and run the container:
 
     ```shell
     docker compose up --build -d
