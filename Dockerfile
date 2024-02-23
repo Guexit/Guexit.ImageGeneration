@@ -9,13 +9,6 @@ ENV TAGS_TO_ADD='{}'
 ENV GENERATE_ON_COMMAND=false
 ENV TOTAL_IMAGES=0
 ENV BATCH_SIZE=50
-# Poetry
-# Variables: https://python-poetry.org/docs/configuration/#using-environment-variables
-ENV POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_CREATE=true \
-  POETRY_CACHE_DIR='/var/cache/pypoetry' \
-  POETRY_HOME='/usr/local' \
-  POETRY_VERSION=1.7.1
 
 # Install system dependencies
 RUN apt-get update && \
@@ -43,6 +36,9 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3.10 get-pip.py && \
     rm get-pip.py
 
+# Set the working directory
+WORKDIR /app
+
 # Update pip
 RUN pip install -U pip && \
     pip install --upgrade certifi
@@ -55,16 +51,15 @@ ENV PATH="/root/.local/bin:$PATH"
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Copy project files
-COPY . app/
-
-# Set the working directory
-WORKDIR /app
+COPY . .
 
 # Install dependencies
-RUN poetry install --only main --sync
+RUN --mount=type=secret,id=git-credentials,dst=/root/.git-credentials \
+    git config --global credential.helper store && \
+    poetry install --with dev --sync
 
 # Ensure the scripts are executable
 RUN chmod +x start_server.sh start_generating.sh
 
 # Start the server and consumer
-ENTRYPOINT ["/bin/sh", "-c", "poetry run ./start_server.sh & poetry run ./start_generating.sh"]
+CMD ["/bin/sh", "-c", "start_server.sh & start_generating.sh"]
