@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    tty: true
     image: guexit_image_generation
     ports:
       - "5001:5000"
