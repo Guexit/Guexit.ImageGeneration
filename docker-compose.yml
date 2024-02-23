@@ -6,15 +6,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      secrets:
-        - git-credentials
+    tty: true
     image: guexit_image_generation
     ports:
       - "5001:5000"
     environment:
       - CUDA_VERSION=11.7.1
     env_file: .env
-
-secrets:
-  git-credentials:
-    file: ~/.git-credentials
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
