@@ -1,9 +1,11 @@
 import time
 import traceback
-from typing import Callable, Optional
+from typing import Callable, List, Optional
+import asyncio
 
 from azure.servicebus import AutoLockRenewer, ServiceBusClient, ServiceBusMessage
 from azure.servicebus.exceptions import OperationTimeoutError, ServiceBusError
+from azure.servicebus.aio import ServiceBusClient as AsyncServiceBusClient
 
 from cloud_manager.custom_logging import set_logger
 from cloud_manager.interfaces.service_bus import ServiceBusInterface
@@ -17,9 +19,14 @@ class AzureServiceBus(ServiceBusInterface):
     ) -> None:
         logger.info("Initializing Azure Service Bus")
         try:
-            self.client = ServiceBusClient.from_connection_string(
+            # This client is for synchronous operations
+            self.sync_client = ServiceBusClient.from_connection_string(
                 connection_string,
                 max_lock_renewal_duration=max_lock_renewal_duration,
+            )
+            # This client is for asynchronous operations
+            self.async_client = AsyncServiceBusClient.from_connection_string(
+                connection_string,
             )
         except ValueError as e:
             logger.error(f"Invalid connection string: {e}")
@@ -27,14 +34,44 @@ class AzureServiceBus(ServiceBusInterface):
 
         self.auto_lock_renewer = AutoLockRenewer()
 
-    def publish(self, topic: str, message: str) -> None:
+    def publish(self, topic: str, messages: List[str]) -> None:
         try:
             with self.client.get_queue_sender(topic) as sender:
-                msg = ServiceBusMessage(message)
-                sender.send_messages(msg)
-                logger.info(f"Published message to '{topic}': {message}")
+                batch_message = sender.create_message_batch()
+                for message in messages:
+                    try:
+                        batch_message.add_message(ServiceBusMessage(message))
+                    except ValueError:
+                        # Message too large to fit in the batch, send what we have and create a new batch
+                        sender.send_messages(batch_message)
+                        batch_message = sender.create_message_batch()
+                        batch_message.add_message(ServiceBusMessage(message))
+
+                if batch_message:
+                    sender.send_messages(batch_message)
+                    logger.info(f"Published batch of messages to '{topic}'")
         except Exception as e:
-            logger.error(f"Error publishing message to '{topic}': {e}")
+            logger.error(f"Error publishing messages to '{topic}': {e}")
+
+    async def publish_async(self, topic: str, messages: List[str]) -> None:
+        try:
+            async with self.async_client.get_queue_sender(topic) as sender:
+                batch_message = await sender.create_message_batch()
+                for message in messages:
+                    try:
+                        batch_message.add_message(ServiceBusMessage(message))
+                    except ValueError:
+                        # Message too large to fit in the batch, send what we have and create a new batch
+                        await sender.send_messages(batch_message)
+                        batch_message = await sender.create_message_batch()
+                        batch_message.add_message(ServiceBusMessage(message))
+
+                if batch_message:
+                    await sender.send_messages(batch_message)
+                    logger.info(f"Published batch of messages to '{topic}' asynchronously")
+        except Exception as e:
+            logger.error(f"Error asynchronously publishing messages to '{topic}': {e}")
+
 
     def consume(self, queue: str, callback: Callable[[str], None]) -> None:
         try:
