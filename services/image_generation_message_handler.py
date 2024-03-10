@@ -1,8 +1,8 @@
+import asyncio
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Tuple
-import asyncio
 
 from rich.progress import (
     BarColumn,
@@ -40,8 +40,8 @@ class ImageGenerationMessageHandler:
             tags_to_add (dict, optional): A dictionary of tags to add to the Azure Service Bus message. Defaults to None.
             batch_size (int, optional): Number of images to process in each batch Defaults to 50.
         """
-        if batch_size <= 1:
-            error_message = "Batch size must be greater than 1."
+        if batch_size < 1:
+            error_message = "Batch size must be greater than 0."
             logger.error(error_message)
             raise ValueError(error_message)
         logger.info(f"Using batch size: {batch_size}")
@@ -130,6 +130,7 @@ class ImageGenerationMessageHandler:
             message_json (dict): The message json to be handled.
         """
         import time
+
         try:
             start_time_total = time.time()  # Start timing for the entire process
 
@@ -155,7 +156,9 @@ class ImageGenerationMessageHandler:
                 )
 
                 for i in range(0, num_images, self.batch_size):
-                    start_time_batch = time.time()  # Start timing for processing each batch
+                    start_time_batch = (
+                        time.time()
+                    )  # Start timing for processing each batch
 
                     message_json = self.set_num_images_in_message(
                         message_json, min(self.batch_size, num_images - i)
@@ -164,7 +167,9 @@ class ImageGenerationMessageHandler:
                     processed_message, message = self.process_incoming_message(
                         message_json
                     )
-                    end_time_process = time.time()  # End timing for processing each batch
+                    end_time_process = (
+                        time.time()
+                    )  # End timing for processing each batch
                     print(
                         f"Time for processing message: {end_time_process - start_time_process} seconds"
                     )
@@ -175,9 +180,13 @@ class ImageGenerationMessageHandler:
                         files_blob_urls,
                         metadata_list,
                         temp_dir,
-                    ) = self.upload_images_to_blob_storage(processed_message, message)
+                    ) = await self.upload_images_to_blob_storage(
+                        processed_message, message
+                    )
                     end_time_upload = time.time()  # End timing for uploading images
-                    print(f"Time for uploading images: {end_time_upload - start_time_upload} seconds")
+                    print(
+                        f"Time for uploading images: {end_time_upload - start_time_upload} seconds"
+                    )
 
                     start_time_service_bus = time.time()
                     messages_to_send = []
@@ -197,7 +206,9 @@ class ImageGenerationMessageHandler:
                         config.AZURE_SERVICE_BUS_TOPIC_NAME, messages_to_send
                     )
 
-                    end_time_service_bus = time.time()  # End timing for sending messages
+                    end_time_service_bus = (
+                        time.time()
+                    )  # End timing for sending messages
                     print(
                         f"Time for sending messages: {end_time_service_bus - start_time_service_bus} seconds"
                     )
@@ -210,12 +221,16 @@ class ImageGenerationMessageHandler:
                         ),
                     )
                     end_time_batch = time.time()  # End timing for processing each batch
-                    print(f"Time for processing batch {i // self.batch_size + 1}: {end_time_batch - start_time_batch} seconds")
+                    print(
+                        f"Time for processing batch {i // self.batch_size + 1}: {end_time_batch - start_time_batch} seconds"
+                    )
 
                     temp_dir.cleanup()
 
             end_time_total = time.time()  # End timing for the entire process
-            print(f"Total time for handling message: {end_time_total - start_time_total} seconds")
+            print(
+                f"Total time for handling message: {end_time_total - start_time_total} seconds"
+            )
         except Exception as e:
             logger.error(f"Error handling message: {e}")
             raise
@@ -242,7 +257,7 @@ class ImageGenerationMessageHandler:
             logger.error(f"Error processing message: {e}")
             raise
 
-    def upload_images_to_blob_storage(
+    async def upload_images_to_blob_storage(
         self, response: Dict[str, Any], message: MessageTypeInterface
     ) -> Tuple[List[Dict[str, str]], TemporaryDirectory]:
         """
@@ -274,7 +289,7 @@ class ImageGenerationMessageHandler:
             logger.info(
                 f"Uploading files to blob storage '{config.AZURE_STORAGE_CONTAINER_NAME}'"
             )
-            files_blob_urls = self.azure_cloud.push_objects(
+            files_blob_urls = await self.azure_cloud.push_objects_async(
                 config.AZURE_STORAGE_CONTAINER_NAME, file_objects, overwrite=True
             )
             logger.info(f"Uploaded files to blob storage: {files_blob_urls}")

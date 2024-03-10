@@ -1,11 +1,10 @@
 import time
 import traceback
 from typing import Callable, List, Optional
-import asyncio
 
 from azure.servicebus import AutoLockRenewer, ServiceBusClient, ServiceBusMessage
-from azure.servicebus.exceptions import OperationTimeoutError, ServiceBusError
 from azure.servicebus.aio import ServiceBusClient as AsyncServiceBusClient
+from azure.servicebus.exceptions import OperationTimeoutError, ServiceBusError
 
 from cloud_manager.custom_logging import set_logger
 from cloud_manager.interfaces.service_bus import ServiceBusInterface
@@ -68,10 +67,11 @@ class AzureServiceBus(ServiceBusInterface):
 
                 if batch_message:
                     await sender.send_messages(batch_message)
-                    logger.info(f"Published batch of messages to '{topic}' asynchronously")
+                    logger.info(
+                        f"Published batch of messages to '{topic}' asynchronously"
+                    )
         except Exception as e:
             logger.error(f"Error asynchronously publishing messages to '{topic}': {e}")
-
 
     def consume(self, queue: str, callback: Callable[[str], None]) -> None:
         try:
