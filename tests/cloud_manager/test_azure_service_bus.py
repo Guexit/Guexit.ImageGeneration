@@ -10,17 +10,30 @@ from cloud_manager.azure_service_bus import AzureServiceBus
 
 class TestAzureServiceBus(unittest.TestCase):
     @patch("azure.servicebus.ServiceBusClient.from_connection_string")
-    def setUp(self, mock_from_connection_string):
+    @patch("azure.servicebus.aio.ServiceBusClient.from_connection_string")
+    def setUp(
+        self, mock_sync_from_connection_string, mock_async_from_connection_string
+    ):
         self.connection_string = "mock_connection_string"
         self.mock_service_bus_client = MagicMock()
-        mock_from_connection_string.return_value = self.mock_service_bus_client
+        self.mock_async_service_bus_client = MagicMock()
+        mock_sync_from_connection_string.return_value = self.mock_service_bus_client
+        mock_async_from_connection_string.return_value = (
+            self.mock_async_service_bus_client
+        )
         self.service_bus = AzureServiceBus(self.connection_string)
 
+    @patch("azure.servicebus.aio.ServiceBusClient.from_connection_string")
     @patch("azure.servicebus.ServiceBusClient.from_connection_string")
-    def test_init(self, mock_from_connection_string):
+    def test_init(
+        self, mock_sync_from_connection_string, mock_async_from_connection_string
+    ):
         AzureServiceBus(self.connection_string)
-        mock_from_connection_string.assert_called_once_with(
+        mock_sync_from_connection_string.assert_called_once_with(
             self.connection_string, max_lock_renewal_duration=300
+        )
+        mock_async_from_connection_string.assert_called_once_with(
+            self.connection_string
         )
 
     @patch(
