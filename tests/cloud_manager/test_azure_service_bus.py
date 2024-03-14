@@ -1,16 +1,92 @@
+import asyncio
 import time
 import unittest
 from unittest.mock import MagicMock, call, patch
 
+from azure.servicebus import ServiceBusMessage, ServiceBusMessageBatch
 from azure.servicebus._common.auto_lock_renewer import AutoLockRenewer
 from azure.servicebus.exceptions import ServiceBusError
 
 from cloud_manager.azure_service_bus import AzureServiceBus
 
 
+class TestAzureServiceBusAsync(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.patcher1 = patch(
+            "azure.servicebus.aio.ServiceBusClient.from_connection_string"
+        )
+        self.patcher2 = patch(
+            "azure.servicebus.ServiceBusClient.from_connection_string"
+        )
+        self.mock_async_from_connection_string = self.patcher1.start()
+        self.mock_from_connection_string = self.patcher2.start()
+
+        # Mock for the asynchronous client
+        self.mock_async_service_bus_client = MagicMock()
+        self.mock_async_from_connection_string.return_value = (
+            self.mock_async_service_bus_client
+        )
+
+        # Mock for the synchronous client
+        self.mock_service_bus_client = MagicMock()
+        self.mock_from_connection_string.return_value = self.mock_service_bus_client
+
+        self.service_bus = AzureServiceBus("mock_connection_string")
+
+    async def asyncTearDown(self):
+        self.patcher1.stop()
+        self.patcher2.stop()
+
+    @patch("cloud_manager.azure_service_bus.logger")
+    async def test_publish_async(self, mock_logger):
+        topic = "test_topic_async"
+        messages = ["async_message1", "async_message2"]
+
+        mock_sender = MagicMock()
+        mock_batch = MagicMock(spec=ServiceBusMessageBatch)
+        mock_batch.__len__.return_value = len(messages)
+        mock_sender.create_message_batch = MagicMock(return_value=asyncio.Future())
+        mock_sender.create_message_batch.return_value.set_result(mock_batch)
+        mock_sender.send_messages = MagicMock()
+
+        self.mock_async_service_bus_client.get_queue_sender.return_value.__aenter__.return_value = (
+            mock_sender
+        )
+
+        await self.service_bus.publish_async(topic, messages)
+
+        # Verify a batch was created and messages were added
+        mock_sender.create_message_batch.assert_called_once()
+        self.assertEqual(mock_batch.add_message.call_count, len(messages))
+
+        # Verify the batch was sent
+        mock_sender.send_messages.assert_called_once_with(mock_batch)
+
+    @patch("cloud_manager.azure_service_bus.logger")
+    async def test_publish_async_with_error(self, mock_logger):
+        topic = "test_topic_async_error"
+        messages = ["async_message_error1", "async_message_error2"]
+
+        mock_sender = MagicMock()
+        mock_batch = MagicMock(spec=ServiceBusMessageBatch)
+        mock_batch.add_message.side_effect = ServiceBusError("Async publish test error")
+        mock_sender.create_message_batch = MagicMock(return_value=asyncio.Future())
+        mock_sender.create_message_batch.return_value.set_result(mock_batch)
+
+        self.mock_async_service_bus_client.get_queue_sender.return_value.__aenter__.return_value = (
+            mock_sender
+        )
+
+        await self.service_bus.publish_async(topic, messages)
+
+        mock_logger.error.assert_called_with(
+            f"Service Bus specific error async publishing messages to '{topic}': Async publish test error"
+        )
+
+
 class TestAzureServiceBus(unittest.TestCase):
-    @patch("azure.servicebus.ServiceBusClient.from_connection_string")
     @patch("azure.servicebus.aio.ServiceBusClient.from_connection_string")
+    @patch("azure.servicebus.ServiceBusClient.from_connection_string")
     def setUp(
         self, mock_sync_from_connection_string, mock_async_from_connection_string
     ):
@@ -48,20 +124,30 @@ class TestAzureServiceBus(unittest.TestCase):
     @patch("cloud_manager.azure_service_bus.AutoLockRenewer")
     def test_publish(self, mock_auto_lock_renewer, mock_from_connection_string):
         topic = "test_topic"
-        message = "test_message"
+        messages = ["test_message1", "test_message2"]
 
+        # Mocks for message batching
         mock_sender = MagicMock()
+        mock_batch = MagicMock(spec=ServiceBusMessageBatch)
+        mock_batch.__len__.return_value = len(messages)
+        mock_sender.create_message_batch.return_value = mock_batch
+
         self.mock_service_bus_client.get_queue_sender.return_value.__enter__.return_value = (
             mock_sender
         )
 
-        self.service_bus.publish(topic, message)
+        # Execute the publish method
+        self.service_bus.publish(topic, messages)
 
+        # Verify get_queue_sender was called correctly
         self.mock_service_bus_client.get_queue_sender.assert_called_once_with(topic)
-        mock_sender.send_messages.assert_called_once()
-        sent_message = mock_sender.send_messages.call_args[0][0]
-        sent_message_body = b"".join(sent_message.body).decode("utf-8")
-        self.assertEqual(sent_message_body, message)
+
+        # Verify a batch was created and messages were added
+        mock_sender.create_message_batch.assert_called_once()
+        self.assertEqual(mock_batch.add_message.call_count, len(messages))
+
+        # Verify the batch was sent
+        mock_sender.send_messages.assert_called_once_with(mock_batch)
 
     @patch("azure.servicebus.ServiceBusClient.from_connection_string")
     @patch("cloud_manager.azure_service_bus.AutoLockRenewer")
@@ -70,17 +156,36 @@ class TestAzureServiceBus(unittest.TestCase):
         self, mock_logger, mock_auto_lock_renewer, mock_from_connection_string
     ):
         topic = "test_topic"
-        message = "test_message"
+        messages = ["test_message1", "test_message2"]
 
         mock_sender = MagicMock()
-        mock_sender.send_messages.side_effect = ServiceBusError("Test error")
+        mock_batch = MagicMock(spec=ServiceBusMessageBatch)
+        mock_batch.add_message.side_effect = ServiceBusError("Test error")
+        mock_sender.create_message_batch.return_value = mock_batch
         self.mock_service_bus_client.get_queue_sender.return_value.__enter__.return_value = (
             mock_sender
         )
 
-        self.service_bus.publish(topic, message)
+        self.service_bus.publish(topic, messages)
         mock_logger.error.assert_called_once_with(
-            f"Error publishing message to '{topic}': Test error"
+            f"Service Bus specific error publishing messages to '{topic}': Test error"
+        )
+
+        # Reset mock_logger before the next part of the test
+        mock_logger.reset_mock()
+
+        # Setup for the second part of the test
+        mock_sender.reset_mock()  # Resetting mock_sender if it's reused
+        mock_batch = MagicMock(spec=ServiceBusMessageBatch)
+        mock_batch.add_message.side_effect = Exception("Test error")
+        mock_sender.create_message_batch.return_value = mock_batch
+        self.mock_service_bus_client.get_queue_sender.return_value.__enter__.return_value = (
+            mock_sender
+        )
+
+        self.service_bus.publish(topic, messages)
+        mock_logger.error.assert_called_once_with(
+            f"General error publishing messages to '{topic}': Test error"
         )
 
     @patch("azure.servicebus.ServiceBusClient.from_connection_string")

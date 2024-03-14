@@ -35,7 +35,7 @@ class AzureServiceBus(ServiceBusInterface):
 
     def publish(self, topic: str, messages: List[str]) -> None:
         try:
-            with self.client.get_queue_sender(topic) as sender:
+            with self.sync_client.get_queue_sender(topic) as sender:
                 batch_message = sender.create_message_batch()
                 for message in messages:
                     try:
@@ -46,11 +46,15 @@ class AzureServiceBus(ServiceBusInterface):
                         batch_message = sender.create_message_batch()
                         batch_message.add_message(ServiceBusMessage(message))
 
-                if batch_message:
+                if len(batch_message) > 0:
                     sender.send_messages(batch_message)
                     logger.info(f"Published batch of messages to '{topic}'")
+        except ServiceBusError as e:
+            logger.error(
+                f"Service Bus specific error publishing messages to '{topic}': {e}"
+            )
         except Exception as e:
-            logger.error(f"Error publishing messages to '{topic}': {e}")
+            logger.error(f"General error publishing messages to '{topic}': {e}")
 
     async def publish_async(self, topic: str, messages: List[str]) -> None:
         try:
@@ -65,17 +69,21 @@ class AzureServiceBus(ServiceBusInterface):
                         batch_message = await sender.create_message_batch()
                         batch_message.add_message(ServiceBusMessage(message))
 
-                if batch_message:
+                if len(batch_message) > 0:
                     await sender.send_messages(batch_message)
                     logger.info(
                         f"Published batch of messages to '{topic}' asynchronously"
                     )
+        except ServiceBusError as e:
+            logger.error(
+                f"Service Bus specific error async publishing messages to '{topic}': {e}"
+            )
         except Exception as e:
-            logger.error(f"Error asynchronously publishing messages to '{topic}': {e}")
+            logger.error(f"General error async publishing messages to '{topic}': {e}")
 
     def consume(self, queue: str, callback: Callable[[str], None]) -> None:
         try:
-            with self.client.get_queue_receiver(
+            with self.sync_client.get_queue_receiver(
                 queue,
                 auto_lock_renew=True,
                 auto_lock_renewer=self.auto_lock_renewer,
@@ -99,7 +107,7 @@ class AzureServiceBus(ServiceBusInterface):
         processed_messages = 0
         while retry_count < max_retries:
             try:
-                with self.client.get_queue_receiver(
+                with self.sync_client.get_queue_receiver(
                     queue,
                     max_wait_time=30,
                     auto_lock_renew=True,
