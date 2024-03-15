@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from services import config
 from services.image_generation_message_handler import ImageGenerationMessageHandler
@@ -44,6 +44,9 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self.patcher_from_connection_string = patch(
             "azure.servicebus.ServiceBusClient.from_connection_string"
         )
+        self.patcher_from_connection_string_async = patch(
+            "azure.servicebus.aio.ServiceBusClient.from_connection_string"
+        )
         self.patcher_message_factory = patch(
             "services.image_generation_message_handler.MessageFactory"
         )
@@ -58,6 +61,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self,
         mock_azure_blob_storage,
         mock_from_connection_string,
+        mock_from_connection_string_async,
         mock_store_images,
         mock_message_factory,
         mock_message_interface,
@@ -67,8 +71,8 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         mock_azure_blob_storage.return_value = mock_blob_storage
 
         # Create a mock ServiceBusClient object and set it as the return value of the from_connection_string method
-        mock_service_bus_client = MagicMock()
-        mock_from_connection_string.return_value = mock_service_bus_client
+        mock_from_connection_string.return_value = MagicMock()
+        mock_from_connection_string_async.return_value = MagicMock()
 
         # Create a mock MessageTypeInterface object and set the return value of its process method
         mock_message = MagicMock()
@@ -88,22 +92,25 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         return (
             mock_azure_blob_storage,
             mock_from_connection_string,
+            mock_from_connection_string_async,
             mock_store_images,
             mock_blob_storage,
             mock_message,
         )
 
-    def test_handle_valid_message_multiple_images(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+    async def test_handle_valid_message_multiple_images(self):
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -125,7 +132,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             ]
 
             # Call the message handler again with the mock message
-            image_generation_handler.handle_message(self.mock_message)
+            await image_generation_handler.handle_message(self.mock_message)
 
             # Assert expected function calls
             self.assertEqual(mock_message.process.call_count, 1)
@@ -133,17 +140,19 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             self.assertEqual(mock_blob_storage.push_objects.call_count, 1)
             self.assertEqual(mock_publish.call_count, 2)
 
-    def test_handle_invalid_message_format(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+    async def test_handle_invalid_message_format(self):
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -156,19 +165,21 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
 
             with self.assertRaises(Exception):
                 image_generation_handler = ImageGenerationMessageHandler()
-                image_generation_handler.handle_message(invalid_message)
+                await image_generation_handler.handle_message(invalid_message)
 
     def test_process_incoming_message(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -194,7 +205,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             self.assertEqual(response, {"status": "success"})
             self.assertEqual(processed_message, mock_message_interface)
 
-    def test_upload_images_to_blob_storage(self):
+    async def test_upload_images_to_blob_storage(self):
         # Setup
         mock_message_interface = MagicMock()
         mock_message_interface.get_file_name.return_value = "test_file_0.png"
@@ -217,7 +228,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             file_objects,
             metadata_list,
             temp_dir,
-        ) = image_generation_handler.upload_images_to_blob_storage(
+        ) = await image_generation_handler.upload_images_to_blob_storage(
             {"status": "success"}, mock_message_interface
         )
 
@@ -236,16 +247,18 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
         self.assertIsInstance(temp_dir, MagicMock)
 
     def test_get_num_images_from_message(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -256,16 +269,18 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             self.assertEqual(num_images, 5)
 
     def test_set_num_images_in_message(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -275,17 +290,19 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             updated_message_json = handler.set_num_images_in_message(message_json, 3)
             self.assertEqual(updated_message_json["text_to_style"]["num_images"], 3)
 
-    def test_handle_message_with_batching(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+    async def test_handle_message_with_batching(self):
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -309,7 +326,7 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             # Mocking message with 5 images to test two full batches and one partial batch
             mock_message_copy = self.mock_message.copy()
             mock_message_copy["text_to_style"]["num_images"] = 6
-            image_generation_handler.handle_message(mock_message_copy)
+            await image_generation_handler.handle_message(mock_message_copy)
 
             # Expect the process method to be called 3 times due to batching (2, 2, 2)
             self.assertEqual(mock_message.process.call_count, 3)
@@ -318,40 +335,44 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             # Assert the publish method is called 6 times (once for each image)
             self.assertEqual(mock_publish.call_count, 6)
 
-    def test_run_generate_on_command(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
+    async def test_run_generate_on_command(self):
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
             )
             handler = ImageGenerationMessageHandler()
-            handler.handle_message = MagicMock()
+            handler.handle_message = AsyncMock()
 
-            handler.run(generate_on_command=True, total_images=10)
+            await handler.run(generate_on_command=True, total_images=10)
             handler.handle_message.assert_called_once_with(
                 {"text_to_style": {"style": "general", "num_images": 10}}
             )
 
     def test_run_standard_message_handling(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface, self.patcher_service_bus as mock_service_bus:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface, self.patcher_service_bus as mock_service_bus:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -366,20 +387,22 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
 
     def test_init_with_invalid_batch_size(self):
         with self.assertRaises(ValueError) as context:
-            ImageGenerationMessageHandler(batch_size=1)
-        self.assertIn("Batch size must be greater than 1", str(context.exception))
+            ImageGenerationMessageHandler(batch_size=0)
+        self.assertIn("Batch size must be greater than 0", str(context.exception))
 
     def test_call_json_decode_error(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface, self.patcher_service_bus as mock_service_bus:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -390,16 +413,18 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
                 handler(invalid_json_message)
 
     def test_get_num_images_from_message_exception(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface, self.patcher_service_bus as mock_service_bus:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -412,16 +437,18 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
             )
 
     def test_set_num_images_in_message_exception(self):
-        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface, self.patcher_service_bus as mock_service_bus:
+        with self.patcher_azure_service_bus_connection_string, self.patcher_image_generation_api, self.patcher_azure_storage_container_name, self.patcher_azure_storage_connection_string, self.patcher_azure_service_bus_topic_name, self.patcher_store_zip_images_temporarily as mock_store_images, self.patcher_azure_blob_storage as mock_azure_blob_storage, self.patcher_publish as mock_publish, self.patcher_from_connection_string as mock_from_connection_string, self.patcher_from_connection_string_async as mock_from_connection_string_async, self.patcher_message_factory as mock_message_factory, self.patcher_message_interface as mock_message_interface:
             (
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_blob_storage,
                 mock_message,
             ) = self.setUpMocks(
                 mock_azure_blob_storage,
                 mock_from_connection_string,
+                mock_from_connection_string_async,
                 mock_store_images,
                 mock_message_factory,
                 mock_message_interface,
@@ -435,4 +462,19 @@ class TestImageGenerationMessageHandler(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    import asyncio
+
+    # Get all test cases from this TestCase
+    test_loader = unittest.TestLoader()
+    test_names = test_loader.getTestCaseNames(TestImageGenerationMessageHandler)
+
+    # Create an instance of the TestCase
+    test_instance = TestImageGenerationMessageHandler()
+
+    # Run each test
+    for test_name in test_names:
+        test = getattr(test_instance, test_name)
+        if asyncio.iscoroutinefunction(test):
+            asyncio.run(test())
+        else:
+            test()
