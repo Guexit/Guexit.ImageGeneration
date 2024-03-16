@@ -1,6 +1,7 @@
 """
 This class implements the CloudInterface for Azure Cloud.
 """
+
 import asyncio
 from typing import List
 

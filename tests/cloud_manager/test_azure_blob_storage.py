@@ -1,7 +1,52 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from cloud_manager.azure_blob_storage import AzureBlobStorage
+
+
+class TestAzureBlobStorageAsync(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.connection_string = "mock_connection_string"
+        self.mock_blob_service_client = MagicMock()
+        with patch(
+            "azure.storage.blob.BlobServiceClient.from_connection_string",
+            return_value=self.mock_blob_service_client,
+        ):
+            self.azure_cloud = AzureBlobStorage(self.connection_string)
+
+    @patch(
+        "cloud_manager.azure_blob_storage.AzureBlobStorage._upload_blob_async",
+        new_callable=AsyncMock,
+    )
+    @patch(
+        "azure.storage.blob.aio.BlobServiceClient.from_connection_string",
+    )
+    async def test_push_objects_async(self, mock_async_client, mock_upload_blob_async):
+        mock_async_client = MagicMock()
+        mock_async_client.__aenter__.return_value = mock_async_client
+
+        with patch(
+            "azure.storage.blob.aio.BlobServiceClient.from_connection_string",
+            return_value=mock_async_client,
+        ):
+            container_name = "test"
+            objects = [
+                {"name": "async_nature_1.jpg", "path": "data/async_nature_1.png"},
+                {"name": "async_time_2.jpg", "path": "data/async_time_2.png"},
+            ]
+            mock_upload_blob_async.side_effect = [
+                f"https://example.com/async_blob_url_{obj['name']}" for obj in objects
+            ]
+
+            blob_urls = await self.azure_cloud.push_objects_async(
+                container_name, objects, overwrite=True
+            )
+
+            expected_urls = [
+                f"https://example.com/async_blob_url_{obj['name']}" for obj in objects
+            ]
+            self.assertEqual(blob_urls, expected_urls)
+            self.assertEqual(mock_upload_blob_async.call_count, len(objects))
 
 
 class TestAzureBlobStorage(unittest.TestCase):
