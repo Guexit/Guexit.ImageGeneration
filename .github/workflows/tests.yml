@@ -46,7 +46,7 @@ jobs:
         tox -e coverage
 
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         token: ${{ inputs.codecov_token != '' && inputs.codecov_token || secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
