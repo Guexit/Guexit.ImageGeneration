@@ -16,6 +16,7 @@ from image_generation.core.styles import (
     objects,
     settings,
     themes,
+    actions
 )
 from image_generation.custom_logging import set_logger
 
@@ -46,6 +47,7 @@ class PromptCrafter:
                 "contexts": contexts,
                 "adjectives": adjectives,
                 "themes": themes,
+                "actions": actions
             }
         else:
             self.original_variables = variables

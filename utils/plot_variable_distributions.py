@@ -159,6 +159,7 @@ if __name__ == "__main__":
         objects,
         settings,
         themes,
+        actions
     )
 
     # Instantiate the PromptCrafter class using the STYLES dictionary
@@ -177,6 +178,7 @@ if __name__ == "__main__":
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
+        "actions": actions
     }
     variables_to_evaluate = {
         "themes": themes,
@@ -185,6 +187,7 @@ if __name__ == "__main__":
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
+        "actions": actions
     }
 
     # Use the function to count occurrences for each variable
