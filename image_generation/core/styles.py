@@ -729,7 +729,7 @@ creatures = [
     "Thunderbird",
     "Frostgiant",
     "Bambi",
-    "Aqrabuamelu"
+    "Aqrabuamelu",
 ]
 
 characters = [
@@ -951,7 +951,7 @@ characters = [
     "Hercules",
     "Sleeping Beauty",
     "James Bond",
-    "Daredevil"
+    "Daredevil",
 ]
 
 
@@ -1123,7 +1123,7 @@ settings = [
     "sky gardens",
     "ghost ship",
     "Luminous Forest",
-    "Merlin"
+    "Merlin",
 ]
 
 actions = [
@@ -1146,7 +1146,7 @@ actions = [
     "investigating",
     "admiring",
     "stealing from",
-    "competing with"
+    "competing with",
 ]
 
 themes = [
