@@ -153,6 +153,7 @@ if __name__ == "__main__":
     from image_generation.core.prompt_crafter import PromptCrafter
     from image_generation.core.styles import (
         STYLES,
+        actions,
         characters,
         contexts,
         creatures,
@@ -177,6 +178,7 @@ if __name__ == "__main__":
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
+        "actions": actions,
     }
     variables_to_evaluate = {
         "themes": themes,
@@ -185,6 +187,7 @@ if __name__ == "__main__":
         "contexts": contexts,
         "creatures": creatures,
         "objects": objects,
+        "actions": actions,
     }
 
     # Use the function to count occurrences for each variable

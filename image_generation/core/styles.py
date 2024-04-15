@@ -73,7 +73,6 @@ adjectives = [
     "draconic",
     "spectral",
     "iridescent",
-    "kaleidoscopic",
     "dazzling",
     "charmed",
     "bewitching",
@@ -727,6 +726,10 @@ creatures = [
     "Tarantula",
     "Tasmanian Devil",
     "Zebra",
+    "Thunderbird",
+    "Frostgiant",
+    "Bambi",
+    "Aqrabuamelu",
 ]
 
 characters = [
@@ -939,6 +942,16 @@ characters = [
     "Mickey Mouse",
     "Peter Pan",
     "Tigger (from 'Winnie-the-Pooh')",
+    "Moonwarrior",
+    "Pinocchio",
+    "Puss in Boots",
+    "Captain Nemo",
+    "Mulan",
+    "King Arthur",
+    "Hercules",
+    "Sleeping Beauty",
+    "James Bond",
+    "Daredevil",
 ]
 
 
@@ -1110,6 +1123,30 @@ settings = [
     "sky gardens",
     "ghost ship",
     "Luminous Forest",
+    "Merlin",
+]
+
+actions = [
+    "rescuing",
+    "battling",
+    "aiding",
+    "observing",
+    "chasing",
+    "guarding",
+    "teaching",
+    "befriending",
+    "healing",
+    "escaping from",
+    "following",
+    "hiding from",
+    "searching for",
+    "summoning",
+    "transforming",
+    "avoiding",
+    "investigating",
+    "admiring",
+    "stealing from",
+    "competing with",
 ]
 
 themes = [
@@ -1231,6 +1268,32 @@ STYLES = {
             "model_scheduler": "euler_a",
             "prompt": {
                 "positive": "{theme} {adjective} {object} on {setting} close-up, 8k, high quality",
+                "guidance_scale": 0.0,
+            },
+            "height": 688,
+            "width": 512,
+            "num_inference_steps": 2,
+            "num_images": 1,
+            "seed": -1,
+        },
+        {
+            "model_path": "stabilityai/sdxl-turbo",
+            "model_scheduler": "euler_a",
+            "prompt": {
+                "positive": "{theme} {adjective} {creature} {action} {character} on {setting} close-up, 8k, high quality",
+                "guidance_scale": 0.0,
+            },
+            "height": 688,
+            "width": 512,
+            "num_inference_steps": 2,
+            "num_images": 1,
+            "seed": -1,
+        },
+        {
+            "model_path": "stabilityai/sdxl-turbo",
+            "model_scheduler": "euler_a",
+            "prompt": {
+                "positive": "{theme} {adjective} {character} {action} {creature} on {setting} close-up, 8k, high quality",
                 "guidance_scale": 0.0,
             },
             "height": 688,

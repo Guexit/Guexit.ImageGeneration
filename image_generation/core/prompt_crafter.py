@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 import numpy as np
 
 from image_generation.core.styles import (
+    actions,
     adjectives,
     characters,
     contexts,
@@ -46,6 +47,7 @@ class PromptCrafter:
                 "contexts": contexts,
                 "adjectives": adjectives,
                 "themes": themes,
+                "actions": actions,
             }
         else:
             self.original_variables = variables
